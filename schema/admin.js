@@ -98,7 +98,7 @@ exports = module.exports = function (app, mongoose) {
 
             tasks[group] = function (done) {
 
-                app.db.model('Admin-Group').findById(group, done);
+                app.db.model('admin-group').findById(group, done);
             };
         });
 
@@ -153,7 +153,7 @@ exports = module.exports = function (app, mongoose) {
             timeCreated: new Date()
         };
 
-        var AdminModel = app.db.model('Admin');
+        var AdminModel = app.db.model('admin');
 
         var admin = new AdminModel(document);
         admin.save(callback);
@@ -162,12 +162,12 @@ exports = module.exports = function (app, mongoose) {
     adminSchema.statics.findByUsername = function (username, callback) {
 
         var query = {'user.name': username.toLowerCase()};
-        app.db.model('Admin').findOne(query, callback);
+        app.db.model('admin').findOne(query, callback);
     };
 
     adminSchema.plugin(require('./plugins/pagedFind'));
     adminSchema.index({'user.id': 1});
     adminSchema.index({'user.name': 1});
     adminSchema.set('autoIndex', (app.get('env') === 'development'));
-    app.db.model('Admin', adminSchema);
+    app.db.model('admin', adminSchema);
 };

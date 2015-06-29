@@ -16,7 +16,7 @@ var stub = {
     bcrypt: {}
 };
 
-var User;
+var user;
 
 describe('Model validations', function () {
     // within before() you can run all the operations that are needed to setup your tests. In this case
@@ -24,9 +24,9 @@ describe('Model validations', function () {
     before(function (done) {
         // In our tests we use the test db
         app.db = mongoose.createConnection(config.mongodb.uri + '_tests');
-        require('../schema/User')(app, mongoose);
-        User = app.db.model('User');
-        User.remove({}, function (err) { });
+        require('../schema/user')(app, mongoose);
+        user = app.db.model('user');
+        user.remove({}, function (err) { });
         done();
     });
 
@@ -40,7 +40,7 @@ describe('Model validations', function () {
 
     it('should create a password hash combination', function (done) {
 
-        User.generatePasswordHash('bighouseblues', function (err, result) {
+        user.generatePasswordHash('bighouseblues', function (err, result) {
 
             should.not.exist(err);
             should.exist(result);
@@ -53,10 +53,10 @@ describe('Model validations', function () {
 
     it('should return a new instance when create succeeds', function (done) {
 
-        User.create('ren', 'bighouseblues', 'ren@stimpy.show', function (err, result) {
+        user.create('ren', 'bighouseblues', 'ren@stimpy.show', function (err, result) {
 
             should.not.exist(err);
-            should(result).be.an.instanceOf(User);
+            should(result).be.an.instanceOf(user);
 
             done();
         });
