@@ -12,6 +12,7 @@ var express = require('express'),
 
 var config = require('./config'),
     routes = require('./routes/index'),
+    contact = require('./routes/contact'),
     users = require('./routes/users'),
     accounts = require('./routes/accounts');
 
@@ -20,6 +21,10 @@ var app = express();
 
 //keep reference to config
 app.config = config;
+
+//setup utilities
+app.utility = {};
+app.utility.sendmail = require('./util/sendmail');
 
 app.server = http.createServer(app);
 
@@ -44,6 +49,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(config.apiPath, routes);
+app.use(config.apiPath + '/contact', contact);
 app.use(config.apiPath + '/users', users);
 app.use(config.apiPath + '/accounts', accounts);
 
