@@ -19,11 +19,11 @@ exports = module.exports = function (app, mongoose) {
         roles: {
             admin: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: 'Admin'
+                ref: 'admin'
             },
             account: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: 'Account'
+                ref: 'account'
             }
         },
         isActive: {
@@ -80,14 +80,14 @@ exports = module.exports = function (app, mongoose) {
         if (this.roles.account) {
             tasks.account = function (done) {
 
-                app.db.model('Account').findById(self.roles.account.id, done);
+                app.db.model('account').findById(self.roles.account.id, done);
             };
         }
 
         if (this.roles.admin) {
             tasks.admin = function (done) {
 
-                app.db.model('Admin').findById(self.roles.admin.id, done);
+                app.db.model('admin').findById(self.roles.admin.id, done);
             };
         }
 
@@ -139,7 +139,7 @@ exports = module.exports = function (app, mongoose) {
                     timeCreated: new Date()
                 };
 
-                var UserModel = app.db.model('User');
+                var UserModel = app.db.model('user');
                 var user = new UserModel(document);
                 user.save(done);
             }]
@@ -170,7 +170,7 @@ exports = module.exports = function (app, mongoose) {
                     query.username = username.toLowerCase();
                 }
 
-                app.db.model('User').findOne(query, done);
+                app.db.model('user').findOne(query, done);
             },
             passwordMatch: ['user', function (done, results) {
 
@@ -197,12 +197,12 @@ exports = module.exports = function (app, mongoose) {
     userSchema.statics.findByUsername = function (username, callback) {
 
         var query = {username: username.toLowerCase()};
-        app.db.model('User').findOne(query, callback);
+        app.db.model('user').findOne(query, callback);
     };
     userSchema.plugin(require('./plugins/pagedFind'));
     userSchema.index({username: 1}, {unique: true});
     userSchema.index({email: 1}, {unique: true});
     userSchema.set('autoIndex', (app.get('env') === 'development'));
-    app.db.model('User', userSchema);
+    app.db.model('user', userSchema);
 
 };

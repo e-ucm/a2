@@ -6,7 +6,7 @@ exports = module.exports = function(app, mongoose) {
       id: { 
         type: mongoose.Schema.Types.ObjectId, 
         required: true,
-        ref: 'User' 
+        ref: 'user'
       },
       name: { 
         type: String, 
@@ -56,18 +56,18 @@ exports = module.exports = function(app, mongoose) {
           timeCreated: new Date()
       };
 
-      var AccountModel = app.db.model('Account');
+      var AccountModel = app.db.model('account');
       var account = new AccountModel(document);
       account.save(callback);
   };
   accountSchema.statics.findByUsername = function (username, callback) {
 
       var query = { 'user.name': username.toLowerCase() };
-      app.db.model('Account').findOne(query, callback);
+      app.db.model('account').findOne(query, callback);
   };
   accountSchema.plugin(require('./plugins/pagedFind'));
   accountSchema.index({ 'user.id': 1 });
   accountSchema.index({ 'user.name': 1 });
   accountSchema.set('autoIndex', (app.get('env') === 'development'));
-  app.db.model('Account', accountSchema);
+  app.db.model('account', accountSchema);
 };
