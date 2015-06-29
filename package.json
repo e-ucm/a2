@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "test": "mocha --reporter spec test"
+    "test": "./node_modules/mocha/bin/_mocha -R spec",
+    "test-travis": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/*"
   },
   "dependencies": {
     "async": "*",
@@ -24,8 +25,11 @@
     "validator": "*"
   },
   "devDependencies": {
+    "assert": "*",
+    "coveralls": "*",
+    "istanbul": "*",
+    "mocha": "*",
     "should": "*",
-    "supertest": "*",
-    "assert": "*"
+    "supertest": "*"
   }
 }
