@@ -156,7 +156,13 @@ exports = module.exports = function (app, mongoose) {
         var AdminModel = app.db.model('admin');
 
         var admin = new AdminModel(document);
-        admin.save(callback);
+        admin.save(function(err, result) {
+            if(err) {
+                return callback(err);
+            }
+
+            callback(null, result);
+        });
     };
 
     adminSchema.statics.findByUsername = function (username, callback) {
