@@ -141,7 +141,7 @@ exports = module.exports = function (app, mongoose) {
         });
     };
 
-    adminSchema.statics.create = function (name, callback) {
+    adminSchema.statics.create = function (userId, username, name, callback) {
         var nameParts = name.trim().split(/\s/);
 
         var document = {
@@ -149,6 +149,10 @@ exports = module.exports = function (app, mongoose) {
                 first: nameParts.shift(),
                 middle: nameParts.length > 1 ? nameParts.shift() : undefined,
                 last: nameParts.join(' ')
+            },
+            user : {
+                id : userId,
+                name :  username
             },
             timeCreated: new Date()
         };
