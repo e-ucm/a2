@@ -13,7 +13,7 @@ var app = {
 
 var authAttempt;
 
-describe('Auth-attempt model validations', function () {
+describe('Authentication attempt model validations', function () {
 
     before(function (done) {
 

@@ -64,7 +64,6 @@ exports = module.exports = function(app, mongoose) {
           if(err) {
               return callback(err);
           }
-          console.log(result);
 
           callback(null, result);
       });

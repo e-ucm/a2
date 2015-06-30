@@ -18,7 +18,7 @@ var stub = {
 
 var user;
 
-describe('Model validations', function () {
+describe('User  model validations', function () {
     // within before() you can run all the operations that are needed to setup your tests. In this case
     // I want to create a connection with the database, and when I'm done, I call done().
     before(function (done) {
