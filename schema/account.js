@@ -4,7 +4,7 @@ exports = module.exports = function(app, mongoose) {
   var accountSchema = new mongoose.Schema({
     user: {
       id: { 
-        type: mongoose.Schema.Types.ObjectId, 
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'user'
       },
@@ -30,12 +30,10 @@ exports = module.exports = function(app, mongoose) {
     },
     verification: {
       complete: {
-        type: Boolean,
-        required: true
+        type: Boolean
       },
       token: {
-        type: String,
-        required: true
+        type: String
       }
     },
     timeCreated: { 
@@ -43,7 +41,7 @@ exports = module.exports = function(app, mongoose) {
       default: Date.now 
     }
   });
-  accountSchema.statics.create = function (name, callback) {
+  accountSchema.statics.create = function (userId, username, name, callback) {
 
       var nameParts = name.trim().split(/\s/);
 
@@ -53,12 +51,23 @@ exports = module.exports = function(app, mongoose) {
               middle: nameParts.length > 1 ? nameParts.shift() : undefined,
               last: nameParts.join(' ')
           },
+          user : {
+              id : userId,
+              name :  username
+          },
           timeCreated: new Date()
       };
 
       var AccountModel = app.db.model('account');
       var account = new AccountModel(document);
-      account.save(callback);
+      account.save(function(err, result) {
+          if(err) {
+              return callback(err);
+          }
+          console.log(result);
+
+          callback(null, result);
+      });
   };
   accountSchema.statics.findByUsername = function (username, callback) {
 

@@ -7,12 +7,14 @@ exports = module.exports = function (app, mongoose) {
         username: {
             type: String,
             unique: true,
+            lowercase: true,
             required: true
         },
         password: String,
         email: {
             type: String,
             unique: true,
+            lowercase: true,
             required: true,
             validate: [require('validator').isEmail, 'Invalid email!']
         },
@@ -80,14 +82,14 @@ exports = module.exports = function (app, mongoose) {
         if (this.roles.account) {
             tasks.account = function (done) {
 
-                app.db.model('account').findById(self.roles.account.id, done);
+                app.db.model('account').findById(self.roles.account, done);
             };
         }
 
         if (this.roles.admin) {
             tasks.admin = function (done) {
 
-                app.db.model('admin').findById(self.roles.admin.id, done);
+                app.db.model('admin').findById(self.roles.admin, done);
             };
         }
 
@@ -141,7 +143,13 @@ exports = module.exports = function (app, mongoose) {
 
                 var UserModel = app.db.model('user');
                 var user = new UserModel(document);
-                user.save(done);
+                user.save(function(err, result) {
+                    if(err) {
+                        return done(err);
+                    }
+
+                    done(null, result);
+                });
             }]
         }, function (err, results) {
 
@@ -149,9 +157,9 @@ exports = module.exports = function (app, mongoose) {
                 return callback(err);
             }
 
-            results.newUser[0].password = results.passwordHash.password;
+            results.newUser.password = results.passwordHash.password;
 
-            callback(null, results.newUser[0]);
+            callback(null, results.newUser);
         });
     };
     userSchema.statics.findByCredentials = function (username, password, callback) {
