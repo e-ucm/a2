@@ -22,6 +22,7 @@
     "passport": "^0.2.x",
     "q": "*",
     "serve-favicon": "^2.3.0",
+    "node-uuid": "*",
     "validator": "*"
   },
   "devDependencies": {
