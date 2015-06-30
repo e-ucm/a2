@@ -13,6 +13,7 @@ var express = require('express'),
 var config = require('./config'),
     routes = require('./routes/index'),
     contact = require('./routes/contact'),
+    signup = require('./routes/signup'),
     users = require('./routes/users'),
     accounts = require('./routes/accounts');
 
@@ -50,6 +51,7 @@ app.use(passport.session());
 
 app.use(config.apiPath, routes);
 app.use(config.apiPath + '/contact', contact);
+app.use(config.apiPath + '/signup', signup);
 app.use(config.apiPath + '/users', users);
 app.use(config.apiPath + '/accounts', accounts);
 
