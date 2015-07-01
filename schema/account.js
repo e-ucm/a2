@@ -42,7 +42,9 @@ exports = module.exports = function(app, mongoose) {
     }
   });
   accountSchema.statics.create = function (userId, username, name, callback) {
-
+      if(!name){
+          name = '';
+      }
       var nameParts = name.trim().split(/\s/);
 
       var document = {
@@ -64,7 +66,6 @@ exports = module.exports = function(app, mongoose) {
           if(err) {
               return callback(err);
           }
-          console.log(result);
 
           callback(null, result);
       });

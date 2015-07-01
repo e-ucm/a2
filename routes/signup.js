@@ -3,12 +3,26 @@ var express = require('express'),
     async = require('async');
 
 /* POST signup. */
-router.post('/', function(req, res) {
+router.post('/', function(req, res, next) {
     var account = req.app.db.model('account');
     var user = req.app.db.model('user');
-    var Session = req.app.db.model('session');
 
     async.auto({
+        validate: function (done) {
+            if(!req.body.username){
+                return done(new Error('username required'))
+            }
+
+            if(!req.body.password){
+                return done(new Error('password required'))
+            }
+
+            if(!req.body.email){
+                return done(new Error('email required'))
+            }
+
+            done();
+        },
         user: function (done) {
             var username = req.body.username;
             var password = req.body.password;
@@ -33,7 +47,6 @@ router.post('/', function(req, res) {
                     }
                 }
             };
-
             account.findByIdAndUpdate(id, update, done);
         }],
         linkAccount: ['account', function (done, results) {
@@ -52,6 +65,15 @@ router.post('/', function(req, res) {
 
             var user = results.linkAccount;
 
+            res.send({
+                user: {
+                    _id: user._id,
+                    username: user.username,
+                    email: user.email,
+                    roles: user.roles
+                }
+            });
+
             req.app.utility.sendmail(req, res, {
                 from: req.app.config.smtp.from.name +' <'+ req.app.config.smtp.from.address +'>',
                 to: req.body.email,
@@ -67,36 +89,41 @@ router.post('/', function(req, res) {
                 email: req.body.email,
                 projectName: req.app.config.projectName,
                 success: function() {
-                    var credentials = user.username + ':' + results.session.key;
-                    var authHeader = 'Basic ' + new Buffer(credentials).toString('base64');
-
-                    res.send({
-                        user: {
-                            _id: user._id,
-                            username: user.username,
-                            email: user.email,
-                            roles: user.roles
-                        },
-                        session: results.session,
-                        authHeader: authHeader
-                    });
+                    console.log('email success')
                 },
                 error: function(err) {
                     throw err;
                 }
             });
-
             done();
         }],
-        session: ['linkUser', 'linkAccount', function (done, results) {
+        login: ['linkUser', 'linkAccount', function (done, results) {
+            req._passport.instance.authenticate('local', function(err, user) {
+                if(err){
+                    done(err);
+                    return;
+                }
 
-            Session.create(req.body.username, done);
+                if(!user){
+                    done(new Error('Login failed. That is strange.'));
+                    return;
+                } else {
+                    req.login(user, function(err) {
+                        if (err) {
+                            done(err);
+                            return;
+                        }
+                    });
+                }
+
+                console.log('logIn success');
+                done();
+
+            })(req, res, next);
         }]
     }, function (err) {
-
         if (err) {
-            res.send(err);
-            return;
+            res.send({message : err.toString()});
         }
     });
 });
