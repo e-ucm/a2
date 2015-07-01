@@ -3,18 +3,32 @@ var express = require('express'),
     async = require('async');
 
 /* POST signup. */
-router.post('/', function(req, res) {
+router.post('/', function(req, res, next) {
     var account = req.app.db.model('account');
     var user = req.app.db.model('user');
-    var Session = req.app.db.model('session');
 
     async.auto({
-        user: function (done) {
-            var username = req.body.username;
-            var password = req.body.password;
-            var email = req.body.email;
+        validate: function (done) {
+            if(!req.body.username){
+                return done(new Error('username required'))
+            }
 
-            user.create(username, password, email, done);
+            if(!req.body.password){
+                return done(new Error('password required'))
+            }
+
+            if(!req.body.email){
+                return done(new Error('email required'))
+            }
+
+            done(null, false);
+        },
+        user: function (done) {
+            user.register(new user({
+                username: req.body.username,
+                email: req.body.email,
+                timeCreated: new Date()
+            }), req.body.password, done);
         },
         account: ['user', function (done, results) {
 
@@ -33,7 +47,6 @@ router.post('/', function(req, res) {
                     }
                 }
             };
-
             account.findByIdAndUpdate(id, update, done);
         }],
         linkAccount: ['account', function (done, results) {
@@ -67,36 +80,42 @@ router.post('/', function(req, res) {
                 email: req.body.email,
                 projectName: req.app.config.projectName,
                 success: function() {
-                    var credentials = user.username + ':' + results.session.key;
-                    var authHeader = 'Basic ' + new Buffer(credentials).toString('base64');
-
-                    res.send({
-                        user: {
-                            _id: user._id,
-                            username: user.username,
-                            email: user.email,
-                            roles: user.roles
-                        },
-                        session: results.session,
-                        authHeader: authHeader
-                    });
+                    console.log('Email sent with success!');
                 },
                 error: function(err) {
-                    throw err;
+                    console.error(err);
                 }
             });
 
-            done();
+            done(null, false);
         }],
-        session: ['linkUser', 'linkAccount', function (done, results) {
-
-            Session.create(req.body.username, done);
+        login: ['linkUser', 'linkAccount', function (done, results) {
+            req.app.passport.authenticate('local', function(err, user, info) {
+                if(err){
+                    return done(err);
+                }
+                if(!user){
+                    return done(info.message)
+                } else {
+                    req.logIn(user, function(err) {
+                        if (err) {
+                            return done(err);
+                        }
+                        res.json({
+                            user: {
+                                username: req.user.username,
+                                email: req.user.email,
+                                roles: req.user.roles
+                            }
+                        });
+                        done(null, false)
+                    });
+                }
+            })(req, res, next);
         }]
     }, function (err) {
-
         if (err) {
-            res.send(err);
-            return;
+            res.send({message : err.toString()});
         }
     });
 });
