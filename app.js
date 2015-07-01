@@ -2,9 +2,9 @@
 
 var express = require('express'),
     path = require('path'),
-    favicon = require('serve-favicon'),
     logger = require('morgan'),
-    cookieParser = require('cookie-parser'),
+    session = require('express-session'),
+    mongoStore = require('connect-mongo')(session),
     bodyParser = require('body-parser'),
     mongoose = require('mongoose'),
     passport = require('passport'),
@@ -15,7 +15,9 @@ var config = require('./config'),
     contact = require('./routes/contact'),
     signup = require('./routes/signup'),
     users = require('./routes/users'),
-    accounts = require('./routes/accounts');
+    accounts = require('./routes/accounts'),
+    login = require('./routes/login'),
+    logout = require('./routes/logout');
 
 
 var app = express();
@@ -44,16 +46,25 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(require('morgan')('dev'));
-app.use(cookieParser(config.cryptoKey));
+
+app.use(session({
+    secret: config.cryptoKey,
+    resave: false,
+    saveUninitialized: false,
+    store: new mongoStore({mongooseConnection: app.db})
+}));
 app.use(passport.initialize());
 app.use(passport.session());
+app.passport = passport;
+require('./passport')(app);
 
 app.use(config.apiPath, routes);
 app.use(config.apiPath + '/contact', contact);
 app.use(config.apiPath + '/signup', signup);
 app.use(config.apiPath + '/users', users);
 app.use(config.apiPath + '/accounts', accounts);
+app.use(config.apiPath + '/login', login);
+app.use(config.apiPath + '/logout', logout);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
