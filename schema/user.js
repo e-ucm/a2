@@ -4,13 +4,6 @@ var Async = require('async'),
 
 exports = module.exports = function (app, mongoose) {
     var userSchema = new mongoose.Schema({
-        username: {
-            type: String,
-            unique: true,
-            lowercase: true,
-            required: true
-        },
-        password: String,
         email: {
             type: String,
             unique: true,
@@ -27,10 +20,6 @@ exports = module.exports = function (app, mongoose) {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'account'
             }
-        },
-        isActive: {
-            type: Boolean,
-            default: true
         },
         resetPassword: {
             token: {
@@ -104,110 +93,12 @@ exports = module.exports = function (app, mongoose) {
             callback(null, self._roles);
         });
     };
-    userSchema.statics.generatePasswordHash = function (password, callback) {
-
-        Async.auto({
-            salt: function (done) {
-
-                Bcrypt.genSalt(10, done);
-            },
-            hash: ['salt', function (done, results) {
-
-                Bcrypt.hash(password, results.salt, done);
-            }]
-        }, function (err, results) {
-
-            if (err) {
-                return callback(err);
-            }
-
-            callback(null, {
-                password: password,
-                hash: results.hash
-            });
-        });
-    };
-    userSchema.statics.create = function (username, password, email, callback) {
-
-        Async.auto({
-            passwordHash: this.generatePasswordHash.bind(this, password),
-            newUser: ['passwordHash', function (done, results) {
-
-                var document = {
-                    isActive: true,
-                    username: username.toLowerCase(),
-                    password: results.passwordHash.hash,
-                    email: email.toLowerCase(),
-                    timeCreated: new Date()
-                };
-
-                var UserModel = app.db.model('user');
-                var user = new UserModel(document);
-                user.save(function(err, result) {
-                    if(err) {
-                        return done(err);
-                    }
-
-                    done(null, result);
-                });
-            }]
-        }, function (err, results) {
-
-            if (err) {
-                return callback(err);
-            }
-
-            results.newUser.password = results.passwordHash.password;
-
-            callback(null, results.newUser);
-        });
-    };
-    userSchema.statics.findByCredentials = function (username, password, callback) {
-
-        Async.auto({
-            user: function (done) {
-
-                var query = {
-                    isActive: true
-                };
-
-                if (username.indexOf('@') > -1) {
-                    query.email = username.toLowerCase();
-                }
-                else {
-                    query.username = username.toLowerCase();
-                }
-
-                app.db.model('user').findOne(query, done);
-            },
-            passwordMatch: ['user', function (done, results) {
-
-                if (!results.user) {
-                    return done(null, false);
-                }
-
-                var source = results.user.password;
-                Bcrypt.compare(password, source, done);
-            }]
-        }, function (err, results) {
-
-            if (err) {
-                return callback(err);
-            }
-
-            if (results.passwordMatch) {
-                return callback(null, results.user);
-            }
-
-            callback();
-        });
-    };
-    userSchema.statics.findByUsername = function (username, callback) {
-
-        var query = {username: username.toLowerCase()};
-        app.db.model('user').findOne(query, callback);
-    };
     userSchema.plugin(require('./plugins/pagedFind'));
+    userSchema.plugin(require('passport-local-mongoose'), {
+        usernameLowerCase: true,
+        limitAttempts: false,
+        maxAttempts: app.config.loginAttempts.failedLoginAttempts
+    });
     userSchema.index({username: 1}, {unique: true});
     userSchema.index({email: 1}, {unique: true});
     userSchema.set('autoIndex', (app.get('env') === 'development'));
