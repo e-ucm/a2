@@ -68,7 +68,7 @@ router.post('/', function (req, res, next) {
             req.app.utility.sendmail(req, res, {
                 from: req.app.config.smtp.from.name + ' <' + req.app.config.smtp.from.address + '>',
                 to: req.body.email,
-                subject: req.app.config.projectName + ' contact form',
+                subject: req.app.config.projectName + ' signup',
                 textPath: 'signup/email-text',
                 htmlPath: 'signup/email-html',
                 locals: {
