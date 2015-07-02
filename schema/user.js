@@ -95,6 +95,17 @@ exports = module.exports = function (app, mongoose) {
     };
     userSchema.plugin(require('./plugins/pagedFind'));
     userSchema.plugin(require('passport-local-mongoose'), {
+        /**
+         * This plugin adds some fields and methods to the schemas that it's applied to.
+         *  Fields like: username, hash, salt, attempts, last.
+         *  Methods like: register, findByUserName, resetAttempts(callback), etc.
+         *
+         *  These fields and the messages returned by the methods
+         *  are configurable by passing an options parameter.
+         *  More info about the options that can be passed here:
+         *      https://github.com/saintedlama/passport-local-mongoose#options
+         */
+
         usernameLowerCase: true,
         limitAttempts: false,
         maxAttempts: app.config.loginAttempts.failedLoginAttempts

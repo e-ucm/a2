@@ -3,21 +3,21 @@ var express = require('express'),
     async = require('async');
 
 /* POST signup. */
-router.post('/', function(req, res, next) {
+router.post('/', function (req, res, next) {
     var account = req.app.db.model('account');
     var user = req.app.db.model('user');
 
     async.auto({
         validate: function (done) {
-            if(!req.body.username){
+            if (!req.body.username) {
                 return done(new Error('username required'))
             }
 
-            if(!req.body.password){
+            if (!req.body.password) {
                 return done(new Error('password required'))
             }
 
-            if(!req.body.email){
+            if (!req.body.email) {
                 return done(new Error('email required'))
             }
 
@@ -66,9 +66,9 @@ router.post('/', function(req, res, next) {
             var user = results.linkAccount;
 
             req.app.utility.sendmail(req, res, {
-                from: req.app.config.smtp.from.name +' <'+ req.app.config.smtp.from.address +'>',
+                from: req.app.config.smtp.from.name + ' <' + req.app.config.smtp.from.address + '>',
                 to: req.body.email,
-                subject: req.app.config.projectName +' contact form',
+                subject: req.app.config.projectName + ' contact form',
                 textPath: 'signup/email-text',
                 htmlPath: 'signup/email-html',
                 locals: {
@@ -79,44 +79,29 @@ router.post('/', function(req, res, next) {
                 name: req.body.name,
                 email: req.body.email,
                 projectName: req.app.config.projectName,
-                success: function() {
+                success: function () {
                     console.log('Email sent with success!');
                 },
-                error: function(err) {
-                    console.error(err);
+                error: function (err) {
+                    console.warn('sending welcome email failed:', err);
                 }
             });
 
-            done(null, false);
-        }],
-        login: ['linkUser', 'linkAccount', function (done, results) {
-            req.app.passport.authenticate('local', function(err, user, info) {
-                if(err){
-                    return done(err);
-                }
-                if(!user){
-                    return done(info.message)
-                } else {
-                    req.logIn(user, function(err) {
-                        if (err) {
-                            return done(err);
-                        }
-                        res.json({
-                            user: {
-                                username: req.user.username,
-                                email: req.user.email,
-                                roles: req.user.roles
-                            }
-                        });
-                        done(null, false)
-                    });
-                }
-            })(req, res, next);
+            done();
         }]
-    }, function (err) {
+    }, function (err, results) {
         if (err) {
-            res.send({message : err.toString()});
+            return res.send({message: err.toString()});
         }
+        res.json({
+            user: {
+                username: results.linkAccount.username,
+                email: results.linkAccount.email,
+                roles: {
+                    account: results.account._id
+                }
+            }
+        });
     });
 });
 
