@@ -1,6 +1,8 @@
 'use strict';
 
 var express = require('express'),
+    session = require('express-session'),
+    mongoStore = require('connect-mongo')(session),
     path = require('path'),
     favicon = require('serve-favicon'),
     logger = require('morgan'),
@@ -46,8 +48,16 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(require('morgan')('dev'));
 app.use(cookieParser(config.cryptoKey));
+app.use(session({
+    resave: false,
+    saveUninitialized: false,
+    secret: config.cryptoKey,
+    store: new mongoStore({ url: config.mongodb.uri })
+}));
 app.use(passport.initialize());
 app.use(passport.session());
+
+require('./passport')(app, passport);
 
 app.use(config.apiPath, routes);
 app.use(config.apiPath + '/contact', contact);
