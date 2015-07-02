@@ -10,9 +10,7 @@ exports.projectName = 'Drywall';
 exports.systemEmail = 'your@email.addy';
 exports.cryptoKey = 'k3yb0ardc4t';
 exports.loginAttempts = {
-  forIp: 50,
-  forIpAndUser: 7,
-  logExpiration: '20m'
+  failedLoginAttempts: 10
 };
 exports.requireAccountVerification = false;
 exports.smtp = {

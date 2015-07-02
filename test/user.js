@@ -4,8 +4,8 @@ var should = require('should');
 var assert = require('assert');
 var request = require('supertest');
 var mongoose = require('mongoose');
-var config = require('../config-example');
 var app = {
+    config: require('../config-example'),
     get: function (str) {
         return '';
     }
@@ -23,7 +23,7 @@ describe('User  model validations', function () {
     // I want to create a connection with the database, and when I'm done, I call done().
     before(function (done) {
         // In our tests we use the test db
-        app.db = mongoose.createConnection(config.mongodb.uri + '_tests');
+        app.db = mongoose.createConnection(app.config.mongodb.uri + '_tests');
         require('../schema/user')(app, mongoose);
         user = app.db.model('user');
         user.remove({}, function (err) { });
@@ -38,22 +38,11 @@ describe('User  model validations', function () {
     // to specify when our test is completed, and that's what makes easy
     // to perform async test!
 
-    it('should create a password hash combination', function (done) {
-
-        user.generatePasswordHash('bighouseblues', function (err, result) {
-
-            should.not.exist(err);
-            should.exist(result);
-            should(result.password).be.a.String;
-            should(result.hash).be.a.String;
-
-            done();
-        });
-    });
-
     it('should return a new instance when create succeeds', function (done) {
-
-        user.create('ren', 'bighouseblues', 'ren@stimpy.show', function (err, result) {
+        user.register(new user({
+            username: 'username',
+            email: 'usermail@mail.com'
+        }), 'user_password', function(err, result) {
 
             should.not.exist(err);
             should(result).be.an.instanceOf(user);
@@ -61,4 +50,55 @@ describe('User  model validations', function () {
             done();
         });
     });
+
+    // Username checking
+
+    it('should alert about duplicated user names', function (done) {
+        user.register(new user({
+            username: 'username',
+            email: 'email@m.com'
+        }), 'user_password2', function(err, result) {
+            should.not.exist(result);
+            should(err).be.an.instanceOf(Error);
+            done();
+        });
+    });
+
+    it('should alert about missing username', function (done) {
+        user.register(new user({
+            email: 'email@m.com'
+        }), 'user_password23', function(err, result) {
+
+            should.not.exist(result);
+            should(err).be.an.instanceOf(Error);
+            done()
+        });
+    });
+
+
+    // Email checking
+
+    it('should alert about missing email', function (done) {
+        user.register(new user({
+            username: 'username23'
+        }), 'user_password23', function(err, result) {
+
+            should.not.exist(result);
+            should(err).be.an.instanceOf(Error);
+            done();
+        });
+    });
+
+    it('should return an error when we provide an invalid email', function (done) {
+        user.register(new user({
+            username: 'username2',
+            email: 'invalid_mail'
+        }), 'user_password2', function(err, result) {
+
+            should.not.exist(result);
+            should(err).be.an.instanceOf(Error);
+            done();
+        });
+    });
+
 });
