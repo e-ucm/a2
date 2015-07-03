@@ -1,19 +1,12 @@
 'use strict';
 
 var should = require('should');
-var assert = require('assert');
-var request = require('supertest');
 var mongoose = require('mongoose');
 var app = {
     config: require('../config-example'),
     get: function (str) {
         return '';
     }
-};
-var stub = {
-    Account: {},
-    Admin: {},
-    bcrypt: {}
 };
 
 var user;

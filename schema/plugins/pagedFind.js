@@ -5,7 +5,6 @@ var Async = require('async');
 module.exports = exports = function pagedFindPlugin(schema) {
     schema.statics.pagedFind = function (filter, fields, sort, limit, page, callback) {
 
-        var self = this;
         var output = {
             data: undefined,
             pages: {
@@ -68,12 +67,14 @@ module.exports = exports = function pagedFindPlugin(schema) {
         };
 
         fields = fieldsAdapter(fields);
-        sort = this.sortAdapter(sort);
+        sort = sortAdapter(sort);
+
+        var self = this;
 
         Async.auto({
             count: function (done) {
 
-                thisSchema.count(filter, done);
+                self.count(filter, done);
             },
             find: function (done) {
 
@@ -83,7 +84,7 @@ module.exports = exports = function pagedFindPlugin(schema) {
                     sort: sort
                 };
 
-                thisSchema.find(filter, fields, options, done);
+                self.find(filter, fields, options, done);
             }
         }, function (err, results) {
 
