@@ -15,7 +15,6 @@ var config = require('./config'),
     contact = require('./routes/contact'),
     signup = require('./routes/signup'),
     users = require('./routes/users'),
-    accounts = require('./routes/accounts'),
     login = require('./routes/login'),
     logout = require('./routes/logout');
 
@@ -33,7 +32,10 @@ app.server = http.createServer(app);
 
 app.db = mongoose.createConnection(config.mongodb.uri);
 app.db.on('error', console.error.bind(console, 'mongoose connection error: '));
-
+app.db.on('connected', function() {
+    console.log('Mongo db Connected!');
+    require('./roles')(app);
+});
 //config data models
 require('./models')(app, mongoose);
 
@@ -56,13 +58,13 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.passport = passport;
+
 require('./passport')(app);
 
 app.use(config.apiPath, routes);
 app.use(config.apiPath + '/contact', contact);
 app.use(config.apiPath + '/signup', signup);
 app.use(config.apiPath + '/users', users);
-app.use(config.apiPath + '/accounts', accounts);
 app.use(config.apiPath + '/login', login);
 app.use(config.apiPath + '/logout', logout);
 

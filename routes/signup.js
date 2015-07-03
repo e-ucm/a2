@@ -40,7 +40,6 @@ router.post('/', function (req, res, next) {
                 if(err) {
                     return done(err);
                 }
-                req.app.acl.addUserRoles(resultUser.username, 'player');
                 done(null, resultUser);
             });
         }],
