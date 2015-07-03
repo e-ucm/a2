@@ -4,66 +4,49 @@ var express = require('express'),
 
 /* POST signup. */
 router.post('/', function (req, res, next) {
-    var account = req.app.db.model('account');
-    var user = req.app.db.model('user');
+    var userModel = req.app.db.model('user');
 
     async.auto({
         validate: function (done) {
             if (!req.body.username) {
-                return done(new Error('username required'))
+                var error = new Error('Username required!');
+                error.status = 400;
+                return done(error);
             }
 
             if (!req.body.password) {
-                return done(new Error('password required'))
+                var error = new Error('Password required!');
+                error.status = 400;
+                return done(error);
             }
 
             if (!req.body.email) {
-                return done(new Error('email required'))
+                var error = new Error('Email required!');
+                error.status = 400;
+                return done(error);
             }
 
-            done(null, false);
+            done();
         },
-        user: function (done) {
-            user.register(new user({
+        user: ['validate', function (done) {
+            userModel.register(new userModel({
                 username: req.body.username,
                 email: req.body.email,
-                timeCreated: new Date()
-            }), req.body.password, done);
-        },
-        account: ['user', function (done, results) {
-
-            var name = req.body.name;
-            var username = req.body.username;
-
-            account.create(results.user._id, username, name, done);
-        }],
-        linkUser: ['account', function (done, results) {
-            var id = results.account._id;
-            var update = {
-                $set: {
-                    user: {
-                        id: results.user._id,
-                        name: results.user.username
-                    }
+                timeCreated: new Date(),
+                verification: {
+                    complete: false
                 }
-            };
-            account.findByIdAndUpdate(id, update, done);
-        }],
-        linkAccount: ['account', function (done, results) {
-            var id = results.user._id;
-            var update = {
-                $set: {
-                    roles: {
-                        account: results.account._id
-                    }
+            }), req.body.password, function(err, resultUser) {
+                if(err) {
+                    return done(err);
                 }
-            };
-
-            user.findByIdAndUpdate(id, update, done);
+                req.app.acl.addUserRoles(resultUser.username, 'player');
+                done(null, resultUser);
+            });
         }],
-        welcome: ['linkUser', 'linkAccount', function (done, results) {
+        welcome: ['user', function (done, results) {
 
-            var user = results.linkAccount;
+            var user = results.user;
 
             req.app.utility.sendmail(req, res, {
                 from: req.app.config.smtp.from.name + ' <' + req.app.config.smtp.from.address + '>',
@@ -91,15 +74,14 @@ router.post('/', function (req, res, next) {
         }]
     }, function (err, results) {
         if (err) {
-            return res.send({message: err.toString()});
+            return next(err);
         }
+        var user = results.user;
         res.json({
             user: {
-                username: results.linkAccount.username,
-                email: results.linkAccount.email,
-                roles: {
-                    account: results.account._id
-                }
+                id: user.id,
+                username: user.username,
+                email: user.email
             }
         });
     });
