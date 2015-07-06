@@ -3,11 +3,10 @@
 var express = require('express'),
     path = require('path'),
     logger = require('morgan'),
-    session = require('express-session'),
-    mongoStore = require('connect-mongo')(session),
     bodyParser = require('body-parser'),
     mongoose = require('mongoose'),
     passport = require('passport'),
+    jwt = require("express-jwt"),
     http = require('http');
 
 var config = require('./config'),
@@ -21,6 +20,8 @@ var config = require('./config'),
 
 var app = express();
 
+
+
 //keep reference to config
 app.config = config;
 
@@ -30,9 +31,10 @@ app.utility.sendmail = require('./util/sendmail');
 
 app.server = http.createServer(app);
 
+mongoose.set('debug', app.get('env') === 'development');
 app.db = mongoose.createConnection(config.mongodb.uri);
 app.db.on('error', console.error.bind(console, 'mongoose connection error: '));
-app.db.on('connected', function() {
+app.db.on('connected', function () {
     console.log('Mongo db Connected!');
     require('./roles')(app);
 });
@@ -49,14 +51,26 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(session({
-    secret: config.cryptoKey,
-    resave: false,
-    saveUninitialized: false,
-    store: new mongoStore({mongooseConnection: app.db})
-}));
-app.use(passport.initialize());
-app.use(passport.session());
+var jwtCheck = jwt({
+    secret: config.cryptoKey
+});
+
+app.use(jwtCheck.unless({path: [
+    config.apiPath + '/login', 
+    config.apiPath + '/login/forgot',
+    new RegExp("/^\\" + config.apiPath + "\/login\/reset\/.*", "g"),
+    config.apiPath + '/contact', 
+    config.apiPath + '/signup'
+]}));
+app.use(function (err, req, res, next) {
+    console.log(err);
+    if (err.name === 'UnauthorizedError') {
+        err.status = 401;
+        return next(err);
+    }
+    next();
+});
+
 app.passport = passport;
 
 require('./passport')(app);
@@ -92,7 +106,7 @@ if (app.get('env') === 'development') {
 // production error handler
 // no stacktraces leaked to user
 app.use(function (err, req, res, next) {
-    res.status(err.status || 500).send({message : err.message});
+    res.status(err.status || 500).send({message: err.message});
 });
 
 //listen up

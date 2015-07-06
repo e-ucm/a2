@@ -38,8 +38,8 @@ exports = module.exports = {
                 acl = req.app.acl,
                 resource,
                 url;
-            if(req.session.passport) {
-                _userId = req.session.passport.user;
+            if(req.user) {
+                _userId = req.user.username;
             }
             if (!_userId) {
                 var error = new Error('User not authenticated.');
