@@ -12,6 +12,7 @@ exports.cryptoKey = 'k3yb0ardc4t';
 exports.loginAttempts = {
   failedLoginAttempts: 10
 };
+exports.tokenExpirationInSeconds = 7 * 86400;
 exports.requireAccountVerification = false;
 exports.smtp = {
   from: {

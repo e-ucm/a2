@@ -1,8 +1,7 @@
 var express = require('express'),
     router = express.Router(),
     jwt = require('jsonwebtoken'),
-    async = require('async'),
-    TOKEN_EXPIRATION_SEC = 7 * 86400;
+    async = require('async');
 
 router.post('/', function (req, res, next) {
     req.app.passport.authenticate('local', function (err, user, info) {
@@ -37,7 +36,7 @@ router.post('/', function (req, res, next) {
                         }
 
                         var token = jwt.sign(data, req.app.config.cryptoKey, {
-                            expiresInSeconds: TOKEN_EXPIRATION_SEC
+                            expiresInSeconds: req.app.config.tokenExpirationInSeconds
                         });
 
                         done(null, token);
