@@ -23,10 +23,7 @@ router.get('/', authentication.authorized(), function (req, res, next) {
     });
 });
 
-/* GET a specific user. */
-router.get('/:userId', authentication.authorized(), function (req, res, next) {
-    var userId = req.params.userId || '';
-
+function sendUserInfo(userId, req, res, next) {
     req.app.db.model('user').findById(userId, function (err, user) {
         if (err) {
             return next(err);
@@ -37,6 +34,21 @@ router.get('/:userId', authentication.authorized(), function (req, res, next) {
             return next(err);
         }
         res.json(user);
+    });
+}
+
+/* GET a specific user. */
+router.get('/:userId', authentication.authenticated, function (req, res, next) {
+    var userId = req.params.userId || '';
+    if(req.user._id === userId) {
+       return sendUserInfo(userId, req, res, next);
+    }
+    authentication.authorized()(req, res, function (err) {
+        if (err) {
+            return next(err);
+        }
+
+        sendUserInfo(userId, req, res, next);
     });
 });
 
