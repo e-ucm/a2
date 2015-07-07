@@ -11,21 +11,43 @@ exports = module.exports = function (app) {
         };
     }
 
-    var acl = require('acl');
-    var acl = new acl(new acl.mongodbBackend(app.db.db, 'acl_'), logger() );
+    var Acl = require('acl');
+    var acl = new Acl(require('./backends/mongodb.js')(app, Acl), logger() );
 
     var roles = [
         {
             name: 'admin',
             resources: [
                 app.config.apiPath + '/users',
-                app.config.apiPath + '/users/:userId'
+                app.config.apiPath + '/users/:userId',
+                app.config.apiPath + '/roles'
             ],
             permissions: '*'
         }
     ];
+
     roles.forEach(function(role) {
         acl.allow(role.name, role.resources, role.permissions);
-    })
+    });
+
+    /**
+     * Return an array with all roles
+     *
+     */
+    acl.listRoles = function(cb){
+        acl.backend.getAll(acl.options.buckets.roles, ['key'], function (err, result){
+            if(err) {
+                cb(err);
+            }
+
+            var res = [];
+            result.forEach(function (item){
+                res.push(item.key)
+            });
+
+            cb(null, res);
+        })
+    }
+
     app.acl = acl;
 };
