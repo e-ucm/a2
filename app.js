@@ -14,6 +14,7 @@ var config = require('./config'),
     contact = require('./routes/contact'),
     signup = require('./routes/signup'),
     users = require('./routes/users'),
+    roles = require('./routes/roles'),
     login = require('./routes/login'),
     logout = require('./routes/logout');
 
@@ -81,6 +82,7 @@ app.use(config.apiPath + '/signup', signup);
 app.use(config.apiPath + '/users', users);
 app.use(config.apiPath + '/login', login);
 app.use(config.apiPath + '/logout', logout);
+app.use(config.apiPath + '/roles', roles);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
