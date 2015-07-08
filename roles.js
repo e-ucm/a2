@@ -11,8 +11,8 @@ exports = module.exports = function (app) {
         };
     }
 
-    var Acl = require('acl');
-    var acl = new Acl(require('./backends/mongodb.js')(app, Acl), logger() );
+    var acl = require('acl');
+    var acl = new acl(new acl.mongodbBackend(app.db.db, 'acl_'), logger() );
 
     var roles = [
         {
@@ -20,7 +20,8 @@ exports = module.exports = function (app) {
             resources: [
                 app.config.apiPath + '/users',
                 app.config.apiPath + '/users/:userId',
-                app.config.apiPath + '/roles'
+                app.config.apiPath + '/roles',
+                app.config.apiPath + '/roles/:roleName'
             ],
             permissions: '*'
         }
@@ -35,19 +36,14 @@ exports = module.exports = function (app) {
      *
      */
     acl.listRoles = function(cb){
-        acl.backend.getAll(acl.options.buckets.roles, ['key'], function (err, result){
+        acl.backend.get(acl.options.buckets.meta, 'roles', function (err, result){
             if(err) {
                 cb(err);
             }
 
-            var res = [];
-            result.forEach(function (item){
-                res.push(item.key)
-            });
-
-            cb(null, res);
-        })
-    }
+            cb(null, result);
+        });
+    };
 
     app.acl = acl;
 };

@@ -5,7 +5,7 @@ var express = require('express'),
     router = express.Router();
 
 /* GET users listing. */
-router.get('/', authentication.authorized(), function (req, res, next) {
+router.get('/', authentication.authorized, function (req, res, next) {
 
     var query = {};
     var fields = req.body.fields || '';
@@ -31,7 +31,7 @@ router.get('/:userId', authentication.authenticated, function (req, res, next) {
         return sendUserInfo(userId, req, res, next);
     }
 
-    authentication.authorized()(req, res, function (err) {
+    authentication.authorized(req, res, function (err) {
         if (err) {
             return next(err);
         }
@@ -48,7 +48,7 @@ router.put('/:userId', authentication.authenticated, function (req, res, next) {
         return updateUserInfo(userId, req, res, next);
     }
 
-    authentication.authorized()(req, res, function (err) {
+    authentication.authorized(req, res, function (err) {
         if (err) {
             return next(err);
         }
@@ -65,7 +65,7 @@ router.delete('/:userId', authentication.authenticated, function (req, res, next
         return deleteUser(userId, req, res, next);
     }
 
-    authentication.authorized()(req, res, function (err) {
+    authentication.authorized(req, res, function (err) {
         if (err) {
             return next(err);
         }
