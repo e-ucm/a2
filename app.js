@@ -6,10 +6,10 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     mongoose = require('mongoose'),
     passport = require('passport'),
-    jwt = require("express-jwt"),
-    http = require('http');
+    jwt = require("express-jwt");
 
-var config = require('./config'),
+var configPath = process.env.CONFIG_PATH || './config';
+var config = require(configPath),
     routes = require('./routes/index'),
     contact = require('./routes/contact'),
     signup = require('./routes/signup'),
@@ -18,10 +18,7 @@ var config = require('./config'),
     login = require('./routes/login'),
     logout = require('./routes/logout');
 
-
 var app = express();
-
-
 
 //keep reference to config
 app.config = config;
@@ -29,8 +26,6 @@ app.config = config;
 //setup utilities
 app.utility = {};
 app.utility.sendmail = require('./util/sendmail');
-
-app.server = http.createServer(app);
 
 mongoose.set('debug', app.get('env') === 'development');
 app.db = mongoose.createConnection(config.mongodb.uri);
@@ -47,7 +42,9 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 //middleware
-app.use(logger('dev'));
+if(app.get('env') == 'development') {
+    app.use(logger('dev'));
+}
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -64,7 +61,6 @@ app.use(jwtCheck.unless({path: [
     config.apiPath + '/signup'
 ]}));
 app.use(function (err, req, res, next) {
-    console.log(err);
     if (err.name === 'UnauthorizedError') {
         err.status = 401;
         return next(err);
@@ -103,18 +99,13 @@ if (app.get('env') === 'development') {
             error: err
         });
     });
-}
+} else {
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function (err, req, res, next) {
-    res.status(err.status || 500).send({message: err.message});
-});
-
-//listen up
-app.server.listen(config.port, function () {
-    //and... we're live
-    console.log('Server is running on port ' + config.port);
-});
+    app.use(function (err, req, res, next) {
+        res.status(err.status || 500).send({message: err.message});
+    });
+}
 
 module.exports = app;
