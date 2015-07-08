@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "test": "CONFIG_PATH=./config-example NODE_ENV=test ./node_modules/mocha/bin/_mocha --recursive -R spec",
-    "test-travis": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/*"
+    "test-travis": "CONFIG_PATH=./config-example NODE_ENV=test ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/*"
   },
   "dependencies": {
     "acl": "^0.4.x",

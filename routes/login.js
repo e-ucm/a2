@@ -9,7 +9,9 @@ router.post('/', function (req, res, next) {
             return next(err);
         }
         if (!user) {
-            return next(new Error(info.message));
+            err = new Error(info.message);
+            err.status = 401;
+            return next(err);
         } else {
             req.logIn(user, {session: false}, function (err) {
                 if (err) {

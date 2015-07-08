@@ -23,6 +23,10 @@ describe('User  model validations', function () {
         done();
     });
 
+    after(function(){
+        app.db.db.dropDatabase();
+    });
+
     // use describe to give a title to your test suite, in this case the tile is "Model validations"
     // and then specify a function in which we are going to declare all the tests
     // we want to run. Each test starts with the function it() and as a first argument
