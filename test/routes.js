@@ -35,12 +35,16 @@ describe('REST API', function () {
         done();
     });
 
-    var post = function (url, data, exprectedCode, callback) {
-        request.post(url).send(data).expect(exprectedCode).end(callback);
-    }
-
     var get = function (url, token, exprectedCode, callback) {
         request.get(url).set('Authorization', 'Bearer ' + token).expect(exprectedCode).end(callback);
+    };
+
+    var post = function (url, data, exprectedCode, callback) {
+        request.post(url).send(data).expect(exprectedCode).end(callback);
+    };
+
+    var authPost = function (url, token, data, exprectedCode, callback) {
+        request.post(url).set('Authorization', 'Bearer ' + token).send(data).expect(exprectedCode).end(callback);
     }
 
     /** /api/signup **/
@@ -98,10 +102,7 @@ describe('REST API', function () {
             post(loginRoute, {
                 "username": "asdsdf",
                 "password": "dsgfsdfg"
-            }, 401, function (err, res) {
-                should.not.exist(err);
-                done();
-            });
+            }, 401, done);
         });
 
         it('should login correctly', function (done) {
@@ -179,6 +180,96 @@ describe('REST API', function () {
                 should(res.items.total).be.a.Number();
                 done();
             });
+        });
+    });
+
+    /** /api/roles **/
+    var rolesRoute = '/api/roles';
+
+    describe(rolesRoute, function () {
+
+        it('should not GET roles because of an invalid_token', function (done) {
+            get(rolesRoute, 'invalid_token', 401, done);
+        });
+
+        it('should correctly GET roles', function (done) {
+
+            get(rolesRoute, token, 200, function (err, res) {
+                res = JSON.parse(res.text);
+                should(res).be.an.Array();
+                done();
+            });
+        });
+    });
+
+    var role1 = {
+        "roles": "role1",
+        "allows": [
+            {"resources": "resource-1", "permissions": ["permission-1", "permission-3"]},
+            {"resources": ["resource-2", "resource-3"], "permissions": ["permission-2"]}
+        ]
+    };
+    var role2 = {
+        "roles": "role2",
+        "resources": [
+            "resource-1",
+            "resource-2",
+            "resource-3"
+        ],
+        "permissions": [
+            "permission-1",
+            "permission-2",
+            "permission-3"
+        ]
+    };
+    describe(rolesRoute, function () {
+
+        it('should not POST role because of an invalid_token', function (done) {
+            post(rolesRoute, 'invalid_token', 401, done);
+        });
+
+        it('should not POST role, bad fields', function (done) {
+            var wrongRole1 = {
+                "name": "role name",
+                "allows": [
+                    {"resources": "resource-1", "permissions": ["permission-1", "permission-3"]},
+                    {"resources": ["resource-2", "resource-3"], "permissions": ["permission-2"]}
+                ]
+            };
+
+            authPost(rolesRoute, token, wrongRole1, 400, done);
+        });
+
+        it('should not POST role, bad fields', function (done) {
+            var wrongRole2 = {
+                "roles": "bad role",
+            };
+
+            authPost(rolesRoute, token, wrongRole2, 400, done);
+        });
+
+        it('should correctly POST role1', function (done) {
+
+            authPost(rolesRoute, token, role1, 200, function (err, res) {
+                res = JSON.parse(res.text);
+                should(res).be.an.Array();
+                should(res).containDeep([role1.roles])
+                done();
+            });
+        });
+
+        it('should correctly POST role2', function (done) {
+
+            authPost(rolesRoute, token, role2, 200, function (err, res) {
+                res = JSON.parse(res.text);
+                should(res).be.an.Array();
+                should(res).containDeep([role2.roles])
+                done();
+            });
+        });
+
+        it('should not POST role, the role already exists.', function (done) {
+            authPost(rolesRoute, token, role1, 400, done);
         });
     });
 });
