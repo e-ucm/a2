@@ -120,7 +120,7 @@ describe('REST API', function () {
                 should(res.user.username).be.a.String();
                 should(res.user.email).be.a.String();
                 should(res.user.token).be.a.String();
-                token = res.token;
+                token = res.user.token;
                 done();
             });
         });
@@ -137,7 +137,48 @@ describe('REST API', function () {
 
 
         it('should correctly GET users', function (done) {
-            get(usersRoute, token, 401, done);
+            get(usersRoute, token, 200, function(err, res) {
+                should.not.exist(err);
+                should(res).be.an.Object();
+
+                res = JSON.parse(res.text);
+
+                // data validation
+                var data = res.data;
+                should(data).be.an.Array();
+                if(data.length > 0) {
+                    // user validation
+                    var user = data[0];
+                    should(user).be.an.Object();
+                    should(user._id).be.a.String();
+                    should(user.username).be.a.String();
+                    should(user.email).be.a.String();
+                    should(user.timeCreated).be.a.String();
+                    should(user.verification).be.an.Object();
+                    should(user.verification.complete).be.a.Boolean();
+                    should(user.name).be.an.Object();
+                    should(user.name.first).be.a.String();
+                    should(user.name.middle).be.a.String();
+                    should(user.name.last).be.a.String();
+                }
+
+                // pages validation
+                should(res.pages).be.an.Object();
+                should(res.pages.current).be.a.Number();
+                should(res.pages.prev).be.a.Number();
+                should(res.pages.hasPrev).be.a.Boolean();
+                should(res.pages.next).be.a.Number();
+                should(res.pages.hasNext).be.a.Boolean();
+                should(res.pages.total).be.a.Number();
+
+                // items validation
+                should(res.items).be.an.Object();
+                should(res.items.limit).be.a.Number();
+                should(res.items.begin).be.a.Number();
+                should(res.items.end).be.a.Number();
+                should(res.items.total).be.a.Number();
+                done();
+            });
         });
     });
 });
