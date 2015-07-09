@@ -152,7 +152,10 @@ router.post('/:roleName/resources', authentication.authorized, function (req, re
 
             done();
         },
-        addResources: ['validate', function (done) {
+        checkRole: ['validate', function (done) {
+            existsRole(req, roleName, done);
+        }],
+        addResources: ['checkRole', function (done) {
             if (req.body.allows) {
                 var role = req.body;
                 role.roles = roleName;
@@ -249,7 +252,10 @@ router.post('/:roleName/resources/:resourceName/permissions', authentication.aut
     var resource = req.params.resourceName || '';
 
     async.auto({
-        validate: function (done) {
+        checkRole: function (done) {
+            existsRole(req, roleName, done);
+        },
+        validate: ['checkRole', function (done) {
             if (!req.body.permissions) {
                 var err = new Error('Permissions required!');
                 err.status = 400;
@@ -269,7 +275,7 @@ router.post('/:roleName/resources/:resourceName/permissions', authentication.aut
 
                 return done();
             });
-        },
+        }],
         addPermissions: ['validate', function (done) {
             req.app.acl.allow(roleName, resource, req.body.permissions, done);
         }]
@@ -292,38 +298,54 @@ router.delete('/:roleName/resources/:resourceName/permissions/:permissionName', 
     var resource = req.params.resourceName || '';
     var permission = req.params.permissionName || '';
 
-    req.app.acl.whatResources(roleName, function (err, result) {
+    async.auto({
+        checkRole: function (done) {
+            existsRole(req, roleName, done)
+        },
+        validate: ['checkRole', function (done) {
+            req.app.acl.whatResources(roleName, function (err, result) {
+                if (err) {
+                    return done(err);
+                }
+                if (!result[resource]) {
+                    err = new Error('The resource ' + resource + ' in ' + roleName + " doesn't exist.");
+                    err.status = 400;
+                    return done(err);
+                }
+
+                if (result[resource].length < 2) {
+                    err = new Error("The permission " + permission + " can't be remove because is the last");
+                    err.status = 400;
+                    return done(err);
+                } else if (result[resource].indexOf(permission) == -1) {
+                    err = new Error("The permission " + permission + ' in the resource ' + resource + ' in ' + roleName + " doesn't exist.");
+                    err.status = 400;
+                    return done(err);
+                }
+                done()
+            });
+        }],
+        removePermissions: ['validate', function (done) {
+            req.app.acl.removeAllow(roleName, resource, permission, function (err) {
+                if (err) {
+                    return done(err);
+                }
+                done();
+            });
+        }]
+    }, function (err) {
         if (err) {
             return next(err);
         }
-        if (!result[resource]) {
-            err = new Error('The resource ' + resource + ' in ' + roleName + " doesn't exist.");
-            err.status = 400;
-            return next(err);
-        }
-
-        if (result[resource].length < 2) {
-            err = new Error("The permission " + permission + " can't be remove because is the last");
-            err.status = 400;
-            return next(err);
-        } else if (result[resource].indexOf(permission) == -1) {
-            err = new Error("The permission " + permission + ' in the resource ' + resource + ' in ' + roleName + " doesn't exist.");
-            err.status = 400;
-            return next(err);
-        }
-
-        req.app.acl.removeAllow(roleName, resource, permission, function (err) {
+        req.app.acl.whatResources(roleName, function (err, result) {
             if (err) {
-                return next(err);
+                return done(err);
             }
-            req.app.acl.whatResources(roleName, function (err, result) {
-                if (err) {
-                    return next(err);
-                }
-                res.json(result[resource] || [])
-            });
+            res.send(result[resource] || [])
         });
     });
+
+
 });
 
 /* GET the username of all users that have the role. */
