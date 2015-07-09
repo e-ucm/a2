@@ -22,7 +22,7 @@ router.post('/', function (req, res, next) {
                     /*Generate a random number*/
                     function (done) {
                         require('crypto').randomBytes(10, function (err, buf) {
-                            if(err) {
+                            if (err) {
                                 return done(err);
                             }
                             var randNum = buf.toString('hex');
@@ -33,15 +33,17 @@ router.post('/', function (req, res, next) {
                     function (randNum, done) {
                         var data = {
                             _id: user._id,
-                            username: user.username,
                             randNum: randNum
                         }
 
+                        var expirationInSec = req.app.config.tokenExpirationInSeconds;
                         var token = jwt.sign(data, req.app.config.cryptoKey, {
-                            expiresInSeconds: req.app.config.tokenExpirationInSeconds
+                            expiresInSeconds: expirationInSec
                         });
 
-                        done(null, token);
+                        req.app.tokenStorage.save(token, {
+                            username: user.username
+                        }, expirationInSec, done);
                     },
                     /*Send the login data*/
                     function (token, done) {

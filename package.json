@@ -18,12 +18,14 @@
     "express-jwt": "*",
     "jade": "^1.11.x",
     "jsonwebtoken": "*",
+    "lodash": "*",
     "mongodb": "^2.0.x",
     "mongoose": "^4.0.x",
     "morgan": "^1.6.x",
     "passport": "^0.2.x",
     "passport-local-mongoose": "1.0.x",
     "q": "*",
+    "redis": "*",
     "validator": "*"
   },
   "devDependencies": {

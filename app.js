@@ -6,7 +6,9 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     mongoose = require('mongoose'),
     passport = require('passport'),
-    jwt = require("express-jwt");
+    jwt = require('express-jwt'),
+    tokenStorage = require('./tokenStorage/token-storage'),
+    http = require('http');
 
 var configPath = process.env.CONFIG_PATH || './config';
 var config = require(configPath),
@@ -20,8 +22,14 @@ var config = require(configPath),
 
 var app = express();
 
+var RedisBackend = require('./tokenStorage/redis-backend');
+var backend = new RedisBackend(config.redisdb);
+tokenStorage = new tokenStorage(backend);
+
 //keep reference to config
 app.config = config;
+
+app.tokenStorage = tokenStorage;
 
 //setup utilities
 app.utility = {};
@@ -53,17 +61,25 @@ var jwtCheck = jwt({
     secret: config.cryptoKey
 });
 
-app.use(jwtCheck.unless({path: [
-    config.apiPath + '/login', 
-    config.apiPath + '/login/forgot',
-    new RegExp("/^\\" + config.apiPath + "\/login\/reset\/.*", "g"),
-    config.apiPath + '/contact', 
-    config.apiPath + '/signup'
-]}));
+app.use(jwtCheck.unless({
+    path: [
+        config.apiPath + '/login',
+        config.apiPath + '/login/forgot',
+        new RegExp("/^\\" + config.apiPath + "\/login\/reset\/.*", "g"),
+        config.apiPath + '/contact',
+        config.apiPath + '/signup'
+    ]
+}));
 app.use(function (err, req, res, next) {
     if (err.name === 'UnauthorizedError') {
         err.status = 401;
         return next(err);
+    }
+    next();
+});
+app.use(function (req, res, next) {
+    if (req.user) {
+        return tokenStorage.middleware(req, res, next);
     }
     next();
 });
