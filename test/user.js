@@ -19,11 +19,12 @@ describe('User  model validations', function () {
         app.db = mongoose.createConnection(app.config.mongodb.uri + '_tests');
         require('../schema/user')(app, mongoose);
         user = app.db.model('user');
-        user.remove({}, function (err) { });
+        user.remove({}, function (err) {
+        });
         done();
     });
 
-    after(function(){
+    after(function () {
         app.db.db.dropDatabase();
     });
 
@@ -39,7 +40,7 @@ describe('User  model validations', function () {
         user.register(new user({
             username: 'username',
             email: 'usermail@mail.com'
-        }), 'user_password', function(err, result) {
+        }), 'user_password', function (err, result) {
 
             should.not.exist(err);
             should(result).be.an.instanceOf(user);
@@ -54,7 +55,7 @@ describe('User  model validations', function () {
         user.register(new user({
             username: 'username',
             email: 'email@m.com'
-        }), 'user_password2', function(err, result) {
+        }), 'user_password2', function (err, result) {
             should.not.exist(result);
             should(err).be.an.instanceOf(Error);
             done();
@@ -64,7 +65,7 @@ describe('User  model validations', function () {
     it('should alert about missing username', function (done) {
         user.register(new user({
             email: 'email@m.com'
-        }), 'user_password23', function(err, result) {
+        }), 'user_password23', function (err, result) {
 
             should.not.exist(result);
             should(err).be.an.instanceOf(Error);
@@ -78,7 +79,7 @@ describe('User  model validations', function () {
     it('should alert about missing email', function (done) {
         user.register(new user({
             username: 'username23'
-        }), 'user_password23', function(err, result) {
+        }), 'user_password23', function (err, result) {
 
             should.not.exist(result);
             should(err).be.an.instanceOf(Error);
@@ -90,7 +91,7 @@ describe('User  model validations', function () {
         user.register(new user({
             username: 'username2',
             email: 'invalid_mail'
-        }), 'user_password2', function(err, result) {
+        }), 'user_password2', function (err, result) {
 
             should.not.exist(result);
             should(err).be.an.instanceOf(Error);

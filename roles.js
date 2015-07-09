@@ -12,7 +12,7 @@ exports = module.exports = function (app) {
     }
 
     var acl = require('acl');
-    var acl = new acl(new acl.mongodbBackend(app.db.db, 'acl_'), logger());
+    var acl = new acl(new acl.mongodbBackend(app.db.db, 'acl_'), app.get('env') == 'development' ? logger() : null);
 
     var roles = [
         {
@@ -20,6 +20,7 @@ exports = module.exports = function (app) {
             resources: [
                 app.config.apiPath + '/users',
                 app.config.apiPath + '/users/:userId',
+                app.config.apiPath + '/users/:userId/roles',
                 app.config.apiPath + '/roles',
                 app.config.apiPath + '/roles/:roleName',
                 app.config.apiPath + '/roles/:roleName/resources',
