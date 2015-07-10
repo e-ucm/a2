@@ -4,6 +4,11 @@ exports.port = process.env.PORT || 3000;
 exports.mongodb = {
   uri: process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost:27017/example-dbname'
 };
+exports.redisdb = {
+  host: '127.0.0.1',
+  port: 6379,
+  dbNumber: 1
+};
 exports.apiPath = '/api';
 exports.companyName = 'Acme, Inc.';
 exports.projectName = 'Drywall';

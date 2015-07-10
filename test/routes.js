@@ -47,6 +47,7 @@ describe('REST API', function () {
 
     after(function () {
         app.db.db.dropDatabase();
+        app.tokenStorage.clean();
     });
 
     it('should exist', function (done) {
