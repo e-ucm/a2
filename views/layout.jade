@@ -1,7 +1,20 @@
 doctype html
 html
-  head
-    title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
-    block content
+    head
+        meta(charset='utf-8')
+        meta(http-equiv='X-UA-Compatible', content='IE=edge')
+        meta(name='viewport', content='width=device-width, initial-scale=1')
+        meta(name='description', content='')
+        meta(name='author', content='')
+        // Bootstrap Core CSS
+        link(href='../node_modules/bootstrap/dist/css/bootstrap.min.css', rel='stylesheet')
+        // Custom Fonts
+        link(href='../node_modules/font-awesome/css/font-awesome.min.css', rel='stylesheet', type='text/css')
+        title= title
+    body
+        block content
+        // jQuery
+        script(src='../node_modules/jquery/dist/jquery.min.js')
+        // Bootstrap Core JavaScript
+        script(src='../node_modules/bootstrap/dist/js/bootstrap.min.js')
+
