@@ -2,6 +2,12 @@ var express = require('express'),
     router = express.Router(),
     async = require('async');
 
+/* GET signup page. */
+router.get('/', function(req, res, next) {
+    res.render('signup', {
+    });
+});
+
 /* POST signup. */
 router.post('/', function (req, res, next) {
     var userModel = req.app.db.model('user');
