@@ -75,6 +75,11 @@ router.post('/', function (req, res, next) {
     })(req, res, next);
 });
 
+/* GET forgot page. */
+router.get('/forgot', function(req, res, next) {
+    res.render('forgot', {
+    });
+});
 
 router.post('/forgot', function (req, res, next) {
     async.waterfall([
@@ -138,6 +143,12 @@ router.post('/forgot', function (req, res, next) {
         if (err) {
             next(err)
         }
+    });
+});
+
+/* GET reset page. */
+router.get('/reset/:token', function(req, res, next) {
+    res.render('reset', {
     });
 });
 
