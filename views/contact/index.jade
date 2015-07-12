@@ -1,16 +1,20 @@
 extends ../layout
+
 block content
-    div.row(ng-app='myApp', ng-controller='myCtrl')
-        .panel-body
-            form(role='form',method="post",action="/api/contact")
-                .form-group
-                    input.form-control(type='text', style='border-radius: 0px;', placeholder='Your name', name="name")
-                .form-group
-                    input.form-control(type='text', style='border-radius: 0px;', placeholder='Your email', name="email")
-                .form-group
-                    input.form-control(type='text', style='border-radius: 0px;', placeholder='Text', name="text")
-                .form-group.text-right
-                    button.btn.btn-primary(type='submit') Contact
-            if error
-                .alert.alert-danger(role="alert")
-                    p Invalid user name and/or password
+    div.row
+        div.col-sm-6
+            div.page-header
+                h1 Contact
+            div#Contact
+                form(role='form',method="post",action="/api/contact")
+                    .form-group
+                        input.form-control(type='text', style='border-radius: 0px;', placeholder='Your name', name="name")
+                    .form-group
+                        input.form-control(type='text', style='border-radius: 0px;', placeholder='Your email', name="email")
+                    .form-group
+                        input.form-control(type='text', style='border-radius: 0px;', placeholder='Text', name="text")
+                    .form-group.text-right
+                        button.btn.btn-primary(type='submit') Contact
+                if error
+                    .alert.alert-danger(role="alert")
+                        p Invalid user name and/or password

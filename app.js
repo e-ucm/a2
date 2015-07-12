@@ -66,7 +66,7 @@ app.use(jwtCheck.unless({
         config.apiPath + '/contact',
         config.apiPath + '/login',
         config.apiPath + '/login/forgot',
-        new RegExp("/^\\" + config.apiPath + "\/login\/reset\/.*", "g"),
+        new RegExp(config.apiPath + "\/login\/reset\/.*", "g"),
         config.apiPath + '/signup'
     ]
 }));
