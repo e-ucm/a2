@@ -30,9 +30,7 @@
   },
   "devDependencies": {
     "assert": "*",
-    "bootstrap": "*",
     "coveralls": "*",
-    "font-awesome": "*",
     "istanbul": "*",
     "jquery": "*",
     "mocha": "*",
