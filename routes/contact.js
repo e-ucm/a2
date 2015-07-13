@@ -2,11 +2,6 @@ var express = require('express'),
     router = express.Router(),
     Q = require('q');
 
-/* GET contact*/
-router.get('/', function (req, res, next) {
-    res.render('../views/contact/index');
-});
-
 /* POST contact. */
 router.post('/', function (req, res, next) {
     Q.resolve().then(function () {

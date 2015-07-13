@@ -34,7 +34,7 @@ router.post('/', function (req, res, next) {
                         var data = {
                             _id: user._id,
                             randNum: randNum
-                        }
+                        };
 
                         var expirationInSec = req.app.config.tokenExpirationInSeconds;
                         var token = jwt.sign(data, req.app.config.cryptoKey, {
@@ -66,12 +66,6 @@ router.post('/', function (req, res, next) {
             });
         }
     })(req, res, next);
-});
-
-/* GET forgot page. */
-router.get('/forgot', function(req, res, next) {
-    res.render('forgot', {
-    });
 });
 
 router.post('/forgot', function (req, res, next) {
@@ -118,7 +112,7 @@ router.post('/forgot', function (req, res, next) {
                 textPath: 'forgot/email-text',
                 htmlPath: 'forgot/email-html',
                 locals: {
-                    link: req.headers.host + req.app.config.apiPath + '/login/reset/' + token,
+                    link: req.headers.host + '/login/reset/' + token,
                     projectName: req.app.config.projectName
                 },
                 email: req.body.email,
@@ -136,12 +130,6 @@ router.post('/forgot', function (req, res, next) {
         if (err) {
             next(err)
         }
-    });
-});
-
-/* GET reset page. */
-router.get('/reset/:token', function(req, res, next) {
-    res.render('reset', {
     });
 });
 
@@ -182,7 +170,7 @@ router.post('/reset/:token', function (req, res, next) {
         /*Mail notification*/
         function (user, done) {
 
-            res.send({message: 'succes'});
+            res.send({message: 'Success'});
             req.app.utility.sendmail(req, res, {
                 from: req.app.config.smtp.from.name + ' <' + req.app.config.smtp.from.address + '>',
                 to: user.email,
