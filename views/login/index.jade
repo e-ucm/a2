@@ -1,19 +1,18 @@
 extends ../layout
 
 block content
-    div.row
-        div.col-sm-6
-            div.page-header
+    .row-fluid
+        .col-sm-6
+            .page-header
                 h1 Sign In
-            div#login
-                form(role='form',method="post",action="/api/login")
-                    div.form-group
-                        label Username or Email:
-                        input.form-control(type='text', name='username')
-                    div.form-group
-                        label Password:
-                        input.form-control(type='password', name='password')
-                    div.form-actions
-                        button.btn.btn-primary.btn-login(type='submit') Sign In
-                        | &nbsp;
-                        a.btn.btn-link(href='/api/login/forgot') Forgot your password?
+            div#login(ng-controller='LoginController')
+                .form-group
+                    label Username:
+                    input.form-control(type='text' name='username' ng-model='username')
+                .form-group
+                    label Password:
+                    input.form-control(type='password' name='password' ng-model='password')
+                .form-actions
+                    button.btn.btn-primary.btn-login(type='submit' ng-click='login()') Sign In
+                    | &nbsp;
+                    a.btn.btn-link(href='/api/login/forgot') Forgot your password?

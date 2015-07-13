@@ -416,10 +416,6 @@ describe('REST API', function () {
             };
         };
 
-        it("should not GET his own when it has none", function (done) {
-            get(usersRoute + '/' + user.id + '/roles', user.token, 403, done);
-        });
-
         it("should GET his own roles being an admin", function (done) {
             get(usersRoute + '/' + admin.id + '/roles', admin.token, 200, validateRolesInformation(done));
         });

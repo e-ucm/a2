@@ -3,13 +3,6 @@ var express = require('express'),
     jwt = require('jsonwebtoken'),
     async = require('async');
 
-
-/* GET login page. */
-router.get('/', function(req, res, next) {
-    res.render('login', {
-    });
-});
-
 router.post('/', function (req, res, next) {
     req.app.passport.authenticate('local', function (err, user, info) {
         if (err) {

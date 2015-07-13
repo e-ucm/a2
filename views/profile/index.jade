@@ -1,0 +1,52 @@
+extends ../layout
+
+block content
+    .row-fluid
+        .col-sm-12(ng-init='uId=#{JSON.stringify(userId)}')
+            .page-header
+                h1 Profile
+            div#profile(ng-controller='ProfileController')
+                label Name
+                table.table
+                    thead
+                        tr
+                            th First
+                            th Middle
+                            th Last
+                            th Action
+                    tbody
+                        tr
+                            td
+                                input.form-control(ng-model='name.first')
+                            td
+                                input.form-control(ng-model='name.middle')
+                            td
+                                input.form-control(ng-model='name.last')
+                            td
+                                button.btn(ng-click='changeName()') Change Name
+                        tr
+                            td {{user.name.first}}
+                            td {{user.name.middle}}
+                            td {{user.name.last}}
+                label Email
+                p {{user.email}}
+                label Id
+                p #{userId}
+                label Roles
+                .row-fluid
+                    table.table(ng-repeat='role in user.roles')
+                        thead
+                            tr
+                                th
+                                    i  {{role.name}},
+                                    |  resources
+                                th Permissions
+                        tbody
+                            tr(ng-repeat='(resource, permissions) in role.info')
+                                td {{resource}}
+                                td
+                                    table(ng-repeat='permission in permissions')
+                                        tbody
+                                            td {{permission}}
+                    div(ng-if='isAdmin()')
+                        button.btn Edit

@@ -41,8 +41,11 @@ router.delete(userIdRoute, authentication.authenticated, function (req, res, nex
 });
 
 /* GET a specific user's roles. */
-router.get(userIdRolesRoute, authentication.authorized, function (req, res, next) {
-    checkUserExistenceAndExec(req, res, next, sendUserRoles);
+router.get(userIdRolesRoute, authentication.authenticated, function (req, res, next) {
+    checkAuthAndExec(req, res, next, function (userId, req, res, next) {
+        checkUserExistenceAndExec(req, res, next,
+            sendUserRoles);
+    });
 });
 
 /* POST roles to an user. */

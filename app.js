@@ -12,7 +12,7 @@ var express = require('express'),
 
 var configPath = process.env.CONFIG_PATH || './config';
 var config = require(configPath),
-    routes = require('./routes/index'),
+    views = require('./routes/index'),
     contact = require('./routes/contact'),
     signup = require('./routes/signup'),
     users = require('./routes/users'),
@@ -63,10 +63,14 @@ var jwtCheck = jwt({
 
 app.use(jwtCheck.unless({
     path: [
+        // Views RegExp: match anything that doesn't start with 'apiRoot'
+        new RegExp('^(?!\\' + config.apiPath + '\/).*$'),
+
+        // REST API: match some unprotected routes such as /contact, /login, /signup, etc.
         config.apiPath + '/contact',
         config.apiPath + '/login',
         config.apiPath + '/login/forgot',
-        new RegExp(config.apiPath + "\/login\/reset\/.*", "g"),
+        new RegExp(config.apiPath + '\/login\/reset\/.*'),
         config.apiPath + '/signup'
     ]
 }));
@@ -88,7 +92,7 @@ app.passport = passport;
 
 require('./passport')(app);
 
-app.use(config.apiPath, routes);
+app.use('/', views);
 app.use(config.apiPath + '/contact', contact);
 app.use(config.apiPath + '/signup', signup);
 app.use(config.apiPath + '/users', users);
