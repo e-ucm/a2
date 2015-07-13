@@ -1,11 +1,14 @@
+extends ../layout
+
 block content
-   div.row
-      div.col-sm-6
-         div.page-header
-            h1 Forgot password
-         div#Contact
-            form(role='form',method="post",action="/api/login/forgot")
-               .form-group
-                  input.form-control(type='text', style='border-radius: 0px;', placeholder='Your email', name="email")
-               .form-group.text-right
-                  button.btn.btn-primary(type='submit') Send
+    .row-fluid
+        .col-sm-6
+            .page-header
+                h1 Forgot password
+            div
+                form(role='form', method="post", action="/api/login/forgot")
+                    .form-group
+                        label Your email:
+                        input.form-control(type='text', style='border-radius: 0px;', placeholder='Your email', name="email")
+                    .form-group.text-right
+                        button.btn.btn-primary(type='submit') Send

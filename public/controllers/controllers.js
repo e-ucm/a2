@@ -39,6 +39,19 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
         }])
 
+    .controller('ResetController', ['$scope', '$http', '$location', '$localStorage',
+        function ResetController($scope, $http, $location, $localStorage) {
+
+            $scope.resetPassword = function () {
+                $http.post('/api/login/reset/' + $scope.tkn, $scope.password, {})
+                    .success(function (data, status) {
+                        $location.path('/login', {message: 'hola'});
+                    }).error(function (data, status) {
+                        console.error('Error on post /api/reset/:token: ' + JSON.stringify(data) + ', status: ' + status);
+                    });
+            };
+        }])
+
     .controller('UsersController', ['$scope', '$http', '$location', '$localStorage',
         function UsersController($scope, $http, $location, $localStorage) {
             $scope.$storage = $localStorage;
