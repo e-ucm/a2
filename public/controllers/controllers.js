@@ -4,13 +4,14 @@
 
 angular.module('myApp.controllers', ['ngStorage'])
 
-    .controller('LoginController', ['$scope', '$http', '$location', '$localStorage',
-        function LoginController($scope, $http, $location, $localStorage) {
+    .controller('LoginController', ['$scope', '$http', '$window', '$timeout', '$localStorage',
+        function LoginController($scope, $http, $window, $timeout, $localStorage) {
             $scope.$storage = $localStorage;
 
             $scope.login = function () {
 
                 $http.post('/api/login', $scope.user).success(function (data, status) {
+                    $localStorage.$reset();
                     $scope.$storage.user = data.user;
 
                     $http.get('/api/users/' + data.user.id + '/roles', {
@@ -19,7 +20,12 @@ angular.module('myApp.controllers', ['ngStorage'])
                         }
                     }).success(function (data) {
                         $scope.$storage.user.roles = data;
-                        $location.path('/users');
+                        // Timeout needed in order to ensure that the
+                        // $localStorage changes are persisted, more info. at
+                        // https://github.com/gsklee/ngStorage/issues/39
+                        $timeout(function () {
+                            $window.location.href = '/users';
+                        }, 110);
                     }).error(function (data, status) {
                         console.error('Error on get /api/users/:userId/roles: ' + JSON.stringify(data) + ', status: ' + status);
 
@@ -30,21 +36,21 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
         }])
 
-    .controller('ResetController', ['$scope', '$http', '$location', '$localStorage',
-        function ResetController($scope, $http, $location, $localStorage) {
+    .controller('ResetController', ['$scope', '$http', '$window', '$localStorage',
+        function ResetController($scope, $http, $window, $localStorage) {
 
             $scope.resetPassword = function () {
                 $http.post('/api/login/reset/' + $scope.tkn, $scope.password, {})
                     .success(function (data, status) {
-                        $location.path('/login');
+                        $window.location.href = '/login';
                     }).error(function (data, status) {
                         console.error('Error on post /api/reset/:token: ' + JSON.stringify(data) + ', status: ' + status);
                     });
             };
         }])
 
-    .controller('UsersController', ['$scope', '$http', '$location', '$localStorage',
-        function UsersController($scope, $http, $location, $localStorage) {
+    .controller('UsersController', ['$scope', '$http', '$window', '$localStorage',
+        function UsersController($scope, $http, $window, $localStorage) {
             $scope.$storage = $localStorage;
 
             $http.get('/api/users', {
@@ -58,12 +64,12 @@ angular.module('myApp.controllers', ['ngStorage'])
             });
 
             $scope.edit = function (userId) {
-                $location.path('/users/' + userId);
+                $window.location.href = '/users/' + userId;
             };
         }])
 
-    .controller('ProfileController', ['$scope', '$http', '$location', '$localStorage',
-        function UsersController($scope, $http, $location, $localStorage) {
+    .controller('ProfileController', ['$scope', '$http', '$localStorage',
+        function UsersController($scope, $http, $localStorage) {
             $scope.$storage = $localStorage;
 
             var refresh = function () {
@@ -116,7 +122,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
                 }, $scope.name)
-                    .success(function (data, status) {
+                    .success(function () {
                         refresh();
                     }).error(function (data, status) {
                         console.error('Error on post /api/users/:userId: ' + JSON.stringify(data) + ', status: ' + status);
