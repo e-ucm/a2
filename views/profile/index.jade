@@ -42,11 +42,13 @@ block content
                                     |  resources
                                 th Permissions
                         tbody
-                            tr(ng-repeat='(resource, permissions) in role.info')
+                            tr.active(ng-repeat='(resource, permissions) in role.info')
                                 td {{resource}}
                                 td
                                     table(ng-repeat='permission in permissions')
                                         tbody
                                             td {{permission}}
-                    div(ng-if='isAdmin()')
-                        button.btn Edit
+                    .col-sm-4(ng-if='isAdmin()')
+                        a.btn.btn-primary.btn-lg(role=button href='/users') Users list
+                    .col-sm-4(ng-if='isAdmin()')
+                        a.btn.btn-primary.btn-lg(role=button href='/roles') Roles list

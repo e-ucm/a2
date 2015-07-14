@@ -10,12 +10,8 @@ angular.module('myApp.controllers', ['ngStorage'])
 
             $scope.login = function () {
 
-                $http.post('/api/login', {
-                    username: $scope.password,
-                    password: $scope.username
-                }).success(function (data, status) {
+                $http.post('/api/login', $scope.user).success(function (data, status) {
                     $scope.$storage.user = data.user;
-
 
                     $http.get('/api/users/' + data.user.id + '/roles', {
                         headers: {
@@ -23,12 +19,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                         }
                     }).success(function (data) {
                         $scope.$storage.user.roles = data;
-
-                        if (data.indexOf('admin') === -1) {
-                            $location.path('/users/' + $scope.$storage.user.id);
-                        } else {
-                            $location.path('/users');
-                        }
+                        $location.path('/users');
                     }).error(function (data, status) {
                         console.error('Error on get /api/users/:userId/roles: ' + JSON.stringify(data) + ', status: ' + status);
 
@@ -36,6 +27,19 @@ angular.module('myApp.controllers', ['ngStorage'])
                 }).error(function (data, status) {
                     console.error('Error on post /api/login: ' + JSON.stringify(data) + ', status: ' + status);
                 });
+            };
+        }])
+
+    .controller('ResetController', ['$scope', '$http', '$location', '$localStorage',
+        function ResetController($scope, $http, $location, $localStorage) {
+
+            $scope.resetPassword = function () {
+                $http.post('/api/login/reset/' + $scope.tkn, $scope.password, {})
+                    .success(function (data, status) {
+                        $location.path('/login');
+                    }).error(function (data, status) {
+                        console.error('Error on post /api/reset/:token: ' + JSON.stringify(data) + ', status: ' + status);
+                    });
             };
         }])
 
@@ -85,8 +89,6 @@ angular.module('myApp.controllers', ['ngStorage'])
                                     'Authorization': 'Bearer ' + $scope.$storage.user.token
                                 }
                             }).success(function (data) {
-                                console.log('successs: role: ' + role);
-                                console.log(data);
                                 $scope.user.roles[role].info = data;
                             }).error(function (data, status) {
                                 console.error('Error on get /api/roles/:roleName: ' + JSON.stringify(data) + ', status: ' + status);
