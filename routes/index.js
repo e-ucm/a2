@@ -40,6 +40,11 @@ router.get('/users', function (req, res, next) {
     res.render('users', {});
 });
 
+/* GET roles list view. */
+router.get('/roles', function (req, res, next) {
+    res.render('roles', {});
+});
+
 /* GET pofile view. */
 router.get('/users/:userId', function (req, res, next) {
     res.render('profile', {

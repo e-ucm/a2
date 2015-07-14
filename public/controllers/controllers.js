@@ -24,7 +24,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                         // $localStorage changes are persisted, more info. at
                         // https://github.com/gsklee/ngStorage/issues/39
                         $timeout(function () {
-                            $window.location.href = '/users';
+                            $window.location.href = '/users/' + $scope.$storage.user.id;
                         }, 110);
                     }).error(function (data, status) {
                         console.error('Error on get /api/users/:userId/roles: ' + JSON.stringify(data) + ', status: ' + status);
@@ -68,8 +68,108 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
         }])
 
+    .controller('RolesController', ['$scope', '$http', '$location', '$localStorage',
+        function RolesController($scope, $http, $location, $localStorage) {
+            $scope.$storage = $localStorage;
+
+            $scope.newPer = {};
+            $scope.newRec = {};
+            $scope.newRecPer = {};
+
+            var getRoles = function () {
+                $http.get('/api/roles', {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function (data) {
+                    $scope.rolesList = {};
+                    data.forEach(function (role) {
+                        $scope.rolesList[role] = {
+                            name: role
+                        };
+                        $http.get('/api/roles/' + role, {
+                            headers: {
+                                'Authorization': 'Bearer ' + $scope.$storage.user.token
+                            }
+                        }).success(function (data) {
+                            $scope.rolesList[role].info = data;
+                        }).error(function (data, status) {
+                            console.error('Error on get /api/roles/:roleName: ' + JSON.stringify(data) + ', status: ' + status);
+                        });
+                    });
+                }).error(function (data, status) {
+                    console.error('Error on get /api/roles ' + JSON.stringify(data) + ', status: ' + status);
+
+                });
+            };
+
+            getRoles();
+
+            $scope.addResource = function (rolName) {
+                $scope.item = {resources: [], permissions: []};
+                $scope.item.resources.push($scope.newRec[rolName]);
+                $scope.item.permissions.push($scope.newRecPer[rolName]);
+
+                $http.post('/api/roles/' + rolName + '/resources', $scope.item, {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function (data) {
+                    console.log('succes')
+                }).error(function (data, status) {
+                    console.error('Error on get /api/roles/' + roleName + ' ' + JSON.stringify(data) + ', status: ' + status);
+
+                });
+            };
+
+            $scope.addPermission = function (roleName, resourceName) {
+                $scope.item = {permissions: []};
+                $scope.item.permissions.push($scope.newPer[resourceName]);
+                $http.post('/api/roles/' + roleName + '/resources/' + resourceName + '/permissions', $scope.item, {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function (data) {
+                    console.log('succes')
+                }).error(function (data, status) {
+                    console.error('Error on get /api/roles/' + roleName + ' ' + JSON.stringify(data) + ', status: ' + status);
+                    window.document.write(data)
+                });
+            };
+
+            $scope.removeResource = function (roleName, resourceName) {
+                $http.delete('/api/roles/' + roleName + '/resources/' + resourceName, {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function (data) {
+                    console.log('succes')
+                }).error(function (data, status) {
+                    console.error('Error on get /api/roles/' + roleName + ' ' + JSON.stringify(data) + ', status: ' + status);
+                    window.document.write(data)
+                });
+            };
+
+            $scope.removePermission = function (roleName, resourceName) {
+                $http.delete('/api/roles/' + roleName + '/resources/' + resourceName + '/permissions/' + $scope.newPer[resourceName], {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function (data) {
+                    console.log('succes')
+                }).error(function (data, status) {
+                    console.error('Error on get /api/roles/' + roleName + ' ' + JSON.stringify(data) + ', status: ' + status);
+                    window.document.write(data)
+                });
+            };
+
+            $scope.isAdminRole = function (rolName) {
+                return rolName.toLowerCase() === 'admin';
+            };
+        }])
+
     .controller('ProfileController', ['$scope', '$http', '$localStorage',
-        function UsersController($scope, $http, $localStorage) {
+        function ProfileController($scope, $http, $localStorage) {
             $scope.$storage = $localStorage;
 
             var refresh = function () {
