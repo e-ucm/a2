@@ -75,10 +75,6 @@ describe('REST API', function () {
         request.delete(url).set('Authorization', 'Bearer ' + token).expect(exprectedCode).end(callback);
     };
 
-    var delWithData = function (url, token, data, exprectedCode, callback) {
-        request.delete(url).set('Authorization', 'Bearer ' + token).send(data).expect(exprectedCode).end(callback);
-    };
-
     var validateUser = function (user) {
         should(user).be.an.Object();
         should(user._id).be.a.String();
@@ -472,18 +468,18 @@ describe('REST API', function () {
     });
 
     describe(DEL + usersRoute + '/:userId/roles', function () {
-        var deletedRoles = ['role2', 'role3'];
+        var deletedRole = 'role2';
 
         it("should not DELETE roles from an user with an invalid token", function (done) {
-            delWithData(usersRoute + '/' + admin.id + '/roles', 'invalid_token', deletedRoles, 401, done);
+            del(usersRoute + '/' + admin.id + '/roles/' + deletedRole, 'invalid_token', 401, done);
         });
 
         it("should not DELETE roles from an user with an unauthorized token", function (done) {
-            delWithData(usersRoute + '/' + admin.id + '/roles', user.token, deletedRoles, 403, done);
+            del(usersRoute + '/' + admin.id + '/roles/' + deletedRole, user.token, 403, done);
         });
 
         it("should not DELETE roles himself with an unauthorized token", function (done) {
-            delWithData(usersRoute + '/' + user.id + '/roles', user.token, deletedRoles, 403, done);
+            del(usersRoute + '/' + user.id + '/roles/' + deletedRole, user.token, 403, done);
         });
 
         var validateDELroles = function (deletedRoles, id, done) {
@@ -505,18 +501,20 @@ describe('REST API', function () {
             };
         };
 
+        var deletedRoleArray = [deletedRole];
+
         it("should DELETE roles from a specific user being authorized", function (done) {
-            delWithData(usersRoute + '/' + user.id + '/roles', admin.token, deletedRoles, 200,
-                validateDELroles(deletedRoles, user.id, done));
+            del(usersRoute + '/' + user.id + '/roles/' + deletedRole, admin.token, 200,
+                validateDELroles(deletedRoleArray, user.id, done));
         });
 
         it("should DELETE roles from himself being authorized (admin)", function (done) {
-            delWithData(usersRoute + '/' + admin.id + '/roles', admin.token, deletedRoles, 200,
-                validateDELroles(deletedRoles, admin.id, done));
+            del(usersRoute + '/' + admin.id + '/roles/' + deletedRole, admin.token, 200,
+                validateDELroles(deletedRoleArray, admin.id, done));
         });
 
         it("shouldn't DELETE the admin role from himself", function (done) {
-            delWithData(usersRoute + '/' + admin.id + '/roles', admin.token, ['admin'], 403, done);
+            del(usersRoute + '/' + admin.id + '/roles/admin', admin.token, 403, done);
         });
     });
 
