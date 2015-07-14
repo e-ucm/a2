@@ -8,10 +8,10 @@ block content
             div#login(ng-controller='LoginController')
                 .form-group
                     label Username:
-                    input.form-control(type='text' name='username' ng-model='username')
+                    input.form-control(type='text' name='username' ng-model='user.username')
                 .form-group
                     label Password:
-                    input.form-control(type='password' name='password' ng-model='password')
+                    input.form-control(type='password' name='password' ng-model='user.password')
                 .form-actions
                     button.btn.btn-primary.btn-login(type='submit' ng-click='login()') Sign In
                     | &nbsp;

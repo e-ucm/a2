@@ -170,7 +170,7 @@ router.post('/reset/:token', function (req, res, next) {
         /*Mail notification*/
         function (user, done) {
 
-            res.send({message: 'Success'});
+            res.send({message: 'Success.'});
             req.app.utility.sendmail(req, res, {
                 from: req.app.config.smtp.from.name + ' <' + req.app.config.smtp.from.address + '>',
                 to: user.email,
