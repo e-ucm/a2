@@ -1,23 +1,25 @@
 extends ../layout
 
 block content
-    .row-fluid
-        .col-sm-6
-            .page-header
-                h1 Contact
-            div#Contact
-                form(role='form',method="post",action="/api/contact")
-                    .form-group
-                        label Your name:
-                        input.form-control(type='text', style='border-radius: 0px;', placeholder='Your name', name="name")
-                    .form-group
-                        label Your email:
-                        input.form-control(type='text', style='border-radius: 0px;', placeholder='Your email', name="email")
-                    .form-group
-                        label Your message:
-                        textarea.form-control(type='text', style='border-radius: 0px;', placeholder='Some text', name="text")
-                    .form-group.text-right
-                        button.btn.btn-primary(type='submit') Contact
-                if error
-                    .alert.alert-danger(role="alert")
-                        p Invalid user name and/or password
+    include ../toolbar
+    .container.theme-showcase
+        .row-fluid
+            .col-sm-6
+                .page-header
+                    h1 Contact
+                #contact
+                    form(role='form',method="post",action="/api/contact")
+                        .form-group
+                            label Your name:
+                            input.form-control(type='text', style='border-radius: 0px;', placeholder='Your name', name="name")
+                        .form-group
+                            label Your email:
+                            input.form-control(type='text', style='border-radius: 0px;', placeholder='Your email', name="email")
+                        .form-group
+                            label Your message:
+                            textarea.form-control(type='text', style='border-radius: 0px;', placeholder='Some text', name="text")
+                        .form-group.text-right
+                            button.btn.btn-primary(type='submit') Contact
+                    if error
+                        .alert.alert-danger(role="alert")
+                            p Invalid user name and/or password

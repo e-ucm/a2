@@ -1,14 +1,16 @@
 extends ../layout
 
 block content
-    .row-fluid
-        .col-sm-6
-            .page-header
-                h1 Forgot password
-            div
-                form(role='form', method="post", action="/api/login/forgot")
-                    .form-group
-                        label Your email:
-                        input.form-control(type='text', style='border-radius: 0px;', placeholder='Your email', name="email")
-                    .form-group.text-right
-                        button.btn.btn-primary(type='submit') Send
+    include ../toolbar
+    .container.theme-showcase
+        .row-fluid
+            .col-sm-6
+                .page-header
+                    h1 Forgot password
+                #forgot
+                    form(role='form', method="post", action="/api/login/forgot")
+                        .form-group
+                            label Your email:
+                            input.form-control(type='text', style='border-radius: 0px;', placeholder='Your email', name="email")
+                        .form-group.text-right
+                            button.btn.btn-primary(type='submit') Send
