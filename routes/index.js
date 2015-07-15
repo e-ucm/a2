@@ -8,19 +8,24 @@ router.get('/', function (req, res, next) {
     });
 });
 
+/* GET RESTAPI page. */
+router.get('/api', function (req, res, next) {
+    res.render('apirest');
+});
+
 /* GET contact page. */
 router.get('/contact', function (req, res, next) {
-    res.render('contact', {});
+    res.render('contact');
 });
 
 /* GET login page. */
 router.get('/login', function (req, res, next) {
-    res.render('login', {});
+    res.render('login');
 });
 
 /* GET forgot page. */
 router.get('/login/forgot', function (req, res, next) {
-    res.render('forgot', {});
+    res.render('forgot');
 });
 
 /* GET reset page. */
@@ -32,17 +37,17 @@ router.get('/login/reset/:token', function (req, res, next) {
 
 /* GET signup page. */
 router.get('/signup', function (req, res, next) {
-    res.render('signup', {});
+    res.render('signup');
 });
 
 /* GET users list view. */
 router.get('/users', function (req, res, next) {
-    res.render('users', {});
+    res.render('users');
 });
 
 /* GET roles list view. */
 router.get('/roles', function (req, res, next) {
-    res.render('roles', {});
+    res.render('roles');
 });
 
 /* GET pofile view. */

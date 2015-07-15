@@ -1,23 +1,23 @@
-extends ../layout
+extends ../page
 
 block content
-    .row-fluid
-        .col-sm-6
-            .page-header
-                h1 Sign Up
-            div#signup
-                form(role='form',method='post',action='/api/signup')
-                    .form-group
-                        label Pick a Username:
-                        input.form-control(type='text', name='username')
-                    .form-group
-                        label Enter Your Email:
-                        input.form-control(type='text', name='email')
-                    .form-group
-                        label Create a Password:
-                        input.form-control(type='password', name='password')
-                    .form-group
-                        button.btn.btn-primary.btn-signup(type='submit') Create My Account
-                .col-sm-6.marketing
-                    p.lead Really, you will love it inside. It's super great!
-                    i.fa.fa-thumbs-o-up.super-awesome
+    .container.theme-showcase
+        .row-fluid
+            .col-sm-6
+                .page-header
+                    h1 Sign Up
+                #signup
+                    form(role='form',method='post',action='/api/signup')
+                        .form-group
+                            label Pick a Username:
+                            input.form-control(type='text', name='username')
+                        .form-group
+                            label Enter Your Email:
+                            input.form-control(type='text', name='email')
+                        .form-group
+                            label Create a Password:
+                            input.form-control(type='password', name='password')
+                        .form-group
+                            button.btn.btn-primary.btn-signup(type='submit') Create My Account
+                        p.lead Really, you will love it inside. It's super great!
+                        i.fa.fa-thumbs-o-up.fa-5x
