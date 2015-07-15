@@ -1,7 +1,6 @@
-extends ../layout
+extends ../page
 
 block content
-    include ../toolbar
     .container.theme-showcase
         .row-fluid
             .col-sm-12(ng-init='uId=#{JSON.stringify(userId)}')
@@ -36,7 +35,7 @@ block content
                     p #{userId}
                     .row-fluid
                         label Roles
-                        .btn-group.pull-right
+                        .btn-group.pull-right(ng-if='isAdmin()')
                             button.btn.btn-success.dropdown-toggle(data-toggle='dropdown')
                                 | Add role
                                 span.caret

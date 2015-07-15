@@ -9,7 +9,7 @@ angular.module('myApp.controllers', ['ngStorage'])
             $scope.$storage = $localStorage;
 
             $scope.isAdmin = function () {
-                return $scope.$storage && $scope.$storage.user &&
+                return $scope.isUser() &&
                     $scope.$storage.user.roles && $scope.$storage.user.roles.indexOf('admin') != -1;
             };
 
@@ -18,7 +18,11 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
 
             $scope.seeProfile = function () {
-                $window.location.href = '/users/' + $scope.$storage.user.id;
+                $scope.href('/users/' + $scope.$storage.user.id);
+            };
+
+            $scope.href = function (href) {
+                $window.location.href = href;
             };
 
             $scope.logout = function () {
@@ -29,7 +33,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                 }).success(function (data) {
                     delete $scope.$storage.user;
                     $timeout(function () {
-                        $window.location.href = '/login';
+                        $scope.href('/login');
                     }, 110);
                 }).error(function (data, status) {
                     console.error('Error on get /api/logout ' + JSON.stringify(data) + ', status: ' + status);
