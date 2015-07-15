@@ -2,7 +2,6 @@
 
 var should = require('should');
 var request = require('supertest');
-var config = require('../config-example');
 var app = require('../app.js');
 
 var port = 3333;
