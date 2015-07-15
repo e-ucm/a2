@@ -105,22 +105,51 @@ angular.module('myApp.controllers', ['ngStorage'])
 
             getRoles();
 
-            $scope.addResource = function (rolName) {
-                $scope.item = {resources: [], permissions: []};
-                $scope.item.resources.push($scope.newRec[rolName]);
-                $scope.item.permissions.push($scope.newRecPer[rolName]);
+            $scope.addRole = function (roleName) {
+                $scope.item = {
+                    roles: $scope.newRole.name,
+                    resources: [$scope.newRole.resource],
+                    permissions: [$scope.newRole.permission]
+                };
 
-                $http.post('/api/roles/' + rolName + '/resources', $scope.item, {
+                $http.post('/api/roles/', $scope.item, {
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function (data) {
-                    console.log('succes')
-                    var role = $scope.rolesList[rolName].info;
-                    role[$scope.newRec[rolName]] = [$scope.newRecPer[rolName]];
+                    var role = $scope.rolesList[$scope.newRole.name] = {};
+                    role.name = $scope.newRole.name;
+                    role.info = {};
+                    role.info[$scope.newRole.resource] = [$scope.newRole.permission];
+                    $scope.newRole.name = '';
+                    $scope.newRole.resource = '';
+                    $scope.newRole.permission = '';
                 }).error(function (data, status) {
                     console.error('Error on get /api/roles/' + roleName + ' ' + JSON.stringify(data) + ', status: ' + status);
+                    window.document.write(data)
+                });
+            };
 
+            $scope.addResource = function (roleName) {
+                $scope.item = {resources: [], permissions: []};
+                $scope.item.resources.push($scope.newRec[roleName]);
+                $scope.item.permissions.push($scope.newRecPer[roleName]);
+
+                $http.post('/api/roles/' + roleName + '/resources', $scope.item, {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function (data) {
+                    var role = $scope.rolesList[roleName] || {};
+                    if (!role.info) {
+                        role.info = {};
+                    }
+                    role.info[$scope.newRec[roleName]] = [$scope.newRecPer[roleName]];
+                    $scope.newRec[roleName] = '';
+                    $scope.newRecPer[roleName] = '';
+                }).error(function (data, status) {
+                    console.error('Error on get /api/roles/' + roleName + '/resources ' + JSON.stringify(data) + ', status: ' + status);
+                    window.document.write(data)
                 });
             };
 
@@ -132,8 +161,24 @@ angular.module('myApp.controllers', ['ngStorage'])
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function (data) {
+                    var role = $scope.rolesList[roleName].info;
+                    role[resourceName].push($scope.newPer[resourceName]);
+                    $scope.newPer[resourceName] = '';
                 }).error(function (data, status) {
-                    console.error('Error on get /api/roles/' + roleName + ' ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Error on post /api/roles/' + roleName + '/resources/' + resourceName + '/permissions/ ' + JSON.stringify(data) + ', status: ' + status);
+                    window.document.write(data)
+                });
+            };
+
+            $scope.removeRole = function (roleName) {
+                $http.delete('/api/roles/' + roleName, {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function () {
+                    delete $scope.rolesList[roleName];
+                }).error(function (data, status) {
+                    console.error('Error on post /api/roles/' + roleName + JSON.stringify(data) + ', status: ' + status);
                     window.document.write(data)
                 });
             };
@@ -146,19 +191,22 @@ angular.module('myApp.controllers', ['ngStorage'])
                 }).success(function () {
                     delete $scope.rolesList[roleName].info[resourceName];
                 }).error(function (data, status) {
-                    console.error('Error on get /api/roles/' + roleName + ' ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Error delete get /api/roles/' + roleName + '/resources/' + resourceName + ' ' + JSON.stringify(data) + ', status: ' + status);
                     window.document.write(data)
                 });
             };
 
-            $scope.removePermission = function (roleName, resourceName) {
-                $http.delete('/api/roles/' + roleName + '/resources/' + resourceName + '/permissions/' + $scope.newPer[resourceName], {
+            $scope.removePermission = function (roleName, resourceName, permission) {
+                var role = $scope.rolesList[roleName].info;
+                var index = role[resourceName].indexOf($scope.newPer[resourceName]);
+                $http.delete('/api/roles/' + roleName + '/resources/' + resourceName + '/permissions/' + permission, {
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function (data) {
+                    delete role[resourceName].splice(index, 1);
                 }).error(function (data, status) {
-                    console.error('Error on get /api/roles/' + roleName + ' ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Error on delete /api/roles/' + roleName + '/resources/' + resourceName + '/permissions/' + permission + ' ' + JSON.stringify(data) + ', status: ' + status);
                     window.document.write(data)
                 });
             };
