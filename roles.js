@@ -21,6 +21,7 @@ exports = module.exports = function (app) {
                 app.config.apiPath + '/users',
                 app.config.apiPath + '/users/:userId',
                 app.config.apiPath + '/users/:userId/roles',
+                app.config.apiPath + '/users/:userId/roles/:roleName',
                 app.config.apiPath + '/roles',
                 app.config.apiPath + '/roles/:roleName',
                 app.config.apiPath + '/roles/:roleName/resources',

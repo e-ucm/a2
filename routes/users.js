@@ -54,7 +54,7 @@ router.post(userIdRolesRoute, authentication.authorized, function (req, res, nex
 });
 
 /* DELETE user's roles. */
-router.delete(userIdRolesRoute, authentication.authorized, function (req, res, next) {
+router.delete(userIdRolesRoute + '/:roleName', authentication.authorized, function (req, res, next) {
     checkUserExistenceAndExec(req, res, next, removeUserRoles);
 });
 
@@ -214,15 +214,15 @@ function addUserRoles(user, req, res, next) {
 }
 
 function removeUserRoles(user, req, res, next) {
-    var toDelete = req.body;
-    if ((Array.isArray(toDelete) && toDelete.indexOf('admin') != -1)) {
-        if (req.params.userId === user._id.toString()) {
+    var toDelete = req.params.roleName;
+    if (toDelete === 'admin') {
+        if (req.user._id === user._id.toString()) {
             var err = new Error("You can't remove the 'admin' role from yourself.");
             err.status = 403;
             return next(err);
         }
     }
-    res.app.acl.removeUserRoles(user.username, req.body, function (err) {
+    res.app.acl.removeUserRoles(user.username, toDelete, function (err) {
         if (err) {
             return next(err);
         }
