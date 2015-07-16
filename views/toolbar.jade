@@ -9,20 +9,26 @@ nav.navbar.navbar-inverse.navbar-top
             a.navbar-brand(href='/') Users API
         #navbar.navbar-collapse.collapse
             ul.nav.navbar-nav
+                li
+                    a.btn(ng-click="href('/api')") API
                 li(ng-if='isUser()')
                     a.btn(ng-click='seeProfile()') Profile
                 li(ng-if='isAdmin()')
                     a.btn(ng-click="href('/users')") Users
                 li(ng-if='isAdmin()')
                     a.btn(ng-click="href('/roles')") Roles
-                li
-                    a.btn(ng-click="href('/api')") API
+                li(ng-if='!isUser()')
+                    a.btn(ng-click="href('/signup')") SignUp
                 li
                     a.btn(ng-click="href('/contact')") Contact
-                li(ng-if='isUser()')
-                    a.btn(ng-click='logout()') Logout
-                li(ng-if='!isUser()')
-                    a.btn(ng-click="href('/signup')") Signup
-                li(ng-if='!isUser()')
-                    a.btn(ng-click="href('/login')") Login
+            ul.nav.navbar-nav.navbar-right
+                    li(ng-if='isUser()')
+                        a.btn(ng-click='logout()')
+                            i.fa.fa-sign-out
+                            |   Logout
+                    li(ng-if='!isUser()')
+                        a.btn(ng-click="href('/login')")
+                            i.fa.fa-user
+                            |   Login
+
 
