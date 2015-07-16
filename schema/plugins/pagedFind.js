@@ -24,6 +24,7 @@ module.exports = exports = function pagedFindPlugin(schema) {
         };
 
 
+
         var fieldsAdapter = function (fields) {
 
             if (Object.prototype.toString.call(fields) === '[object String]') {
@@ -39,6 +40,10 @@ module.exports = exports = function pagedFindPlugin(schema) {
 
                 fields = document;
             }
+
+            fields['hash'] = false;
+            fields['salt'] = false;
+            fields['__v'] = false;
 
             return fields;
         };
@@ -84,7 +89,7 @@ module.exports = exports = function pagedFindPlugin(schema) {
                     sort: sort
                 };
 
-                self.find(filter, fields, options, done);
+                self.find(filter, fields, options).exec(done);
             }
         }, function (err, results) {
 

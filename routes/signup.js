@@ -78,7 +78,7 @@ router.post('/', function (req, res, next) {
         var user = results.user;
         res.json({
             user: {
-                id: user.id,
+                _id: user.id,
                 username: user.username,
                 email: user.email
             }

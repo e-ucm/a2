@@ -12,7 +12,7 @@ var GET = 'GET ',
     DEL = 'DEL ';
 
 var admin = {
-    id: "",
+    _id: "",
     username: "admin",
     password: "123",
     email: "adminemail@comp.ink",
@@ -20,7 +20,7 @@ var admin = {
 };
 
 var user = {
-    id: "",
+    _id: "",
     username: "user_asd",
     password: "12321",
     email: "useremail@comp.ink",
@@ -123,7 +123,7 @@ describe('REST API', function () {
                 res = JSON.parse(res.text);
                 should(res).be.an.Object();
                 should(res.user).be.an.Object();
-                should(res.user.id).be.an.String();
+                should(res.user._id).be.an.String();
                 should(res.user.username).be.an.String();
                 should.equal(res.user.username, admin.username);
                 should(res.user.email).be.an.String();
@@ -167,12 +167,12 @@ describe('REST API', function () {
                 should(res).be.an.Object();
                 res = JSON.parse(res.text);
                 should(res.user).be.an.Object();
-                should(res.user.id).be.a.String();
+                should(res.user._id).be.a.String();
                 should(res.user.username).be.a.String();
                 should(res.user.email).be.a.String();
                 should(res.user.token).be.a.String();
                 admin.token = res.user.token;
-                admin.id = res.user.id;
+                admin._id = res.user._id;
                 post(loginRoute, {
                     "username": user.username,
                     "password": user.password
@@ -180,7 +180,7 @@ describe('REST API', function () {
                     res = JSON.parse(res.text);
 
                     user.token = res.user.token;
-                    user.id = res.user.id;
+                    user._id = res.user._id;
                     done();
                 });
             });
@@ -247,11 +247,11 @@ describe('REST API', function () {
     describe(GET + usersRoute + '/:userId', function () {
 
         it('should not GET a specific user with an invalid_token', function (done) {
-            get(usersRoute + '/' + admin.id, 'invalid_token', 401, done);
+            get(usersRoute + '/' + admin._id, 'invalid_token', 401, done);
         });
 
         it('should not GET a specific user with an unauthorized token', function (done) {
-            get(usersRoute + '/' + admin.id, user.token, 403, done);
+            get(usersRoute + '/' + admin._id, user.token, 403, done);
         });
 
         var validateUserInformation = function (id, username, email, done) {
@@ -270,26 +270,26 @@ describe('REST API', function () {
         };
 
         it('should GET its own user information', function (done) {
-            get(usersRoute + '/' + user.id, user.token, 200, validateUserInformation(user.id, user.username, user.email, done));
+            get(usersRoute + '/' + user._id, user.token, 200, validateUserInformation(user._id, user.username, user.email, done));
         });
 
         it('should GET its own admin information', function (done) {
-            get(usersRoute + '/' + admin.id, admin.token, 200, validateUserInformation(admin.id, admin.username, admin.email, done));
+            get(usersRoute + '/' + admin._id, admin.token, 200, validateUserInformation(admin._id, admin.username, admin.email, done));
         });
 
         it('should GET a specific user that its not his own information', function (done) {
-            get(usersRoute + '/' + user.id, admin.token, 200, validateUserInformation(user.id, user.username, user.email, done));
+            get(usersRoute + '/' + user._id, admin.token, 200, validateUserInformation(user._id, user.username, user.email, done));
         });
     });
 
     describe(PUT + usersRoute + '/:userId', function () {
 
         it("should not PUT a specific user's name with an invalid_token", function (done) {
-            authPut(usersRoute + '/' + admin.id, 'invalid_token', name, 401, done);
+            authPut(usersRoute + '/' + admin._id, 'invalid_token', name, 401, done);
         });
 
         it("should not PUT a specific user's name with an unauthorized token", function (done) {
-            authPut(usersRoute + '/' + admin.id, user.token, name, 403, done);
+            authPut(usersRoute + '/' + admin._id, user.token, name, 403, done);
         });
 
         var validateNameInformation = function (nameData, done) {
@@ -309,18 +309,18 @@ describe('REST API', function () {
         };
 
         it("should PUT its own user name", function (done) {
-            authPut(usersRoute + '/' + user.id, user.token, name, 200, validateNameInformation(name, done));
+            authPut(usersRoute + '/' + user._id, user.token, name, 200, validateNameInformation(name, done));
         });
 
         it("should PUT its own admin name", function (done) {
-            authPut(usersRoute + '/' + admin.id, admin.token, name, 200, validateNameInformation(name, done));
+            authPut(usersRoute + '/' + admin._id, admin.token, name, 200, validateNameInformation(name, done));
         });
 
         it("should PUT a specific user name that is not his own", function (done) {
             name.first += name.first;
             name.middle += name.middle;
             name.last += name.last;
-            authPut(usersRoute + '/' + user.id, admin.token, name, 200, validateNameInformation(name, done));
+            authPut(usersRoute + '/' + user._id, admin.token, name, 200, validateNameInformation(name, done));
         });
     });
 
@@ -351,10 +351,10 @@ describe('REST API', function () {
                 should.not.exist(err);
                 var result = JSON.parse(res.text);
 
-                del(usersRoute + '/' + result.user.id, 'invalid_token', 401, function (err, res) {
+                del(usersRoute + '/' + result.user._id, 'invalid_token', 401, function (err, res) {
                     should.not.exist(err);
 
-                    del(usersRoute + '/' + result.user.id, admin.token, 200,
+                    del(usersRoute + '/' + result.user._id, admin.token, 200,
                         validateDeletedUser(result.user.username, done));
                 });
             });
@@ -375,7 +375,7 @@ describe('REST API', function () {
                 }, 200, function (err, res) {
                     res = JSON.parse(res.text);
                     var testUserToken = res.user.token;
-                    del(usersRoute + '/' + result.user.id, testUserToken, 200,
+                    del(usersRoute + '/' + result.user._id, testUserToken, 200,
                         validateDeletedUser(result.user.username, done));
                 });
             });
@@ -387,11 +387,11 @@ describe('REST API', function () {
     describe(GET + usersRoute + '/:userId/roles', function () {
 
         it('should not GET a specific user roles with an invalid_token', function (done) {
-            get(usersRoute + '/' + admin.id + '/roles', 'invalid_token', 401, done);
+            get(usersRoute + '/' + admin._id + '/roles', 'invalid_token', 401, done);
         });
 
         it('should not GET a specific user roles with an unauthorized token', function (done) {
-            get(usersRoute + '/' + admin.id + '/roles', user.token, 403, done);
+            get(usersRoute + '/' + admin._id + '/roles', user.token, 403, done);
         });
 
         var validateRolesInformation = function (done) {
@@ -412,11 +412,11 @@ describe('REST API', function () {
         };
 
         it("should GET his own roles being an admin", function (done) {
-            get(usersRoute + '/' + admin.id + '/roles', admin.token, 200, validateRolesInformation(done));
+            get(usersRoute + '/' + admin._id + '/roles', admin.token, 200, validateRolesInformation(done));
         });
 
         it("should GET a specific user's roles being authorized (admin)", function (done) {
-            get(usersRoute + '/' + user.id + '/roles', admin.token, 200, validateRolesInformation(done));
+            get(usersRoute + '/' + user._id + '/roles', admin.token, 200, validateRolesInformation(done));
         });
     });
 
@@ -425,15 +425,15 @@ describe('REST API', function () {
         var newRoles = ['role1', 'role2', 'role3'];
 
         it("should not POST roles to an user with an invalid token", function (done) {
-            authPost(usersRoute + '/' + admin.id + '/roles', 'invalid_token', newRoles, 401, done);
+            authPost(usersRoute + '/' + admin._id + '/roles', 'invalid_token', newRoles, 401, done);
         });
 
         it("should not POST roles to himself with an unauthorized token", function (done) {
-            authPost(usersRoute + '/' + user.id + '/roles', user.token, newRoles, 403, done);
+            authPost(usersRoute + '/' + user._id + '/roles', user.token, newRoles, 403, done);
         });
 
         it("should not POST roles to an user with an unauthorized token", function (done) {
-            authPost(usersRoute + '/' + admin.id + '/roles', user.token, newRoles, 403, done);
+            authPost(usersRoute + '/' + admin._id + '/roles', user.token, newRoles, 403, done);
         });
 
         var validatePOSTroles = function (newRoles, done) {
@@ -444,7 +444,7 @@ describe('REST API', function () {
                 var result = JSON.parse(res.text);
                 should(result.message).be.a.String();
 
-                get(usersRoute + '/' + admin.id + '/roles', admin.token, 200, function (err, res) {
+                get(usersRoute + '/' + admin._id + '/roles', admin.token, 200, function (err, res) {
 
                     var roles = JSON.parse(res.text);
 
@@ -456,12 +456,12 @@ describe('REST API', function () {
         };
 
         it("should POST roles to himself being authorized", function (done) {
-            authPost(usersRoute + '/' + admin.id + '/roles', admin.token, newRoles, 200,
+            authPost(usersRoute + '/' + admin._id + '/roles', admin.token, newRoles, 200,
                 validatePOSTroles(newRoles, done));
         });
 
         it("should POST roles to a specific user being authorized (admin)", function (done) {
-            authPost(usersRoute + '/' + user.id + '/roles', admin.token, newRoles, 200,
+            authPost(usersRoute + '/' + user._id + '/roles', admin.token, newRoles, 200,
                 validatePOSTroles(newRoles, done));
         });
     });
@@ -470,15 +470,15 @@ describe('REST API', function () {
         var deletedRole = 'role2';
 
         it("should not DELETE roles from an user with an invalid token", function (done) {
-            del(usersRoute + '/' + admin.id + '/roles/' + deletedRole, 'invalid_token', 401, done);
+            del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, 'invalid_token', 401, done);
         });
 
         it("should not DELETE roles from an user with an unauthorized token", function (done) {
-            del(usersRoute + '/' + admin.id + '/roles/' + deletedRole, user.token, 403, done);
+            del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, user.token, 403, done);
         });
 
         it("should not DELETE roles himself with an unauthorized token", function (done) {
-            del(usersRoute + '/' + user.id + '/roles/' + deletedRole, user.token, 403, done);
+            del(usersRoute + '/' + user._id + '/roles/' + deletedRole, user.token, 403, done);
         });
 
         var validateDELroles = function (deletedRoles, id, done) {
@@ -503,17 +503,17 @@ describe('REST API', function () {
         var deletedRoleArray = [deletedRole];
 
         it("should DELETE roles from a specific user being authorized", function (done) {
-            del(usersRoute + '/' + user.id + '/roles/' + deletedRole, admin.token, 200,
-                validateDELroles(deletedRoleArray, user.id, done));
+            del(usersRoute + '/' + user._id + '/roles/' + deletedRole, admin.token, 200,
+                validateDELroles(deletedRoleArray, user._id, done));
         });
 
         it("should DELETE roles from himself being authorized (admin)", function (done) {
-            del(usersRoute + '/' + admin.id + '/roles/' + deletedRole, admin.token, 200,
-                validateDELroles(deletedRoleArray, admin.id, done));
+            del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, admin.token, 200,
+                validateDELroles(deletedRoleArray, admin._id, done));
         });
 
         it("shouldn't DELETE the admin role from himself", function (done) {
-            del(usersRoute + '/' + admin.id + '/roles/admin', admin.token, 403, done);
+            del(usersRoute + '/' + admin._id + '/roles/admin', admin.token, 403, done);
         });
     });
 

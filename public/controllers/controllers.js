@@ -18,7 +18,7 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
 
             $scope.seeProfile = function () {
-                $scope.href('/users/' + $scope.$storage.user.id);
+                $scope.href('/users/' + $scope.$storage.user._id);
             };
 
             $scope.href = function (href) {
@@ -52,7 +52,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                     $localStorage.$reset();
                     $scope.$storage.user = data.user;
 
-                    $http.get('/api/users/' + data.user.id + '/roles', {
+                    $http.get('/api/users/' + data.user._id + '/roles', {
                         headers: {
                             'Authorization': 'Bearer ' + $scope.$storage.user.token
                         }
@@ -62,7 +62,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                         // $localStorage changes are persisted, more info. at
                         // https://github.com/gsklee/ngStorage/issues/39
                         $timeout(function () {
-                            $window.location.href = '/users/' + $scope.$storage.user.id;
+                            $window.location.href = '/users/' + $scope.$storage.user._id;
                         }, 110);
                     }).error(function (data, status) {
                         console.error('Error on get /api/users/:userId/roles: ' + JSON.stringify(data) + ', status: ' + status);
