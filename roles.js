@@ -11,8 +11,8 @@ exports = module.exports = function (app, callback) {
         };
     }
 
-    var acl = require('acl');
-    var acl = new acl(new acl.mongodbBackend(app.db.db, 'acl_'), app.get('env') == 'development' ? logger() : null);
+    var Acl = require('acl');
+    var acl = new Acl(new Acl.mongodbBackend(app.db.db, 'acl_'), app.get('env') === 'development' ? logger() : null);
 
     var admin = {
         name: 'admin',

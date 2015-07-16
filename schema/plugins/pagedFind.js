@@ -41,9 +41,9 @@ module.exports = exports = function pagedFindPlugin(schema) {
                 fields = document;
             }
 
-            fields['hash'] = false;
-            fields['salt'] = false;
-            fields['__v'] = false;
+            fields.hash = false;
+            fields.salt = false;
+            fields.__v = false;
 
             return fields;
         };
@@ -115,5 +115,5 @@ module.exports = exports = function pagedFindPlugin(schema) {
 
             callback(null, output);
         });
-    }
+    };
 };

@@ -7,8 +7,7 @@ var express = require('express'),
     mongoose = require('mongoose'),
     passport = require('passport'),
     jwt = require('express-jwt'),
-    tokenStorage = require('./tokenStorage/token-storage'),
-    http = require('http');
+    tokenStorage = require('./tokenStorage/token-storage');
 
 var config = require((process.env.NODE_ENV === 'test') ? './config-test' : './config'),
     views = require('./routes/index'),
@@ -49,7 +48,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 //middleware
-if(app.get('env') == 'development') {
+if(app.get('env') === 'development') {
     app.use(logger('dev'));
 }
 app.use(bodyParser.json());
@@ -120,7 +119,7 @@ app.use(function (req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-    app.use(function (err, req, res, next) {
+    app.use(function (err, req, res) {
         res.status(err.status || 500);
         res.render('error', {
             message: err.message,
@@ -131,7 +130,7 @@ if (app.get('env') === 'development') {
 
 // production error handler
 // no stacktraces leaked to user
-    app.use(function (err, req, res, next) {
+    app.use(function (err, req, res) {
         res.status(err.status || 500).send({message: err.message});
     });
 }

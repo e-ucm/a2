@@ -50,7 +50,7 @@ exports = module.exports = function (req, res, options) {
 
     require('async').parallel(
         renderers,
-        function (err, results) {
+        function (err) {
             if (err) {
                 options.error('Email template render failed. ' + err);
                 return;
@@ -81,10 +81,8 @@ exports = module.exports = function (req, res, options) {
             }, function (err, message) {
                 if (err) {
                     options.error('Email failed to send. ' + err);
-                    return;
                 } else {
                     options.success(message);
-                    return;
                 }
             });
         }

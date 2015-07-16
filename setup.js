@@ -56,7 +56,7 @@ var registerRoot = function (options, callback) {
     var mongoose = require('mongoose');
     var app = {
         get: function (key) {
-            return '';
+            return key;
         },
         config: {
             apiPath: apiPath,
@@ -136,7 +136,7 @@ if (process.env.NODE_ENV === 'test') {
 
             Promptly.prompt('Project name: (' + promptOptions.default + ')', promptOptions, done);
         },
-        companyName: ['projectName', function (done, results) {
+        companyName: ['projectName', function (done) {
 
             var promptOptions = {
                 default: defaultValues.companyName || 'e-UCM Research Group'
@@ -144,7 +144,7 @@ if (process.env.NODE_ENV === 'test') {
 
             Promptly.prompt('Company name: (' + promptOptions.default + ')', promptOptions, done);
         }],
-        mongodbUrl: ['companyName', function (done, results) {
+        mongodbUrl: ['companyName', function (done) {
 
             var promptOptions = {
                 default: defaultValues.mongodbUrl || 'mongodb://localhost:27017/gleaner-users'
@@ -164,7 +164,7 @@ if (process.env.NODE_ENV === 'test') {
             });
             done(null, true);
         }],
-        redisdbHost: ['testMongo', function (done, results) {
+        redisdbHost: ['testMongo', function (done) {
 
             var promptOptions = {
                 default: defaultValues.redisdbHost || '127.0.0.1'
@@ -172,7 +172,7 @@ if (process.env.NODE_ENV === 'test') {
 
             Promptly.prompt('Redis DB host: (' + promptOptions.default + ')', promptOptions, done);
         }],
-        redisPort: ['redisdbHost', function (done, results) {
+        redisPort: ['redisdbHost', function (done) {
 
             var promptOptions = {
                 default: defaultValues.redisPort || '6379'
@@ -180,7 +180,7 @@ if (process.env.NODE_ENV === 'test') {
 
             Promptly.prompt('Redis DB port: (' + promptOptions.default + ')', promptOptions, done);
         }],
-        redisdbNumber: ['redisPort', function (done, results) {
+        redisdbNumber: ['redisPort', function (done) {
 
             var promptOptions = {
                 default: defaultValues.redisdbNumber || '0'
@@ -188,7 +188,7 @@ if (process.env.NODE_ENV === 'test') {
 
             Promptly.prompt('Redis DB number: (' + promptOptions.default + ')', promptOptions, done);
         }],
-        cryptoKey: ['redisdbNumber', function (done, results) {
+        cryptoKey: ['redisdbNumber', function (done) {
 
             var promptOptions = {
                 default: defaultValues.cryptoKey || 'th15_15_s3cr3t_5hhhh'
@@ -196,7 +196,7 @@ if (process.env.NODE_ENV === 'test') {
 
             Promptly.password('Crypto secret key: (' + promptOptions.default + ')', promptOptions, done);
         }],
-        rootEmail: ['cryptoKey', function (done, results) {
+        rootEmail: ['cryptoKey', function (done) {
 
             var promptOptions = {
                 default: defaultValues.rootEmail || 'root@email.com'
@@ -204,7 +204,7 @@ if (process.env.NODE_ENV === 'test') {
 
             Promptly.prompt('Root user email: (' + promptOptions.default + ')', promptOptions, done);
         }],
-        rootPassword: ['rootEmail', function (done, results) {
+        rootPassword: ['rootEmail', function (done) {
 
             var promptOptions = {
                 default: defaultValues.rootPassword || 'root'
@@ -220,7 +220,7 @@ if (process.env.NODE_ENV === 'test') {
 
             Promptly.prompt('System email: (' + promptOptions.default + ')', promptOptions, done);
         }],
-        smtpHost: ['systemEmail', function (done, results) {
+        smtpHost: ['systemEmail', function (done) {
 
             var promptOptions = {
                 default: defaultValues.smtpHost || 'smtp.gmail.com'
@@ -236,7 +236,7 @@ if (process.env.NODE_ENV === 'test') {
 
             Promptly.prompt('SMTP username/email: (' + promptOptions.default + ')', promptOptions, done);
         }],
-        smtpPassword: ['smtpUsername', function (done, results) {
+        smtpPassword: ['smtpUsername', function (done) {
 
             var promptOptions = {
                 default: defaultValues.smtpPassword || ''
@@ -279,7 +279,7 @@ if (process.env.NODE_ENV === 'test') {
             registerRoot(results, done);
 
         }]
-    }, function (err, results) {
+    }, function (err) {
 
         if (err) {
             console.error('Setup failed.');

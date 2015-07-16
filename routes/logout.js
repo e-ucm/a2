@@ -1,3 +1,5 @@
+'use strict';
+
 var express = require('express'),
     authentication = require('../util/authentication'),
     router = express.Router();

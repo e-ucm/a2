@@ -32,7 +32,7 @@ describe('REST API', function () {
     /** config **/
 
     before(function (done) {
-        app.listen(port, function (err, result) {
+        app.listen(port, function (err) {
             if (err) {
                 done(err);
             } else {
@@ -351,7 +351,7 @@ describe('REST API', function () {
                 should.not.exist(err);
                 var result = JSON.parse(res.text);
 
-                del(usersRoute + '/' + result.user._id, 'invalid_token', 401, function (err, res) {
+                del(usersRoute + '/' + result.user._id, 'invalid_token', 401, function (err) {
                     should.not.exist(err);
 
                     del(usersRoute + '/' + result.user._id, admin.token, 200,
@@ -520,7 +520,7 @@ describe('REST API', function () {
     /** /api/roles **/
     var rolesRoute = '/api/roles';
 
-    describe( GET + rolesRoute, function () {
+    describe(GET + rolesRoute, function () {
 
         it('should not GET roles because of an invalid_token', function (done) {
             get(rolesRoute, 'invalid_token', 401, done);
@@ -560,7 +560,7 @@ describe('REST API', function () {
             "permission-3"
         ]
     };
-    describe( POST + rolesRoute, function () {
+    describe(POST + rolesRoute, function () {
 
         it('should not POST role because of an invalid_token', function (done) {
             post(rolesRoute, 'invalid_token', 401, done);
@@ -597,7 +597,7 @@ describe('REST API', function () {
             authPost(rolesRoute, admin.token, role1, 200, function (err, res) {
                 res = JSON.parse(res.text);
                 should(res).be.an.Array();
-                should(res).containDeep([role1.roles])
+                should(res).containDeep([role1.roles]);
                 done();
             });
         });
@@ -607,7 +607,7 @@ describe('REST API', function () {
             authPost(rolesRoute, admin.token, role2, 200, function (err, res) {
                 res = JSON.parse(res.text);
                 should(res).be.an.Array();
-                should(res).containDeep([role2.roles])
+                should(res).containDeep([role2.roles]);
                 done();
             });
         });
@@ -620,7 +620,7 @@ describe('REST API', function () {
     var routeRoleId = rolesRoute + '/:roleName';
     var validRoleRouteId = rolesRoute + '/' + role2.roles;
     var invalidRoleRouteId = rolesRoute + '/invalidRole';
-    describe( GET + routeRoleId, function () {
+    describe(GET + routeRoleId, function () {
 
         it('should not GET the resources and permissions of role because of an invalid_token', function (done) {
             get(validRoleRouteId, 'invalid_token', 401, done);
@@ -640,9 +640,9 @@ describe('REST API', function () {
             get(validRoleRouteId, admin.token, 200, function (err, res) {
                 res = JSON.parse(res.text);
                 should(res).be.an.Object();
-                role2.resources.forEach(function(resource){
+                role2.resources.forEach(function (resource) {
                     should(res[resource.toString()]).be.an.Array();
-                    should(res[resource.toString()]).containDeep(role2.permissions)
+                    should(res[resource.toString()]).containDeep(role2.permissions);
                 });
                 done();
             });
@@ -655,7 +655,7 @@ describe('REST API', function () {
     var invalidResourcesRoleId = invalidRoleRouteId + resourcesPath;
 
     var theResource = 'newResource';
-    var thePermission = 'newPermission'
+    var thePermission = 'newPermission';
     var resource1 = {
         "resources": [
             theResource
@@ -666,7 +666,7 @@ describe('REST API', function () {
             "perm-2"
         ]
     };
-    describe( POST + routeResourcesRole, function () {
+    describe(POST + routeResourcesRole, function () {
 
         it('should not POST role because of an invalid_token', function (done) {
             authPost(validResourcesRoleId, 'invalid_token', resource1, 401, done);
@@ -688,7 +688,7 @@ describe('REST API', function () {
                 should(res).be.an.Object();
                 resource1.resources.forEach(function (resource) {
                     should(res[resource.toString()]).be.an.Array();
-                    should(res[resource.toString()]).containDeep(resource1.permissions)
+                    should(res[resource.toString()]).containDeep(resource1.permissions);
                 });
                 done();
             });
@@ -698,7 +698,7 @@ describe('REST API', function () {
     var routeResourceId = routeResourcesRole + '/:resourceName';
     var validResourcesId = validResourcesRoleId + '/' + theResource;
     var invalidResourcesId = invalidResourcesRoleId + '/invalidResource';
-    describe( GET + routeResourceId, function () {
+    describe(GET + routeResourceId, function () {
 
         it('should not GET the permissions of resources in role because of an invalid_token', function (done) {
             get(validResourcesId, 'invalid_token', 401, done);
@@ -718,7 +718,7 @@ describe('REST API', function () {
             get(validResourcesId, admin.token, 200, function (err, res) {
                 res = JSON.parse(res.text);
                 should(res).be.an.Array();
-                resource1.permissions.forEach(function(permission){
+                resource1.permissions.forEach(function (permission) {
                     should(res).containDeep([permission]);
                 });
                 done();
@@ -726,11 +726,11 @@ describe('REST API', function () {
         });
     });
 
-    var permissionsPath = '/permissions'
+    var permissionsPath = '/permissions';
     var routePermissionId = routeResourceId + permissionsPath + '/:permissionName';
     var validPermissionId = validResourcesId + permissionsPath + '/' + thePermission;
     var invalidPermissionId = invalidResourcesId + permissionsPath + '/invalidPermission';
-    describe( DEL + routePermissionId, function () {
+    describe(DEL + routePermissionId, function () {
 
         it('should not DELETE the resource because of an invalid_token', function (done) {
             del(validPermissionId, 'invalid_token', 401, done);
@@ -756,7 +756,7 @@ describe('REST API', function () {
         });
     });
 
-    describe( DEL + routeResourceId, function () {
+    describe(DEL + routeResourceId, function () {
 
         it('should not DELETE the resource because of an invalid_token', function (done) {
             del(validResourcesId, 'invalid_token', 401, done);
@@ -776,14 +776,14 @@ describe('REST API', function () {
             del(validResourcesId, admin.token, 200, function (err, res) {
                 res = JSON.parse(res.text);
                 should(res).be.an.Object();
-                should.not.exist(res[resource1.toString()])
+                should.not.exist(res[resource1.toString()]);
                 done();
             });
         });
     });
 
     var adminRoleRouteId = rolesRoute + '/Admin';
-    describe( DEL + routeRoleId, function () {
+    describe(DEL + routeRoleId, function () {
 
         it('should not DELETE the role because of an invalid_token', function (done) {
             del(validRoleRouteId, 'invalid_token', 401, done);

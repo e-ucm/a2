@@ -10,7 +10,7 @@ angular.module('myApp.controllers', ['ngStorage'])
 
             $scope.isAdmin = function () {
                 return $scope.isUser() &&
-                    $scope.$storage.user.roles && $scope.$storage.user.roles.indexOf('admin') != -1;
+                    $scope.$storage.user.roles && $scope.$storage.user.roles.indexOf('admin') !== -1;
             };
 
             $scope.isUser = function () {
@@ -30,7 +30,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
-                }).success(function (data) {
+                }).success(function () {
                     delete $scope.$storage.user;
                     $timeout(function () {
                         $scope.href('/login');
@@ -48,7 +48,7 @@ angular.module('myApp.controllers', ['ngStorage'])
 
             $scope.login = function () {
 
-                $http.post('/api/login', $scope.user).success(function (data, status) {
+                $http.post('/api/login', $scope.user).success(function (data) {
                     $localStorage.$reset();
                     $scope.$storage.user = data.user;
 
@@ -74,12 +74,12 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
         }])
 
-    .controller('ResetController', ['$scope', '$http', '$window', '$localStorage',
-        function ResetController($scope, $http, $window, $localStorage) {
+    .controller('ResetController', ['$scope', '$http', '$window',
+        function ResetController($scope, $http, $window) {
 
             $scope.resetPassword = function () {
                 $http.post('/api/login/reset/' + $scope.tkn, $scope.password, {})
-                    .success(function (data, status) {
+                    .success(function () {
                         $window.location.href = '/login';
                     }).error(function (data, status) {
                         console.error('Error on post /api/reset/:token: ' + JSON.stringify(data) + ', status: ' + status);
@@ -154,7 +154,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
-                }).success(function (data) {
+                }).success(function () {
                     var role = $scope.rolesList[$scope.newRole.name] = {};
                     role.name = $scope.newRole.name;
                     role.info = {};
@@ -164,7 +164,6 @@ angular.module('myApp.controllers', ['ngStorage'])
                     $scope.newRole.permission = '';
                 }).error(function (data, status) {
                     console.error('Error on get /api/roles/' + roleName + ' ' + JSON.stringify(data) + ', status: ' + status);
-                    window.document.write(data)
                 });
             };
 
@@ -177,7 +176,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
-                }).success(function (data) {
+                }).success(function () {
                     var role = $scope.rolesList[roleName] || {};
                     if (!role.info) {
                         role.info = {};
@@ -187,7 +186,6 @@ angular.module('myApp.controllers', ['ngStorage'])
                     $scope.newRecPer[roleName] = '';
                 }).error(function (data, status) {
                     console.error('Error on get /api/roles/' + roleName + '/resources ' + JSON.stringify(data) + ', status: ' + status);
-                    window.document.write(data)
                 });
             };
 
@@ -198,13 +196,12 @@ angular.module('myApp.controllers', ['ngStorage'])
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
-                }).success(function (data) {
+                }).success(function () {
                     var role = $scope.rolesList[roleName].info;
                     role[resourceName].push($scope.newPer[resourceName]);
                     $scope.newPer[resourceName] = '';
                 }).error(function (data, status) {
                     console.error('Error on post /api/roles/' + roleName + '/resources/' + resourceName + '/permissions/ ' + JSON.stringify(data) + ', status: ' + status);
-                    window.document.write(data)
                 });
             };
 
@@ -217,7 +214,6 @@ angular.module('myApp.controllers', ['ngStorage'])
                     delete $scope.rolesList[roleName];
                 }).error(function (data, status) {
                     console.error('Error on post /api/roles/' + roleName + JSON.stringify(data) + ', status: ' + status);
-                    window.document.write(data)
                 });
             };
 
@@ -230,22 +226,19 @@ angular.module('myApp.controllers', ['ngStorage'])
                     delete $scope.rolesList[roleName].info[resourceName];
                 }).error(function (data, status) {
                     console.error('Error delete get /api/roles/' + roleName + '/resources/' + resourceName + ' ' + JSON.stringify(data) + ', status: ' + status);
-                    window.document.write(data)
                 });
             };
 
             $scope.removePermission = function (roleName, resourceName, permission) {
                 var role = $scope.rolesList[roleName].info;
-                var index = role[resourceName].indexOf($scope.newPer[resourceName]);
                 $http.delete('/api/roles/' + roleName + '/resources/' + resourceName + '/permissions/' + permission, {
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function (data) {
-                    role[resourceName]=data;
+                    role[resourceName] = data;
                 }).error(function (data, status) {
                     console.error('Error on delete /api/roles/' + roleName + '/resources/' + resourceName + '/permissions/' + permission + ' ' + JSON.stringify(data) + ', status: ' + status);
-                    window.document.write(data)
                 });
             };
 
@@ -263,7 +256,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
-                }).success(function (data, status) {
+                }).success(function (data) {
                     $scope.user = data;
                     $http.get('/api/users/' + data._id + '/roles', {
                         headers: {
@@ -309,7 +302,7 @@ angular.module('myApp.controllers', ['ngStorage'])
 
             $scope.isAdmin = function () {
                 return $scope.$storage && $scope.$storage.user &&
-                    $scope.$storage.user.roles && $scope.$storage.user.roles.indexOf('admin') != -1;
+                    $scope.$storage.user.roles && $scope.$storage.user.roles.indexOf('admin') !== -1;
             };
 
             $scope.changeName = function () {

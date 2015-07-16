@@ -1,3 +1,5 @@
+'use strict';
+
 var express = require('express'),
     router = express.Router(),
     jwt = require('jsonwebtoken'),
@@ -73,8 +75,9 @@ router.post('/forgot', function (req, res, next) {
         /*Generate token*/
         function (done) {
             require('crypto').randomBytes(20, function (err, buf) {
+                var token;
                 if (!err) {
-                    var token = buf.toString('hex');
+                    token = buf.toString('hex');
                 }
                 done(err, token);
             });
@@ -83,7 +86,7 @@ router.post('/forgot', function (req, res, next) {
         function (token, done) {
             req.app.db.model('user').findOne({email: req.body.email}, function (err, user) {
                 if (err) {
-                    return done(err)
+                    return done(err);
                 }
 
                 if (!user) {
@@ -128,7 +131,7 @@ router.post('/forgot', function (req, res, next) {
         }
     ], function (err) {
         if (err) {
-            next(err)
+            next(err);
         }
     });
 });
@@ -152,7 +155,7 @@ router.post('/reset/:token', function (req, res, next) {
 
                 user.setPassword(req.body.password, function (err, user) {
                     if (err) {
-                        return done(err)
+                        return done(err);
                     }
 
                     user.resetPassword = undefined;
@@ -183,17 +186,17 @@ router.post('/reset/:token', function (req, res, next) {
                 email: user.email,
                 projectName: req.app.config.projectName,
                 success: function () {
-                    console.log('Email sent')
+                    console.log('Email sent');
                 },
                 error: function (err) {
                     console.log('Error : ' + err);
                 }
             });
-            done()
+            done();
         }
     ], function (err) {
         if (err) {
-            next(err)
+            next(err);
         }
     });
 });

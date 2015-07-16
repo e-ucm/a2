@@ -10,10 +10,10 @@ router.get('/', authentication.authorized, function (req, res, next) {
 
     req.app.acl.listRoles(function (err, roles) {
         if (err) {
-            return next(err)
+            return next(err);
         }
 
-        res.json(roles)
+        res.json(roles);
     });
 });
 
@@ -22,14 +22,15 @@ router.post('/', authentication.authorized, function (req, res, next) {
     async.auto({
         validate: function (done) {
             var roleName = req.body.roles;
+            var err;
             if (!roleName) {
-                var err = new Error('Roles required!');
+                err = new Error('Roles required!');
                 err.status = 400;
                 return done(err);
             }
 
             if (!req.body.allows && (!req.body.resources || !req.body.permissions)) {
-                var err = new Error('Allows, or Resources and Permissions required!');
+                err = new Error('Allows, or Resources and Permissions required!');
                 err.status = 400;
                 return done(err);
             }
@@ -39,14 +40,14 @@ router.post('/', authentication.authorized, function (req, res, next) {
                     return done(err);
                 }
 
-                if (roles.indexOf(roleName) != -1) {
+                if (roles.indexOf(roleName) !== -1) {
                     err = new Error("The role " + roleName + " already exists.");
                     err.status = 400;
                     return done(err);
                 }
 
                 done();
-            })
+            });
         },
         addRole: ['validate', function (done) {
             if (req.body.allows) {
@@ -65,10 +66,10 @@ router.post('/', authentication.authorized, function (req, res, next) {
         }
         req.app.acl.listRoles(function (err, roles) {
             if (err) {
-                return next(err)
+                return next(err);
             }
 
-            res.json(roles)
+            res.json(roles);
         });
     });
 });
@@ -86,7 +87,7 @@ router.get('/:roleName', authentication.authorized, function (req, res, next) {
                 if (err) {
                     done(err);
                 }
-                if (JSON.stringify(result) == "{}") {
+                if (JSON.stringify(result) === "{}") {
                     err = new Error("The role " + roleName + " doesn't exist.");
                     err.status = 400;
                     return next(err);
@@ -172,7 +173,7 @@ router.post('/:roleName/resources', authentication.authorized, function (req, re
             if (err) {
                 return next(err);
             }
-            res.json(result)
+            res.json(result);
         });
     });
 });
@@ -200,7 +201,7 @@ router.delete('/:roleName/resources/:resourceName', authentication.authorized, f
                         return done(err);
                     }
 
-                    done(null, result[resource])
+                    done(null, result[resource]);
                 });
             });
         },
@@ -215,7 +216,7 @@ router.delete('/:roleName/resources/:resourceName', authentication.authorized, f
             if (err) {
                 return next(err);
             }
-            res.json(result)
+            res.json(result);
         });
     });
 });
@@ -287,7 +288,7 @@ router.post('/:roleName/resources/:resourceName/permissions', authentication.aut
             if (err) {
                 return next(err);
             }
-            res.json(result[resource])
+            res.json(result[resource]);
         });
     });
 });
@@ -300,7 +301,7 @@ router.delete('/:roleName/resources/:resourceName/permissions/:permissionName', 
 
     async.auto({
         checkRole: function (done) {
-            existsRole(req, roleName, done)
+            existsRole(req, roleName, done);
         },
         validate: ['checkRole', function (done) {
             req.app.acl.whatResources(roleName, function (err, result) {
@@ -317,12 +318,12 @@ router.delete('/:roleName/resources/:resourceName/permissions/:permissionName', 
                     err = new Error("The permission " + permission + " can't be remove because is the last");
                     err.status = 400;
                     return done(err);
-                } else if (result[resource].indexOf(permission) == -1) {
+                } else if (result[resource].indexOf(permission) === -1) {
                     err = new Error("The permission " + permission + ' in the resource ' + resource + ' in ' + roleName + " doesn't exist.");
                     err.status = 400;
                     return done(err);
                 }
-                done()
+                done();
             });
         }],
         removePermissions: ['validate', function (done) {
@@ -339,9 +340,9 @@ router.delete('/:roleName/resources/:resourceName/permissions/:permissionName', 
         }
         req.app.acl.whatResources(roleName, function (err, result) {
             if (err) {
-                return done(err);
+                return next(err);
             }
-            res.send(result[resource] || [])
+            res.send(result[resource] || []);
         });
     });
 
@@ -376,14 +377,14 @@ function existsRole(req, roleName, cb) {
             return cb(err);
         }
 
-        if (roles.indexOf(roleName) == -1) {
+        if (roles.indexOf(roleName) === -1) {
             err = new Error("The role " + roleName + " doesn't exist.");
             err.status = 400;
             return cb(err);
         }
 
         cb();
-    })
+    });
 }
 
 module.exports = router;

@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var app = {
     config: require('../config-test'),
     get: function (str) {
-        return '';
+        return str;
     }
 };
 
@@ -20,8 +20,8 @@ describe('User  model validations', function () {
         require('../schema/user')(app, mongoose);
         user = app.db.model('user');
         user.remove({}, function (err) {
+            done(err);
         });
-        done();
     });
 
     after(function () {
@@ -69,7 +69,7 @@ describe('User  model validations', function () {
 
             should.not.exist(result);
             should(err).be.an.instanceOf(Error);
-            done()
+            done();
         });
     });
 
