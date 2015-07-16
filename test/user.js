@@ -3,7 +3,7 @@
 var should = require('should');
 var mongoose = require('mongoose');
 var app = {
-    config: require('../config-example'),
+    config: require('../config-test'),
     get: function (str) {
         return '';
     }
