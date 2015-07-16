@@ -2,54 +2,32 @@
 
 exports.port = process.env.PORT || 3000;
 exports.mongodb = {
-  uri: process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost:27017/example-dbname'
+  uri: process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || '{{mongodbUrl}}'
 };
 exports.redisdb = {
-  host: '127.0.0.1',
-  port: 6379,
-  dbNumber: 1
+  host: '{{redisdbHost}}',
+  port: {{redisPort}},
+  dbNumber: {{redisdbNumber}}
 };
-exports.apiPath = '/api';
-exports.companyName = 'Acme, Inc.';
-exports.projectName = 'Drywall';
-exports.systemEmail = 'your@email.addy';
-exports.cryptoKey = 'k3yb0ardc4t';
+exports.apiPath = '{{apiPath}}';
+exports.companyName = '{{companyName}}';
+exports.projectName = '{{projectName}}';
+exports.systemEmail = '{{systemEmail}}';
+exports.cryptoKey = '{{cryptoKey}}';
 exports.loginAttempts = {
-  failedLoginAttempts: 10
+  failedLoginAttempts: {{failedLoginAttempts}}
 };
 exports.tokenExpirationInSeconds = 7 * 86400;
 exports.requireAccountVerification = false;
 exports.smtp = {
   from: {
-    name: process.env.SMTP_FROM_NAME || exports.projectName +' Website',
-    address: process.env.SMTP_FROM_ADDRESS || 'your@email.addy'
+    name: process.env.SMTP_FROM_NAME || exports.projectName,
+    address: process.env.SMTP_FROM_ADDRESS || exports.systemEmail
   },
   credentials: {
-    user: process.env.SMTP_USERNAME || 'your@email.addy',
-    password: process.env.SMTP_PASSWORD || 'bl4rg!',
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    user: process.env.SMTP_USERNAME || '{{smtpUsername}}',
+    password: process.env.SMTP_PASSWORD || '{{smtpPassword}}',
+    host: process.env.SMTP_HOST || '{{smtpHost}}',
     ssl: true
-  }
-};
-exports.oauth = {
-  twitter: {
-    key: process.env.TWITTER_OAUTH_KEY || '',
-    secret: process.env.TWITTER_OAUTH_SECRET || ''
-  },
-  facebook: {
-    key: process.env.FACEBOOK_OAUTH_KEY || '',
-    secret: process.env.FACEBOOK_OAUTH_SECRET || ''
-  },
-  github: {
-    key: process.env.GITHUB_OAUTH_KEY || '',
-    secret: process.env.GITHUB_OAUTH_SECRET || ''
-  },
-  google: {
-    key: process.env.GOOGLE_OAUTH_KEY || '',
-    secret: process.env.GOOGLE_OAUTH_SECRET || ''
-  },
-  tumblr: {
-    key: process.env.TUMBLR_OAUTH_KEY || '',
-    secret: process.env.TUMBLR_OAUTH_SECRET || ''
   }
 };

@@ -4,6 +4,44 @@
 
 angular.module('myApp.controllers', ['ngStorage'])
 
+    .controller('ToolbarController', ['$scope', '$http', '$window', '$timeout', '$localStorage',
+        function ToolbarController($scope, $http, $window, $timeout, $localStorage) {
+            $scope.$storage = $localStorage;
+
+            $scope.isAdmin = function () {
+                return $scope.isUser() &&
+                    $scope.$storage.user.roles && $scope.$storage.user.roles.indexOf('admin') != -1;
+            };
+
+            $scope.isUser = function () {
+                return $scope.$storage && $scope.$storage.user;
+            };
+
+            $scope.seeProfile = function () {
+                $scope.href('/users/' + $scope.$storage.user.id);
+            };
+
+            $scope.href = function (href) {
+                $window.location.href = href;
+            };
+
+            $scope.logout = function () {
+                $http.delete('/api/logout', {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function (data) {
+                    delete $scope.$storage.user;
+                    $timeout(function () {
+                        $scope.href('/login');
+                    }, 110);
+                }).error(function (data, status) {
+                    console.error('Error on get /api/logout ' + JSON.stringify(data) + ', status: ' + status);
+                });
+            };
+
+        }])
+
     .controller('LoginController', ['$scope', '$http', '$window', '$timeout', '$localStorage',
         function LoginController($scope, $http, $window, $timeout, $localStorage) {
             $scope.$storage = $localStorage;

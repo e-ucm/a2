@@ -10,8 +10,7 @@ var express = require('express'),
     tokenStorage = require('./tokenStorage/token-storage'),
     http = require('http');
 
-var configPath = process.env.CONFIG_PATH || './config';
-var config = require(configPath),
+var config = require((process.env.NODE_ENV === 'test') ? './config-test' : './config'),
     views = require('./routes/index'),
     contact = require('./routes/contact'),
     signup = require('./routes/signup'),

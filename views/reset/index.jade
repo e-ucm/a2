@@ -1,14 +1,15 @@
-extends ../layout
+extends ../page
 
 block content
-    .row-fluid
-        .col-sm-6(ng-init='tkn=#{JSON.stringify(token)}')
-            .page-header
-                h1 Reset password
-            div#profile(ng-controller='ResetController')
-                form(role='form')
-                    .form-group
-                        label Your new password:
-                        input.form-control(type='password', style='border-radius: 0px;', placeholder='The new password', ng-model='password.password')
-                    .form-group.text-right
-                        button.btn.btn-primary(ng-click='resetPassword()') Reset password
+    .container.theme-showcase
+        .row-fluid
+            .col-sm-6(ng-init='tkn=#{JSON.stringify(token)}')
+                .page-header
+                    h1 Reset password
+                #reset(ng-controller='ResetController')
+                    form(role='form')
+                        .form-group
+                            label Your new password:
+                            input.form-control(type='password', style='border-radius: 0px;', placeholder='The new password', ng-model='password.password')
+                        .form-group.text-right
+                            button.btn.btn-primary(ng-click='resetPassword()') Reset password

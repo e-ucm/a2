@@ -1,22 +1,23 @@
-extends ../layout
+extends ../page
 
 block content
-    .row-fluid
-        .col-sm-12
-            .page-header
-                h1 Users list
-            div#users(ng-controller='UsersController')
-                table.table
-                    thead
-                        tr
-                            th Name
-                            th Email
-                            th Id
-                            th Action
-                    tbody
-                        tr.active(ng-repeat='user in response.data')
-                            td {{user.name.first}} {{user.name.middle}} {{user.name.last}}
-                            td {{user.email}}
-                            td {{user._id}}
-                            td
-                                button.btn(ng-click='edit(user._id)') Edit
+    .container.theme-showcase
+        .row-fluid
+            .col-sm-12
+                .page-header
+                    h1 Users list
+                #users(ng-controller='UsersController')
+                    table.table
+                        thead
+                            tr
+                                th Name
+                                th Email
+                                th Id
+                                th Action
+                        tbody
+                            tr.active(ng-repeat='user in response.data')
+                                td {{user.name.first}} {{user.name.middle}} {{user.name.last}}
+                                td {{user.email}}
+                                td {{user._id}}
+                                td
+                                    button.btn(ng-click='edit(user._id)') Edit
