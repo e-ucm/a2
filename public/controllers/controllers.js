@@ -242,7 +242,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function (data) {
-                    delete role[resourceName].splice(index, 1);
+                    role[resourceName]=data;
                 }).error(function (data, status) {
                     console.error('Error on delete /api/roles/' + roleName + '/resources/' + resourceName + '/permissions/' + permission + ' ' + JSON.stringify(data) + ', status: ' + status);
                     window.document.write(data)
