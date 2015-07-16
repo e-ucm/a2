@@ -37,7 +37,7 @@ router.post('/', function (req, res, next) {
             text: req.body.text,
             projectName: req.app.config.projectName,
             success: function () {
-                res.send({message: 'Success'});
+                res.sendDefaultSuccessMessage();
             },
             error: function (err) {
                 next(err);

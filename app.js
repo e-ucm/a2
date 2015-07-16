@@ -91,6 +91,15 @@ app.passport = passport;
 
 require('./passport')(app);
 
+app.use(function (req, res, next) {
+    res.sendDefaultSuccessMessage = function() {
+        res.json({
+            message: 'Success.'
+        });
+    };
+    next();
+});
+
 app.use('/', views);
 app.use(config.apiPath + '/contact', contact);
 app.use(config.apiPath + '/signup', signup);
