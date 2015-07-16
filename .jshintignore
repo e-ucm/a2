@@ -1,0 +1,6 @@
+.idea/
+mongoDB
+public/libs
+node_modules/
+coverage/
+config-example.js
