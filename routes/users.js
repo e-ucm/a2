@@ -4,7 +4,8 @@ var express = require('express'),
     authentication = require('../util/authentication'),
     router = express.Router(),
     userIdRoute = '/:userId',
-    userIdRolesRoute = '/:userId/roles';
+    userIdRolesRoute = '/:userId/roles',
+    unselectedFields = '-salt -hash -__v';
 
 /* GET users listing. */
 router.get('/', authentication.authorized, function (req, res, next) {
@@ -76,7 +77,7 @@ function checkAuthAndExec(req, res, next, execFunc) {
 //User info.
 
 function sendUserInfo(userId, req, res, next) {
-    req.app.db.model('user').findById(userId, function (err, user) {
+    req.app.db.model('user').findById(userId).select(unselectedFields).exec(function (err, user) {
         if (err) {
             return next(err);
         }
@@ -112,7 +113,7 @@ function updateUserInfo(userId, req, res, next) {
         new: true
     };
 
-    req.app.db.model('user').findOneAndUpdate(query, update, options, function (err, user) {
+    req.app.db.model('user').findOneAndUpdate(query, update, options).select(unselectedFields).exec(function (err, user) {
         if (err) {
             return next(err);
         }
@@ -154,14 +155,10 @@ function deleteUser(userId, req, res, next) {
                         return next(err);
                     }
 
-                    res.json({
-                        message: 'Success.'
-                    });
+                    res.sendDefaultSuccessMessage();
                 });
             } else {
-                res.json({
-                    message: 'Success.'
-                });
+                res.sendDefaultSuccessMessage();
             }
         });
     });
@@ -207,9 +204,7 @@ function addUserRoles(user, req, res, next) {
             return next(err);
         }
 
-        res.json({
-            message: 'Success.'
-        });
+        res.sendDefaultSuccessMessage();
     });
 }
 
@@ -227,9 +222,7 @@ function removeUserRoles(user, req, res, next) {
             return next(err);
         }
 
-        res.json({
-            message: 'Success.'
-        });
+        res.sendDefaultSuccessMessage();
     });
 }
 

@@ -1,35 +1,38 @@
+'use strict';
+
 var express = require('express'),
     router = express.Router(),
     async = require('async');
 
 /* POST signup. */
 router.post('/', function (req, res, next) {
-    var userModel = req.app.db.model('user');
 
     async.auto({
         validate: function (done) {
+            var err;
             if (!req.body.username) {
-                var error = new Error('Username required!');
-                error.status = 400;
-                return done(error);
+                err = new Error('Username required!');
+                err.status = 400;
+                return done(err);
             }
 
             if (!req.body.password) {
-                var error = new Error('Password required!');
-                error.status = 400;
-                return done(error);
+                err = new Error('Password required!');
+                err.status = 400;
+                return done(err);
             }
 
             if (!req.body.email) {
-                var error = new Error('Email required!');
-                error.status = 400;
-                return done(error);
+                err = new Error('Email required!');
+                err.status = 400;
+                return done(err);
             }
 
             done();
         },
         user: ['validate', function (done) {
-            userModel.register(new userModel({
+            var UserModel = req.app.db.model('user');
+            UserModel.register(new UserModel({
                 username: req.body.username,
                 email: req.body.email,
                 timeCreated: new Date(),
@@ -78,7 +81,7 @@ router.post('/', function (req, res, next) {
         var user = results.user;
         res.json({
             user: {
-                id: user.id,
+                _id: user.id,
                 username: user.username,
                 email: user.email
             }

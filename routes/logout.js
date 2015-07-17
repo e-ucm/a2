@@ -1,3 +1,5 @@
+'use strict';
+
 var express = require('express'),
     authentication = require('../util/authentication'),
     router = express.Router();
@@ -5,9 +7,7 @@ var express = require('express'),
 router.delete('/', authentication.authenticated, function (req, res) {
     req.logout();
     req.app.tokenStorage.delete(req);
-    res.json({
-        message: 'Success.'
-    });
+    res.sendDefaultSuccessMessage();
 });
 
 module.exports = router;

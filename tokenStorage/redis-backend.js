@@ -16,7 +16,7 @@ var RedisBackend = function (options) {
     var fetchToken = function (req) {
         if (req.headers && req.headers.authorization) {
             var parts = req.headers.authorization.split(' ');
-            if (parts.length == 2) {
+            if (parts.length === 2) {
                 var scheme = parts[0];
                 var credentials = parts[1];
 
@@ -27,7 +27,7 @@ var RedisBackend = function (options) {
             }
         }
         return null;
-    }
+    };
 
     this.middleware = function (req, res, next) {
         var token = fetchToken(req);
@@ -48,7 +48,7 @@ var RedisBackend = function (options) {
                 return next();
             } else {
                 req.user = undefined;
-                var err = new Error("Token doesn't exist, login into the system so it can generate a new token.");
+                err = new Error("Token doesn't exist, login into the system so it can generate a new token.");
                 err.status = 401;
                 next(err);
             }
@@ -89,6 +89,6 @@ var RedisBackend = function (options) {
     this.clean = function () {
         client.flushdb();
     };
-}
+};
 
 exports = module.exports = RedisBackend;
