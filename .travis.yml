@@ -7,11 +7,10 @@ services:
   - redis-server
 
 before_script:
-  - sleep 10
+  - sleep 5
   - npm install
 
 script:
-  - npm run-script fast-setup
   - npm run-script test-travis
 
 after_success: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
