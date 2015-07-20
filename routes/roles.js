@@ -5,7 +5,22 @@ var express = require('express'),
     async = require('async'),
     router = express.Router();
 
-/* GET roles. */
+/**
+ * @api {get} /roles Return the all roles.
+ * @apiName GetRoles
+ * @apiGroup Roles
+ *
+ * @apiSuccess(200) {String} Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      [
+ *          "Role1",
+ *          "Role2",
+ *          "Role3"
+ *      ]
+ *
+ */
 router.get('/', authentication.authorized, function (req, res, next) {
 
     req.app.acl.listRoles(function (err, roles) {
@@ -17,7 +32,59 @@ router.get('/', authentication.authorized, function (req, res, next) {
     });
 });
 
-/* POST roles, create a new role. */
+/**
+ * @api {post} /roles Creates new roles.
+ * @apiName PostRoles
+ * @apiGroup Roles
+ *
+ * @apiParam {String} roles Role name.
+ * @apiParam {Object[]} allows Object with resources and permissions.
+ *
+ * @apiParam {String} roles Role name.
+ * @apiParam {String[]} resources Role resources.
+ * @apiParam {String[]} permissions Resources permissions
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "roles":"newRole",
+ *          "allows":[
+ *              {"resources":"resource-1", "permissions":["perm-1", "perm-3"]},
+ *              {"resources":["resource-2","resource-3"], "permissions":["perm-1"]}
+ *          ]
+ *      }
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "roles": "newRole",
+ *          "resources": [
+ *              "resource-1",
+ *              "resource-2",
+ *              "resource-3"
+ *      ],
+ *          "permissions": [
+ *               "permission-1",
+ *               "permission-2",
+ *               "permission-3"
+ *          ]
+ *      }
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      [
+ *          "Role1",
+ *          "Role2",
+ *          "newRole"
+ *      ]
+ *
+ * @apiError(400) RolesRequired Roles required!.
+ *
+ * @apiError(400) RequiredResourcesAndPermissions Allows, or Resources and Permissions required!.
+ *
+ * @apiError(400) RoleExists The role {roleName} already exists.
+ *
+ */
 router.post('/', authentication.authorized, function (req, res, next) {
     async.auto({
         validate: function (done) {
@@ -74,7 +141,37 @@ router.post('/', authentication.authorized, function (req, res, next) {
     });
 });
 
-/* GET permissions and resources of a role. */
+/**
+ * @api {get} /roles/:roleName Returns the resources and permissions of role roleName
+ * @apiName GetResources
+ * @apiGroup Roles
+ *
+ * @apiParam {String} roleName Role name.
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *         "resources-1": [
+ *              "permission-1"
+ *              "permission-2",
+ *              "permission-3"
+ *         ],
+ *         "resources-2": [
+ *              "permission-3"
+ *          ],
+ *          "resources-3": [
+ *              "permission-1",
+ *              "permission-3"
+ *          ],
+ *      }
+ *
+ * @apiError(400) RolesDoesNotExist The role doesn't exist.
+ *
+ * @apiError(400) RoleExists The role {roleName}  doesn't exist.
+ *
+ */
 router.get('/:roleName', authentication.authorized, function (req, res, next) {
     var roleName = req.params.roleName || '';
 
@@ -104,7 +201,30 @@ router.get('/:roleName', authentication.authorized, function (req, res, next) {
 
 });
 
-/* DELETE role. */
+/**
+ * @api {delete} /roles/:roleName Deletes the role with roleName.
+ * @apiName DelRole
+ * @apiGroup Roles
+ *
+ * @apiParam {String} roleName Role name.
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      [
+ *          "Admin"
+ *      ]
+ *
+ * @apiError(400) RolesRequired Roles required!.
+ *
+ * @apiError(400) RolesDoesNotExist The role doesn't exist.
+ *
+ * @apiError(400) RequiredResourcesAndPermissions Allows, or Resources and Permissions required!.
+ *
+ * @apiError(400) RoleExists The role {roleName} already exists.
+ *
+ */
 router.delete('/:roleName', authentication.authorized, function (req, res, next) {
     var roleName = req.params.roleName || '';
 
@@ -139,7 +259,72 @@ router.delete('/:roleName', authentication.authorized, function (req, res, next)
     });
 });
 
-/* POST resource. Add a new resource in a role */
+/**
+ * @api {post} /roles/:roleName/resources Creates new resource with permissions for a role.
+ * @apiName PostResources
+ * @apiGroup Roles
+ *
+ * @apiParam {Object[]} allows Object with resources and permissions.
+ *
+ * @apiParam {String[]} resources Role resources.
+ * @apiParam {String[]} permissions Resources permissions
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "allows":[
+ *              {
+ *                  "resources":"resource-1",
+ *                  "permissions":[
+ *                      "perm-1",
+ *                      "perm-3"
+ *                  ]
+ *              },
+ *              {
+ *                  "resources":[
+ *                      "resource-2",
+ *                      "resource-3"
+ *                  ],
+ *                  "permissions":["perm-1"]
+ *              }
+ *          ]
+ *      }
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "resources": [
+ *              "resource-1",
+ *              "resource-2",
+ *              "resource-3"
+ *      ],
+ *          "permissions": [
+ *               "permission-1",
+ *               "permission-2",
+ *               "permission-3"
+ *          ]
+ *      }
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *         "resources-1": [
+ *              "perm-1"
+ *              "perm-3"
+ *         ],
+ *         "resources-2": [
+ *              "perm-1"
+ *          ],
+ *          "resources-3": [
+ *              "perm-1"
+ *          ]
+ *      }
+ *
+ * @apiError(400) RolesDoesNotExist The role doesn't exist.
+ *
+ * @apiError(400) RequiredResourcesAndPermissions Allows, or Resources and Permissions required!.
+ *
+ */
 router.post('/:roleName/resources', authentication.authorized, function (req, res, next) {
     var roleName = req.params.roleName || '';
 
@@ -178,7 +363,30 @@ router.post('/:roleName/resources', authentication.authorized, function (req, re
     });
 });
 
-/* DELETE resource of role. */
+/**
+ * @api {delete} /roles/:roleName/resources/:resourceName Deletes the resource with resourceName in roleName role
+ * @apiName DelResource
+ * @apiGroup Roles
+ *
+ * @apiParam {String} roleName Role name.
+ * @apiParam {String} resourceName Resource to delete.
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *         "resources-1": [
+ *              "perm-1"
+ *              "perm-3"
+ *         ]
+ *      }
+ *
+ * @apiError(400) RolesDoesNotExist The role doesn't exist.
+ *
+ * @apiError(400) ResourceDoesNotExist The resource in the role doesn't exist.
+ *
+ */
 router.delete('/:roleName/resources/:resourceName', authentication.authorized, function (req, res, next) {
     var roleName = req.params.roleName || '';
     var resource = req.params.resourceName || '';
@@ -221,7 +429,29 @@ router.delete('/:roleName/resources/:resourceName', authentication.authorized, f
     });
 });
 
-/* GET permissions of resource in a role. */
+/**
+ * @api {get} /roles/:roleName/resources/:resourceName Returns the permissions of resource resourceName in role roleName.
+ * @apiName GetResources
+ * @apiGroup Roles
+ *
+ * @apiParam {String} roleName Role name.
+ * @apiParam {String} resourceName Resource name.
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      [
+ *          "permission1",
+ *          "permission2",
+ *          "permission3"
+ *      ]
+ *
+ * @apiError(400) RolesDoesNotExist The role doesn't exist.
+ *
+ * @apiError(400) ResourceDoesNotExist The resource in role doesn't exist.
+ *
+ */
 router.get('/:roleName/resources/:resourceName', authentication.authorized, function (req, res, next) {
     var roleName = req.params.roleName || '';
     var resource = req.params.resourceName || '';
@@ -247,7 +477,39 @@ router.get('/:roleName/resources/:resourceName', authentication.authorized, func
     });
 });
 
-/* POST permissions. Add a new permissions in resource of role */
+/**
+ * @api {post} /roles/:roleName/resources/:resourceName/permissions Creates new permissions.
+ * @apiName PostPermissions
+ * @apiGroup Roles
+ *
+ * @apiParam {String} roleName Role name.
+ * @apiParam {String} resourceName Resource name.
+ * @apiParam {String[]} permissions The new permissions.
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "permission" : [
+ *              "perm-1",
+ *              "perm-3"
+ *          ]
+ *      }
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      [
+ *          "permission",
+ *          "perm-1",
+ *          "perm-2"
+ *      ]
+ * @apiError(400) RolesDoesNotExist The role doesn't exist.
+ *
+ * @apiError(400) PermissionRequired Permissions required!.
+ *
+ * @apiError(400) ResourceDoesNotExist The resource in role doesn't exist.
+ *
+ */
 router.post('/:roleName/resources/:resourceName/permissions', authentication.authorized, function (req, res, next) {
     var roleName = req.params.roleName || '';
     var resource = req.params.resourceName || '';
@@ -293,7 +555,34 @@ router.post('/:roleName/resources/:resourceName/permissions', authentication.aut
     });
 });
 
-/* DEL permission. Remove the permission in resource of role */
+/**
+ * @api {delete} /roles/:roleName/resources/:resourceName/permissions/:permissionName Deletes a permission
+ * @apiName DelPermission
+ * @apiGroup Roles
+ *
+ * @apiParam {String} roleName Role name.
+ * @apiParam {String} resourceName Resource name.
+ * @apiParam {String} permissionName The permissions to delete.
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      [
+ *          "permission-1",
+ *          "permission-2",
+ *          "permission-3"
+ *      ]
+ *
+ * @apiError(400) RolesDoesNotExist The role doesn't exist.
+ *
+ * @apiError(400) PermissionDoesNotExist The permission of the resource doesn't exist.
+ *
+ * @apiError(400) ResourceDoesNotExist The resource in role doesn't exist.
+ *
+ * @apiError(403) LastPermission The permission can't be remove because is the last
+ *
+ */
 router.delete('/:roleName/resources/:resourceName/permissions/:permissionName', authentication.authorized, function (req, res, next) {
     var roleName = req.params.roleName || '';
     var resource = req.params.resourceName || '';
@@ -345,11 +634,28 @@ router.delete('/:roleName/resources/:resourceName/permissions/:permissionName', 
             res.send(result[resource] || []);
         });
     });
-
-
 });
 
-/* GET the username of all users that have the role. */
+/**
+ * @api {get} /roles/:roleName/users Return the username of user with the role.
+ * @apiName GetRoleUsers
+ * @apiGroup Roles
+ *
+ * @apiParam {String} roles Role name.
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      [
+ *          "user1",
+ *          "user2",
+ *          "user3"
+ *      ]
+ *
+ * @apiError(400) RolesDoesNotExist The role doesn't exist.
+ *
+ */
 router.get('/:roleName/users', authentication.authorized, function (req, res, next) {
     var roleName = req.params.roleName || '';
 
