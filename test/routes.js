@@ -420,103 +420,6 @@ describe('REST API', function () {
         });
     });
 
-
-    describe(POST + usersRoute + '/:userId/roles', function () {
-        var newRoles = ['role1', 'role2', 'role3'];
-
-        it("should not POST roles to an user with an invalid token", function (done) {
-            authPost(usersRoute + '/' + admin._id + '/roles', 'invalid_token', newRoles, 401, done);
-        });
-
-        it("should not POST roles to himself with an unauthorized token", function (done) {
-            authPost(usersRoute + '/' + user._id + '/roles', user.token, newRoles, 403, done);
-        });
-
-        it("should not POST roles to an user with an unauthorized token", function (done) {
-            authPost(usersRoute + '/' + admin._id + '/roles', user.token, newRoles, 403, done);
-        });
-
-        var validatePOSTroles = function (newRoles, done) {
-            return function (err, res) {
-                should.not.exist(err);
-                should(res).be.an.Object();
-
-                var result = JSON.parse(res.text);
-                should(result.message).be.a.String();
-
-                get(usersRoute + '/' + admin._id + '/roles', admin.token, 200, function (err, res) {
-
-                    var roles = JSON.parse(res.text);
-
-                    should(roles).containDeep(newRoles);
-
-                    done();
-                });
-            };
-        };
-
-        it("should POST roles to himself being authorized", function (done) {
-            authPost(usersRoute + '/' + admin._id + '/roles', admin.token, newRoles, 200,
-                validatePOSTroles(newRoles, done));
-        });
-
-        it("should POST roles to a specific user being authorized (admin)", function (done) {
-            authPost(usersRoute + '/' + user._id + '/roles', admin.token, newRoles, 200,
-                validatePOSTroles(newRoles, done));
-        });
-    });
-
-    describe(DEL + usersRoute + '/:userId/roles', function () {
-        var deletedRole = 'role2';
-
-        it("should not DELETE roles from an user with an invalid token", function (done) {
-            del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, 'invalid_token', 401, done);
-        });
-
-        it("should not DELETE roles from an user with an unauthorized token", function (done) {
-            del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, user.token, 403, done);
-        });
-
-        it("should not DELETE roles himself with an unauthorized token", function (done) {
-            del(usersRoute + '/' + user._id + '/roles/' + deletedRole, user.token, 403, done);
-        });
-
-        var validateDELroles = function (deletedRoles, id, done) {
-            return function (err, res) {
-                should.not.exist(err);
-                should(res).be.an.Object();
-
-                var result = JSON.parse(res.text);
-                should(result.message).be.a.String();
-
-                get(usersRoute + '/' + id + '/roles', admin.token, 200, function (err, res) {
-
-                    var roles = JSON.parse(res.text);
-
-                    should(roles).not.containDeep(deletedRoles);
-
-                    done();
-                });
-            };
-        };
-
-        var deletedRoleArray = [deletedRole];
-
-        it("should DELETE roles from a specific user being authorized", function (done) {
-            del(usersRoute + '/' + user._id + '/roles/' + deletedRole, admin.token, 200,
-                validateDELroles(deletedRoleArray, user._id, done));
-        });
-
-        it("should DELETE roles from himself being authorized (admin)", function (done) {
-            del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, admin.token, 200,
-                validateDELroles(deletedRoleArray, admin._id, done));
-        });
-
-        it("shouldn't DELETE the admin role from himself", function (done) {
-            del(usersRoute + '/' + admin._id + '/roles/admin', admin.token, 403, done);
-        });
-    });
-
     /** /api/roles **/
     var rolesRoute = '/api/roles';
 
@@ -726,6 +629,146 @@ describe('REST API', function () {
         });
     });
 
+    /** /api/users/roles **/
+    describe(POST + usersRoute + '/:userId/roles', function () {
+        var newValidRoles = ['role1', 'role2'];
+        var newInvalidRoles = ['role1', 'role2', 'role3'];
+        var newInvalidRole = ['role3'];
+
+        it("should not POST roles to an user with an invalid token", function (done) {
+            authPost(usersRoute + '/' + admin._id + '/roles', 'invalid_token', newValidRoles, 401, done);
+        });
+
+        it("should not POST roles to himself with an unauthorized token", function (done) {
+            authPost(usersRoute + '/' + user._id + '/roles', user.token, newValidRoles, 403, done);
+        });
+
+        it("should not POST roles to an user with an unauthorized token", function (done) {
+            authPost(usersRoute + '/' + admin._id + '/roles', user.token, newValidRoles, 403, done);
+        });
+
+        it("should not POST roles, some role doesn't exist", function (done) {
+            authPost(usersRoute + '/' + admin._id + '/roles', admin.token, newInvalidRoles, 400, done);
+        });
+
+        it("should not POST roles, some role doesn't exist", function (done) {
+            authPost(usersRoute + '/' + admin._id + '/roles', admin.token, newInvalidRole, 400, done);
+        });
+
+        var validatePOSTroles = function (newValidRoles, done) {
+            return function (err, res) {
+                should.not.exist(err);
+                should(res).be.an.Object();
+
+                var result = JSON.parse(res.text);
+                should(result.message).be.a.String();
+
+                get(usersRoute + '/' + admin._id + '/roles', admin.token, 200, function (err, res) {
+
+                    var roles = JSON.parse(res.text);
+
+                    should(roles).containDeep(newValidRoles);
+
+                    done();
+                });
+            };
+        };
+
+        it("should POST roles to himself being authorized", function (done) {
+            authPost(usersRoute + '/' + admin._id + '/roles', admin.token, newValidRoles, 200,
+                validatePOSTroles(newValidRoles, done));
+        });
+
+        it("should POST roles to a specific user being authorized (admin)", function (done) {
+            authPost(usersRoute + '/' + user._id + '/roles', admin.token, newValidRoles, 200,
+                validatePOSTroles(newValidRoles, done));
+        });
+    });
+
+    describe(GET + usersRoute + '/:userId/:resourceName/:permissionName', function () {
+        var noPermission = 'noPermission';
+
+        it("should not GET response with an invalid token", function (done) {
+            get(usersRoute + '/' + admin._id + '/' + theResource + '/' + thePermission, 'invalid_token', 401, done);
+        });
+
+        it("should not GET response from an user with an unauthorized token", function (done) {
+            get(usersRoute + '/' + admin._id + '/' + theResource + '/' + thePermission, user.token, 403, done);
+        });
+
+        it("should GET response (true) from himself being authorized (admin)", function (done) {
+            get(usersRoute + '/' + admin._id + '/' + theResource + '/' + thePermission, admin.token, 200,
+                function (err, res) {
+                    res = JSON.parse(res.text);
+                    should(res).be.an.Boolean();
+                    should.equal(res, true);
+                    done();
+                });
+        });
+
+        it("should GET response (false) from himself being authorized (admin)", function (done) {
+            get(usersRoute + '/' + admin._id + '/' + theResource + '/' + noPermission, admin.token, 200,
+                function (err, res) {
+                    res = JSON.parse(res.text);
+                    should(res).be.an.Boolean();
+                    should.equal(res, false);
+                    done();
+                });
+        });
+    });
+
+    describe(DEL + usersRoute + '/:userId/roles', function () {
+        var deletedRole = 'role2';
+
+        it("should not DELETE roles from an user with an invalid token", function (done) {
+            del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, 'invalid_token', 401, done);
+        });
+
+        it("should not DELETE roles from an user with an unauthorized token", function (done) {
+            del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, user.token, 403, done);
+        });
+
+        it("should not DELETE roles himself with an unauthorized token", function (done) {
+            del(usersRoute + '/' + user._id + '/roles/' + deletedRole, user.token, 403, done);
+        });
+
+        var validateDELroles = function (deletedRoles, id, done) {
+            return function (err, res) {
+                should.not.exist(err);
+                should(res).be.an.Object();
+
+                var result = JSON.parse(res.text);
+                should(result.message).be.a.String();
+
+                get(usersRoute + '/' + id + '/roles', admin.token, 200, function (err, res) {
+
+                    var roles = JSON.parse(res.text);
+
+                    should(roles).not.containDeep(deletedRoles);
+
+                    done();
+                });
+            };
+        };
+
+        var deletedRoleArray = [deletedRole];
+
+        it("should DELETE roles from a specific user being authorized", function (done) {
+            del(usersRoute + '/' + user._id + '/roles/' + deletedRole, admin.token, 200,
+                validateDELroles(deletedRoleArray, user._id, done));
+        });
+
+        it("should DELETE roles from himself being authorized (admin)", function (done) {
+            del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, admin.token, 200,
+                validateDELroles(deletedRoleArray, admin._id, done));
+        });
+
+        it("shouldn't DELETE the admin role from himself", function (done) {
+            del(usersRoute + '/' + admin._id + '/roles/admin', admin.token, 403, done);
+        });
+    });
+
+    /** DELETES /api/roles **/
     var permissionsPath = '/permissions';
     var routePermissionId = routeResourceId + permissionsPath + '/:permissionName';
     var validPermissionId = validResourcesId + permissionsPath + '/' + thePermission;

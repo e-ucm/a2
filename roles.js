@@ -21,6 +21,7 @@ exports = module.exports = function (app, callback) {
             app.config.apiPath + '/users/:userId',
             app.config.apiPath + '/users/:userId/roles',
             app.config.apiPath + '/users/:userId/roles/:roleName',
+            app.config.apiPath + '/users/:userId/:resourceName/:permissionName',
             app.config.apiPath + '/roles',
             app.config.apiPath + '/roles/:roleName',
             app.config.apiPath + '/roles/:roleName/resources',
@@ -49,6 +50,25 @@ exports = module.exports = function (app, callback) {
             }
 
             cb(null, result);
+        });
+    };
+
+    /**
+     * Return a Error if the role doesn't exist
+     */
+    acl.existsRole = function(roleName, cb) {
+        acl.listRoles(function (err, roles) {
+            if (err) {
+                return cb(err);
+            }
+
+            if (roles.indexOf(roleName) === -1) {
+                err = new Error("The role " + roleName + " doesn't exist.");
+                err.status = 400;
+                return cb(err);
+            }
+
+            cb();
         });
     };
 

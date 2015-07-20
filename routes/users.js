@@ -1,6 +1,7 @@
 'use strict';
 
 var express = require('express'),
+    async = require('async'),
     authentication = require('../util/authentication'),
     router = express.Router(),
     userIdRoute = '/:userId',
@@ -111,7 +112,19 @@ router.get('/', authentication.authorized, function (req, res, next) {
  *
  */
 router.get(userIdRoute, authentication.authenticated, function (req, res, next) {
-    checkAuthAndExec(req, res, next, sendUserInfo);
+    async.auto({
+        checkAuth: function (done) {
+            checkAuthAndExec(req, res, done);
+        },
+        getInfo: ['checkAuth', function (done, results) {
+            getUserInfo(results.checkAuth, req, res, done);
+        }]
+    }, function (err, results) {
+        if (err) {
+            return next(err);
+        }
+        res.json(results.getInfo);
+    });
 });
 
 /**
@@ -126,8 +139,8 @@ router.get(userIdRoute, authentication.authenticated, function (req, res, next) 
  *      {
  *          "name": {
  *              "first" : "Firstname",
- *              "middle" : Middlename",
-  *              "last" : "Lastname
+ *              "middle" : "Middlename",
+  *              "last" : "Lastname"
  *          }
  *      }
  *
@@ -155,7 +168,19 @@ router.get(userIdRoute, authentication.authenticated, function (req, res, next) 
  *
  */
 router.put(userIdRoute, authentication.authenticated, function (req, res, next) {
-    checkAuthAndExec(req, res, next, updateUserInfo);
+    async.auto({
+        checkAuth: function (done) {
+            checkAuthAndExec(req, res, done);
+        },
+        put: ['checkAuth', function (done, results) {
+            updateUserInfo(results.checkAuth, req, res, done);
+        }]
+    }, function (err, results) {
+        if (err) {
+            return next(err);
+        }
+        res.json(results.put);
+    });
 });
 
 /**
@@ -177,7 +202,19 @@ router.put(userIdRoute, authentication.authenticated, function (req, res, next) 
  *
  */
 router.delete(userIdRoute, authentication.authenticated, function (req, res, next) {
-    checkAuthAndExec(req, res, next, deleteUser);
+    async.auto({
+        checkAuth: function (done) {
+            checkAuthAndExec(req, res, done);
+        },
+        deleteUser: ['checkAuth', function (done, results) {
+            deleteUser(results.checkAuth, req, res, done);
+        }]
+    }, function (err) {
+        if (err) {
+            return next(err);
+        }
+        res.sendDefaultSuccessMessage();
+    });
 });
 
 /**
@@ -200,14 +237,26 @@ router.delete(userIdRoute, authentication.authenticated, function (req, res, nex
  *
  */
 router.get(userIdRolesRoute, authentication.authenticated, function (req, res, next) {
-    checkAuthAndExec(req, res, next, function (userId, req, res, next) {
-        checkUserExistenceAndExec(req, res, next,
-            sendUserRoles);
+    async.auto({
+        checkAuth: function (done) {
+            checkAuthAndExec(req, res, done);
+        },
+        checkUser: ['checkAuth', function (done) {
+            checkUserExistenceAndExec(req, res, done);
+        }],
+        getRoles: ['checkUser', function (done, results) {
+            getUserRoles(results.checkUser, req, res, done);
+        }]
+    }, function (err, results) {
+        if (err) {
+            return next(err);
+        }
+        res.json(results.getRoles);
     });
 });
 
 /**
- * @api {post} /users/:userId/roles Creates new roles.
+ * @api {post} /users/:userId/roles Added a role to user.
  * @apiName PostUserRole
  * @apiGroup Users
  *
@@ -232,7 +281,29 @@ router.get(userIdRolesRoute, authentication.authenticated, function (req, res, n
  *
  */
 router.post(userIdRolesRoute, authentication.authorized, function (req, res, next) {
-    checkUserExistenceAndExec(req, res, next, addUserRoles);
+    async.auto({
+        checkUser: function (done) {
+            checkUserExistenceAndExec(req, res, done);
+        },
+        checkRoles : ['checkUser', function(done){
+            req.body.forEach(function(role){
+                req.app.acl.existsRole(role, function(err){
+                    if(err){
+                        return done(err);
+                    }
+                });
+            });
+            done();
+        }],
+        addRoles: ['checkRoles', function (done, results) {
+            addUserRoles(results.checkUser, req, res, done);
+        }]
+    }, function (err) {
+        if (err) {
+            return next(err);
+        }
+        res.sendDefaultSuccessMessage();
+    });
 });
 
 /**
@@ -255,40 +326,88 @@ router.post(userIdRolesRoute, authentication.authorized, function (req, res, nex
  *
  */
 router.delete(userIdRolesRoute + '/:roleName', authentication.authorized, function (req, res, next) {
-    checkUserExistenceAndExec(req, res, next, removeUserRoles);
+    async.auto({
+        checkUser: function (done) {
+            checkUserExistenceAndExec(req, res, done);
+        },
+        deleteRoles: ['checkUser', function (done, results) {
+            removeUserRoles(results.checkUser, req, res, done);
+        }]
+    }, function (err) {
+        if (err) {
+            return next(err);
+        }
+        res.sendDefaultSuccessMessage();
+    });
 });
 
-function checkAuthAndExec(req, res, next, execFunc) {
+/**
+ * @api {get} /users/:userId/:resourceName/:permissionName Returns true if the user has the permission for the resource. Otherwise returns false.
+ * @apiName UserAllow
+ * @apiGroup Users
+ *
+ * @apiParam {String} userId User id.
+ * @apiParam {String} resourceName Resource name.
+ * @apiParam {String} permissionName Permission name.
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      true
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ *
+ */
+router.get(userIdRoute + '/:resourceName/:permissionName', authentication.authorized, function (req, res, next) {
+    async.auto({
+        checkUser: function (done) {
+            checkUserExistenceAndExec(req, res, done);
+        },
+        allow: ['checkUser', function (done, results) {
+            isAllowed(results.checkUser, req, res, done);
+        }]
+    }, function (err, results) {
+        if (err) {
+            return next(err);
+        }
+        res.json(results.allow);
+    });
+});
+
+
+
+function checkAuthAndExec(req, res, cb) {
     var userId = req.params.userId || '';
     if (req.user._id === userId) {
-        return execFunc(userId, req, res, next);
+        return cb(null, userId);
     }
 
     authentication.authorized(req, res, function (err) {
         if (err) {
-            return next(err);
+            return cb(err);
         }
 
-        execFunc(userId, req, res, next);
+        cb(null, userId);
     });
 }
 
 //User info.
-function sendUserInfo(userId, req, res, next) {
+function getUserInfo(userId, req, res, cb) {
     req.app.db.model('user').findById(userId).select(unselectedFields).exec(function (err, user) {
         if (err) {
-            return next(err);
+            return cb(err);
         }
         if (!user) {
             err = new Error('No account with the given user id exists.');
             err.status = 400;
-            return next(err);
+            return cb(err);
         }
-        res.json(user);
+        cb(null, user);
     });
 }
 
-function updateUserInfo(userId, req, res, next) {
+function updateUserInfo(userId, req, res, cb) {
 
     var query = {
         _id: userId
@@ -313,19 +432,19 @@ function updateUserInfo(userId, req, res, next) {
 
     req.app.db.model('user').findOneAndUpdate(query, update, options).select(unselectedFields).exec(function (err, user) {
         if (err) {
-            return next(err);
+            return cb(err);
         }
         if (!user) {
             err = new Error('No account with the given user id exists.');
             err.status = 400;
-            return next(err);
+            return cb(err);
         }
-        res.json(user);
+        cb(null, user);
     });
 }
 
 
-function deleteUser(userId, req, res, next) {
+function deleteUser(userId, req, res, cb) {
 
     var query = {
         _id: userId
@@ -333,30 +452,30 @@ function deleteUser(userId, req, res, next) {
 
     req.app.db.model('user').findOneAndRemove(query, function (err, user) {
         if (err) {
-            return next(err);
+            return cb(err);
         }
         if (!user) {
             err = new Error('No account with the given user id exists.');
             err.status = 400;
-            return next(err);
+            return cb(err);
         }
 
         var acl = req.app.acl;
         acl.userRoles(user.username, function (err, roles) {
             if (err) {
-                return next(err);
+                return cb(err);
             }
 
             if (roles && roles.length > 0) {
                 acl.removeUserRoles(user.username, roles, function (err) {
                     if (err) {
-                        return next(err);
+                        return cb(err);
                     }
 
-                    res.sendDefaultSuccessMessage();
+                    cb();
                 });
             } else {
-                res.sendDefaultSuccessMessage();
+                cb();
             }
         });
     });
@@ -364,63 +483,73 @@ function deleteUser(userId, req, res, next) {
 
 // Roles
 
-function checkUserExistenceAndExec(req, res, next, func) {
+function checkUserExistenceAndExec(req, res, cb) {
     var userId = req.params.userId || '';
 
     req.app.db.model('user').findById(userId, function (err, user) {
         if (err) {
-            return next(err);
+            return cb(err);
         }
         if (!user) {
             err = new Error('No account with the given user id exists.');
             err.status = 400;
-            return next(err);
+            return cb(err);
         }
 
-        func(user, req, res, next);
+        cb(null, user);
     });
 }
 
-function sendUserRoles(user, req, res, next) {
+function getUserRoles(user, req, res, cb) {
     res.app.acl.userRoles(user.username, function (err, roles) {
         if (err) {
-            return next(err);
+            return cb(err);
         }
 
         if (!roles) {
             err = new Error('Something went wrong and the roles could not be retrieved');
-            return next(err);
+            return cb(err);
         }
 
-        res.json(roles);
+        cb(null, roles);
     });
 }
 
-function addUserRoles(user, req, res, next) {
+function addUserRoles(user, req, res, cb) {
     res.app.acl.addUserRoles(user.username, req.body, function (err) {
         if (err) {
-            return next(err);
+            return cb(err);
         }
 
-        res.sendDefaultSuccessMessage();
+        cb();
     });
 }
 
-function removeUserRoles(user, req, res, next) {
+function removeUserRoles(user, req, res, cb) {
     var toDelete = req.params.roleName;
     if (toDelete === 'admin') {
         if (req.user._id === user._id.toString()) {
             var err = new Error("You can't remove the 'admin' role from yourself.");
             err.status = 403;
-            return next(err);
+            return cb(err);
         }
     }
     res.app.acl.removeUserRoles(user.username, toDelete, function (err) {
         if (err) {
-            return next(err);
+            return cb(err);
         }
 
-        res.sendDefaultSuccessMessage();
+        cb();
+    });
+}
+
+function isAllowed(user, req, res, cb) {
+    res.app.acl.isAllowed(user.username, req.params.resourceName, req.params.permissionName, function (err, result) {
+        if (err) {
+            return cb(err);
+        }
+
+        cb(null, result);
     });
 }
 

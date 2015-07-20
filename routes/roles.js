@@ -177,7 +177,7 @@ router.get('/:roleName', authentication.authorized, function (req, res, next) {
 
     async.auto({
         validate: function (done) {
-            existsRole(req, roleName, done);
+            req.app.acl.existsRole(roleName, done);
         },
         get: ['validate', function (done) {
             req.app.acl.whatResources(roleName, function (err, result) {
@@ -236,7 +236,7 @@ router.delete('/:roleName', authentication.authorized, function (req, res, next)
                 return done(err);
             }
 
-            existsRole(req, roleName, done);
+            req.app.acl.existsRole(roleName, done);
         },
         delete: ['validate', function (done) {
             req.app.acl.removeRole(roleName, function (err) {
@@ -339,7 +339,7 @@ router.post('/:roleName/resources', authentication.authorized, function (req, re
             done();
         },
         checkRole: ['validate', function (done) {
-            existsRole(req, roleName, done);
+            req.app.acl.existsRole(roleName, done);
         }],
         addResources: ['checkRole', function (done) {
             if (req.body.allows) {
@@ -393,7 +393,7 @@ router.delete('/:roleName/resources/:resourceName', authentication.authorized, f
 
     async.auto({
         validate: function (done) {
-            existsRole(req, roleName, function (err) {
+            req.app.acl.existsRole(roleName, function (err) {
                 if (err) {
                     return done(err);
                 }
@@ -456,7 +456,7 @@ router.get('/:roleName/resources/:resourceName', authentication.authorized, func
     var roleName = req.params.roleName || '';
     var resource = req.params.resourceName || '';
 
-    existsRole(req, roleName, function (err) {
+    req.app.acl.existsRole(roleName, function (err) {
         if (err) {
             return next(err);
         }
@@ -516,7 +516,7 @@ router.post('/:roleName/resources/:resourceName/permissions', authentication.aut
 
     async.auto({
         checkRole: function (done) {
-            existsRole(req, roleName, done);
+            req.app.acl.existsRole(roleName, done);
         },
         validate: ['checkRole', function (done) {
             if (!req.body.permissions) {
@@ -590,7 +590,7 @@ router.delete('/:roleName/resources/:resourceName/permissions/:permissionName', 
 
     async.auto({
         checkRole: function (done) {
-            existsRole(req, roleName, done);
+            req.app.acl.existsRole(roleName, done);
         },
         validate: ['checkRole', function (done) {
             req.app.acl.whatResources(roleName, function (err, result) {
@@ -659,7 +659,7 @@ router.delete('/:roleName/resources/:resourceName/permissions/:permissionName', 
 router.get('/:roleName/users', authentication.authorized, function (req, res, next) {
     var roleName = req.params.roleName || '';
 
-    existsRole(req, roleName, function (err) {
+    req.app.acl.existsRole(roleName, function (err) {
         if (err) {
             return next(err);
         }
@@ -674,23 +674,5 @@ router.get('/:roleName/users', authentication.authorized, function (req, res, ne
     });
 });
 
-/**
- * Return a Error if the role doesn't exist
- */
-function existsRole(req, roleName, cb) {
-    req.app.acl.listRoles(function (err, roles) {
-        if (err) {
-            return cb(err);
-        }
-
-        if (roles.indexOf(roleName) === -1) {
-            err = new Error("The role " + roleName + " doesn't exist.");
-            err.status = 400;
-            return cb(err);
-        }
-
-        cb();
-    });
-}
 
 module.exports = router;
