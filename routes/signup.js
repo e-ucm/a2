@@ -4,7 +4,41 @@ var express = require('express'),
     router = express.Router(),
     async = require('async');
 
-/* POST signup. */
+/**
+ * @api {post} /signup Sign Up a new user.
+ * @apiName Signup
+ * @apiGroup Signup
+ *
+ * @apiParam {String} email User email.
+ * @apiParam {String[]} username User username.
+ * @apiParam {String[]} password User password
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "email" : "user@email.com",
+ *          "username" : "user",
+ *          "password" : "pass"
+ *      }
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "user": {
+ *              "_id": "558bf50db06537ec2225beb5",
+ *              "username": "user",
+ *              "email": "user@email.com"
+ *          }
+ *      }
+ *
+ * @apiError(400) UsernameRequired Username required!.
+ *
+ * @apiError(400) PasswordRequired Password required!.
+ *
+ * @apiError(400) EmailRequired Email required!.
+ *
+ */
 router.post('/', function (req, res, next) {
 
     async.auto({

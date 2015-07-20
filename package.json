@@ -2,6 +2,11 @@
     "name": "Gleaner-Users-Module",
     "version": "0.0.2",
     "private": true,
+    "apidoc": {
+        "description": "API documentation",
+        "title": "API doc",
+        "url" : "/api"
+    },
     "author": "e-UCM Research Group",
     "license": "Apache 2.0",
     "scripts": {
@@ -10,7 +15,8 @@
         "setup": "./setup.js",
         "fast-setup": "NODE_ENV=test ./setup.js",
         "test": "npm run lint && NODE_ENV=test ./node_modules/mocha/bin/_mocha --recursive -R spec",
-        "test-travis": "npm run lint && npm run fast-setup && NODE_ENV=test ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/*"
+        "test-travis": "npm run lint && npm run fast-setup && NODE_ENV=test ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/*",
+        "gen-apidoc": "apidoc -i ./routes -o ./public/apirest"
     },
     "dependencies": {
         "acl": "^0.4.x",
@@ -34,6 +40,7 @@
         "validator": "*"
     },
     "devDependencies": {
+        "apidoc": "*",
         "assert": "*",
         "confidence": "*",
         "coveralls": "*",
