@@ -1,35 +1,72 @@
+'use strict';
+
 var express = require('express'),
     router = express.Router(),
     async = require('async');
 
-/* POST signup. */
+/**
+ * @api {post} /signup Sign Up a new user.
+ * @apiName Signup
+ * @apiGroup Signup
+ *
+ * @apiParam {String} email User email.
+ * @apiParam {String[]} username User username.
+ * @apiParam {String[]} password User password
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "email" : "user@email.com",
+ *          "username" : "user",
+ *          "password" : "pass"
+ *      }
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "user": {
+ *              "_id": "558bf50db06537ec2225beb5",
+ *              "username": "user",
+ *              "email": "user@email.com"
+ *          }
+ *      }
+ *
+ * @apiError(400) UsernameRequired Username required!.
+ *
+ * @apiError(400) PasswordRequired Password required!.
+ *
+ * @apiError(400) EmailRequired Email required!.
+ *
+ */
 router.post('/', function (req, res, next) {
-    var userModel = req.app.db.model('user');
 
     async.auto({
         validate: function (done) {
+            var err;
             if (!req.body.username) {
-                var error = new Error('Username required!');
-                error.status = 400;
-                return done(error);
+                err = new Error('Username required!');
+                err.status = 400;
+                return done(err);
             }
 
             if (!req.body.password) {
-                var error = new Error('Password required!');
-                error.status = 400;
-                return done(error);
+                err = new Error('Password required!');
+                err.status = 400;
+                return done(err);
             }
 
             if (!req.body.email) {
-                var error = new Error('Email required!');
-                error.status = 400;
-                return done(error);
+                err = new Error('Email required!');
+                err.status = 400;
+                return done(err);
             }
 
             done();
         },
         user: ['validate', function (done) {
-            userModel.register(new userModel({
+            var UserModel = req.app.db.model('user');
+            UserModel.register(new UserModel({
                 username: req.body.username,
                 email: req.body.email,
                 timeCreated: new Date(),
@@ -78,7 +115,7 @@ router.post('/', function (req, res, next) {
         var user = results.user;
         res.json({
             user: {
-                id: user.id,
+                _id: user.id,
                 username: user.username,
                 email: user.email
             }

@@ -1,7 +1,29 @@
 doctype html
 html
-  head
-    title= title
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
-    block content
+    head
+        base(href='/')
+        meta(charset='utf-8')
+        meta(http-equiv='X-UA-Compatible', content='IE=edge')
+        meta(name='viewport', content='width=device-width, initial-scale=1')
+        meta(name='description', content='')
+        meta(name='author', content='')
+        // Bootstrap Core CSS
+        link(href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css', rel='stylesheet')
+        link(href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css', rel='stylesheet')
+        // Custom Fonts
+        link(href='//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css', rel='stylesheet')
+        title= title
+    body(ng-app='myApp')
+        // JQuery
+        script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js')
+        // Bootstrap JavaScript
+        script(src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js')
+        // Angular files
+        script(src='https://ajax.googleapis.com/ajax/libs/angularjs/1.4.2/angular.min.js')
+        script(src='../../libs/ngStorage.min.js')
+        script(src='../../controllers/controllers.js')
+        script(src='../../controllers/app.js')
+        block toolbar
+        block content
+
+

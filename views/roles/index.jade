@@ -1,0 +1,59 @@
+extends ../page
+
+block content
+    .container.theme-showcase
+        .row-fluid
+            .col-sm-12
+                .page-header
+                    h1 Roles
+                #roles(ng-controller='RolesController')
+                    .row-fluid
+                        table.table(ng-repeat='role in rolesList')
+                            thead
+                                tr
+                                    th
+                                        h2 {{role.name}}
+                                        |  Resources
+                                    th Permissions
+                                    th
+                                        button.btn.btn-danger.btn-ls.fa.fa-trash(ng-if='!isAdminRole(role.name)' ng-click='removeRole(role.name)' role=button)
+                            tbody
+                                tr.active(ng-repeat='(resource, permissions) in role.info')
+                                    td {{resource}}
+                                    td
+                                        table(ng-repeat='permission in permissions')
+                                            tbody
+                                                td {{permission}}
+                                                td.col-sm-6
+                                                    button.btn.btn-danger.btn-xs.fa.fa-times(ng-if='!isAdminRole(role.name)' ng-click='removePermission(role.name, resource, permission)' role=button)
+                                    td
+                                        input.form-control(ng-if='!isAdminRole(role.name)' type='text' ng-model='newPer[resource]')
+                                    td
+                                        .btn.btn-success(ng-if='!isAdminRole(role.name)' ng-click='addPermission(role.name, resource)' role=button) Add permission
+                                    td
+                                        .btn.btn-danger(ng-if='!isAdminRole(role.name)' ng-click='removeResource(role.name, resource)' role=button) Remove resource
+                                tr(ng-if='!isAdminRole(role.name)')
+                                    td
+                                        input.form-control(type='text' ng-model='newRec[role.name]')
+                                    td
+                                        input.form-control(type='text' ng-model='newRecPer[role.name]')
+                                    td
+                                        .btn.btn-primary(role=button ng-click='addResource(role.name)') Add resource
+                    #createRole.row-fluid
+                        table
+                            tr
+                                td.col-sm-8
+                                    label Role name
+                                    input.form-control(type='text' ng-model='newRole.name')
+                                td.col-sm-8
+                                    .btn.btn-primary(role=button ng-click='addRole()') Create a new Role
+                            tr
+                                td.col-sm-8
+                                    label Resource
+                                    input.form-control(type='text' ng-model='newRole.resource')
+                                td
+                                    label Permission
+                                    input.form-control(type='text' ng-model='newRole.permission')
+
+
+

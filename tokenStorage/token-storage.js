@@ -1,7 +1,6 @@
 'use strict';
 
 var TokenStorage = function (backend) {
-    var backend = backend;
 
     /**
      * A custom function that will ensure that the provided token inside the

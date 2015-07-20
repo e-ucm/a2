@@ -1,6 +1,6 @@
 'use strict';
 
-exports = module.exports = function (app) {
+exports = module.exports = function (app, callback) {
 
     // Generic debug logger for node_acl
     function logger() {
@@ -11,31 +11,32 @@ exports = module.exports = function (app) {
         };
     }
 
-    var acl = require('acl');
-    var acl = new acl(new acl.mongodbBackend(app.db.db, 'acl_'), app.get('env') == 'development' ? logger() : null);
+    var Acl = require('acl');
+    var acl = new Acl(new Acl.mongodbBackend(app.db.db, 'acl_'), app.get('env') === 'development' ? logger() : null);
 
-    var roles = [
-        {
-            name: 'admin',
-            resources: [
-                app.config.apiPath + '/users',
-                app.config.apiPath + '/users/:userId',
-                app.config.apiPath + '/users/:userId/roles',
-                app.config.apiPath + '/roles',
-                app.config.apiPath + '/roles/:roleName',
-                app.config.apiPath + '/roles/:roleName/resources',
-                app.config.apiPath + '/roles/:roleName/resources/:resourceName',
-                app.config.apiPath + '/roles/:roleName/resources/:resourceName/permissions',
-                app.config.apiPath + '/roles/:roleName/resources/:resourceName/permissions/:permissionName',
-                app.config.apiPath + '/roles/:roleName/users'
-            ],
-            permissions: '*'
-        }
-    ];
+    var admin = {
+        name: 'admin',
+        resources: [
+            app.config.apiPath + '/users',
+            app.config.apiPath + '/users/:userId',
+            app.config.apiPath + '/users/:userId/roles',
+            app.config.apiPath + '/users/:userId/roles/:roleName',
+            app.config.apiPath + '/roles',
+            app.config.apiPath + '/roles/:roleName',
+            app.config.apiPath + '/roles/:roleName/resources',
+            app.config.apiPath + '/roles/:roleName/resources/:resourceName',
+            app.config.apiPath + '/roles/:roleName/resources/:resourceName/permissions',
+            app.config.apiPath + '/roles/:roleName/resources/:resourceName/permissions/:permissionName',
+            app.config.apiPath + '/roles/:roleName/users'
+        ],
+        permissions: '*'
+    };
 
-    roles.forEach(function (role) {
-        acl.allow(role.name, role.resources, role.permissions);
-    });
+    if (!callback) {
+        acl.allow(admin.name, admin.resources, admin.permissions);
+    } else {
+        acl.allow(admin.name, admin.resources, admin.permissions, callback);
+    }
 
     /**
      * Return an array with all roles

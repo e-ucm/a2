@@ -4,9 +4,65 @@ var express = require('express'),
     authentication = require('../util/authentication'),
     router = express.Router(),
     userIdRoute = '/:userId',
-    userIdRolesRoute = '/:userId/roles';
+    userIdRolesRoute = '/:userId/roles',
+    unselectedFields = '-salt -hash -__v';
 
-/* GET users listing. */
+/**
+ * @api {get} /users Returns all users.
+ * @apiName GetUsers
+ * @apiGroup Users
+ *
+ * @apiParam {String} [fields] The show fields separated by spaces
+ * @apiParam {String} [sort=_id]
+ * @apiParam {Number} [limit=20]
+ * @apiParam {Number} [page=1]
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "fields": "field",
+ *          "sort": "name",
+ *          "limit": 20,
+ *          "page": 1
+ *      }
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "data": [
+ *          {
+ *              "_id": "559a447831b7acec185bf513",
+ *              "username": "admin",
+ *              "email": "admin@email.es",
+ *              "timeCreated": "2015-07-06T09:03:52.636Z",
+ *              "verification": {
+ *                  "complete": false
+ *              },
+ *              "name": {
+ *                  "last": "",
+ *                  "middle": "",
+ *                  "first": ""
+ *              },
+ *                 "roles" : ["admin"]
+ *          }],
+ *          "pages": {
+ *              "current": 1,
+ *              "prev": 0,
+ *              "hasPrev": false,
+ *              "next": 2,
+ *              "hasNext": false,
+ *              "total": 1
+ *         },
+ *          "items": {
+ *              "limit": 20,
+ *              "begin": 1,
+ *              "end": 1,
+ *              "total": 1
+ *          }
+ *      }
+ *
+ */
 router.get('/', authentication.authorized, function (req, res, next) {
 
     var query = {};
@@ -25,33 +81,180 @@ router.get('/', authentication.authorized, function (req, res, next) {
     });
 });
 
-/* GET a specific user. */
+/**
+ * @api {get} /users/:userId Gets the user information.
+ * @apiName GetUser
+ * @apiGroup Users
+ *
+ * @apiParam {String} userId User id.
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "_id": "559a447831b7acec185bf513",
+ *          "username": "admin",
+ *          "email": "admin@email.es",
+ *          "timeCreated": "2015-07-06T09:03:52.636Z",
+ *          "verification": {
+ *             "complete": false
+ *          },
+ *          "name": {
+ *              "last": "",
+ *              "middle": "",
+ *              "first": ""
+ *          }
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ *
+ */
 router.get(userIdRoute, authentication.authenticated, function (req, res, next) {
     checkAuthAndExec(req, res, next, sendUserInfo);
 });
 
-/* PUT: update a specific user's name. */
+/**
+ * @api {put} /users/:userId Changes the user name.
+ * @apiName PutUser
+ * @apiGroup Users
+ *
+ * @apiParam {String} userId User id.
+ * @apiParam {Object} name User name.
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "name": {
+ *              "first" : "Firstname",
+ *              "middle" : Middlename",
+  *              "last" : "Lastname
+ *          }
+ *      }
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "_id": "559a447831b7acec185bf513",
+ *          "username": "admin",
+ *          "email": "admin@email.es",
+ *          "timeCreated": "2015-07-06T09:03:52.636Z",
+ *          "verification": {
+ *             "complete": false
+ *          },
+ *          "name": {
+ *              "last": "Firstname",
+ *              "middle": "Middlename",
+ *              "first": "Lastname"
+ *          },
+ *              "roles" : ["admin"]
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ *
+ */
 router.put(userIdRoute, authentication.authenticated, function (req, res, next) {
     checkAuthAndExec(req, res, next, updateUserInfo);
 });
 
-/* DELETE a specific user. */
+/**
+ * @api {delete} /users/:userId Removes the user.
+ * @apiName DeleteUser
+ * @apiGroup Users
+ *
+ * @apiParam {String} userId User id.
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message": "Success."
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ *
+ */
 router.delete(userIdRoute, authentication.authenticated, function (req, res, next) {
     checkAuthAndExec(req, res, next, deleteUser);
 });
 
-/* GET a specific user's roles. */
-router.get(userIdRolesRoute, authentication.authorized, function (req, res, next) {
-    checkUserExistenceAndExec(req, res, next, sendUserRoles);
+/**
+ * @api {get} /users/:userId/roles Gets the user roles.
+ * @apiName GetUsersRoles
+ * @apiGroup Users
+ *
+ * @apiParam {String} userId User id.
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      [
+ *          "Role1",
+ *          "Role2"
+ *      ]
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ *
+ */
+router.get(userIdRolesRoute, authentication.authenticated, function (req, res, next) {
+    checkAuthAndExec(req, res, next, function (userId, req, res, next) {
+        checkUserExistenceAndExec(req, res, next,
+            sendUserRoles);
+    });
 });
 
-/* POST roles to an user. */
+/**
+ * @api {post} /users/:userId/roles Creates new roles.
+ * @apiName PostUserRole
+ * @apiGroup Users
+ *
+ * @apiParam {String} userId User id.
+ * @apiParam {String[]} roles The new roles for the user.
+ *
+ * @apiParamExample {json} Request-Example:
+ *      [
+ *          "Role1",
+ *          "Role2"
+ *      ]
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message": "Success."
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ *
+ */
 router.post(userIdRolesRoute, authentication.authorized, function (req, res, next) {
     checkUserExistenceAndExec(req, res, next, addUserRoles);
 });
 
-/* DELETE user's roles. */
-router.delete(userIdRolesRoute, authentication.authorized, function (req, res, next) {
+/**
+ * @api {delete} /users/:userId/roles Removes a role from the roles of an user.
+ * @apiName DeleteUserRole
+ * @apiGroup Users
+ *
+ * @apiParam {String} userId User id.
+ *
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message": "Success."
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ *
+ */
+router.delete(userIdRolesRoute + '/:roleName', authentication.authorized, function (req, res, next) {
     checkUserExistenceAndExec(req, res, next, removeUserRoles);
 });
 
@@ -71,9 +274,8 @@ function checkAuthAndExec(req, res, next, execFunc) {
 }
 
 //User info.
-
 function sendUserInfo(userId, req, res, next) {
-    req.app.db.model('user').findById(userId, function (err, user) {
+    req.app.db.model('user').findById(userId).select(unselectedFields).exec(function (err, user) {
         if (err) {
             return next(err);
         }
@@ -109,7 +311,7 @@ function updateUserInfo(userId, req, res, next) {
         new: true
     };
 
-    req.app.db.model('user').findOneAndUpdate(query, update, options, function (err, user) {
+    req.app.db.model('user').findOneAndUpdate(query, update, options).select(unselectedFields).exec(function (err, user) {
         if (err) {
             return next(err);
         }
@@ -151,14 +353,10 @@ function deleteUser(userId, req, res, next) {
                         return next(err);
                     }
 
-                    res.json({
-                        message: 'Success.'
-                    });
+                    res.sendDefaultSuccessMessage();
                 });
             } else {
-                res.json({
-                    message: 'Success.'
-                });
+                res.sendDefaultSuccessMessage();
             }
         });
     });
@@ -204,29 +402,25 @@ function addUserRoles(user, req, res, next) {
             return next(err);
         }
 
-        res.json({
-            message: 'Success.'
-        });
+        res.sendDefaultSuccessMessage();
     });
 }
 
 function removeUserRoles(user, req, res, next) {
-    var toDelete = req.body;
-    if ((Array.isArray(toDelete) && toDelete.indexOf('admin') != -1)) {
-        if (req.params.userId === user._id.toString()) {
+    var toDelete = req.params.roleName;
+    if (toDelete === 'admin') {
+        if (req.user._id === user._id.toString()) {
             var err = new Error("You can't remove the 'admin' role from yourself.");
             err.status = 403;
             return next(err);
         }
     }
-    res.app.acl.removeUserRoles(user.username, req.body, function (err) {
+    res.app.acl.removeUserRoles(user.username, toDelete, function (err) {
         if (err) {
             return next(err);
         }
 
-        res.json({
-            message: 'Success.'
-        });
+        res.sendDefaultSuccessMessage();
     });
 }
 

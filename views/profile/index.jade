@@ -1,0 +1,70 @@
+extends ../page
+
+block content
+    .container.theme-showcase
+        .row-fluid
+            .col-sm-12(ng-init='uId=#{JSON.stringify(userId)}')
+                .page-header
+                    h1 Profile
+                #profile(ng-controller='ProfileController')
+                    label Name
+                    table.table
+                        thead
+                            tr
+                                th First
+                                th Middle
+                                th Last
+                                th Action
+                        tbody
+                            tr
+                                td
+                                    input.form-control(ng-model='name.first')
+                                td
+                                    input.form-control(ng-model='name.middle')
+                                td
+                                    input.form-control(ng-model='name.last')
+                                td
+                                    button.btn(ng-click='changeName()') Change Name
+                            tr
+                                td {{user.name.first}}
+                                td {{user.name.middle}}
+                                td {{user.name.last}}
+                    label Email
+                    p {{user.email}}
+                    label Id
+                    p #{userId}
+                    .row-fluid
+                        label Roles
+                        .btn-group.pull-right(ng-if='isAdmin()')
+                            button.btn.btn-success.dropdown-toggle(data-toggle='dropdown')
+                                | Add role
+                                span.caret
+                            ul.dropdown-menu
+                                li(ng-repeat='appRole in appRoles')
+                                    a(ng-click='addRole(appRole)') {{appRole}}
+                                li.divider(role='separator')
+                                li
+                                    a(href='roles/#createRole') Add new role
+                    .row-fluid
+                        div(ng-repeat='role in user.roles')
+                            h3
+                                span.label.label-default {{role.name}}
+                                a.btn.btn-danger(ng-click='removeRole(role.name)')
+                                    i.fa.fa-trash-o.fa-lg
+                                    |  Delete
+                            table.table
+                                thead
+                                    tr
+                                        th Resources
+                                        th Permissions
+                                tbody
+                                    tr.active(ng-repeat='(resource, permissions) in role.info')
+                                        td {{resource}}
+                                        td
+                                            table(ng-repeat='permission in permissions')
+                                                tbody
+                                                    td {{permission}}
+                        .col-sm-2(ng-if='isAdmin()')
+                            a.btn.btn-primary.btn-lg(role=button href='/users') Users list
+                        .col-sm-2(ng-if='isAdmin()')
+                            a.btn.btn-primary.btn-lg(role=button href='/roles') Roles list

@@ -1,8 +1,39 @@
+'use strict';
+
 var express = require('express'),
     router = express.Router(),
     jwt = require('jsonwebtoken'),
     async = require('async');
 
+/**
+ * @api {post} /login LogIn the user.
+ * @apiName Login
+ * @apiGroup Login
+ *
+ * @apiParam {String} username User username.
+ * @apiParam {String} password User password.
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "username": "username",
+ *          "password": "pass"
+ *      }
+ *
+ * @apiSuccess(200) {String} Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "user": {
+ *              "_id": "559a447831b7acec185bf513",
+ *              "username": "root",
+ *              "email": "yourmail@ucm.es",
+ *              "roles" : ["admin"],
+ *              "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIU..."
+ *          }
+ *      }
+ *
+ * @apiError(401) UserNotFound User not found.
+ */
 router.post('/', function (req, res, next) {
     req.app.passport.authenticate('local', function (err, user, info) {
         if (err) {
@@ -34,7 +65,7 @@ router.post('/', function (req, res, next) {
                         var data = {
                             _id: user._id,
                             randNum: randNum
-                        }
+                        };
 
                         var expirationInSec = req.app.config.tokenExpirationInSeconds;
                         var token = jwt.sign(data, req.app.config.cryptoKey, {
@@ -49,7 +80,7 @@ router.post('/', function (req, res, next) {
                     function (token, done) {
                         res.json({
                             user: {
-                                id: user._id,
+                                _id: user._id,
                                 username: user.username,
                                 email: user.email,
                                 token: token
@@ -68,14 +99,37 @@ router.post('/', function (req, res, next) {
     })(req, res, next);
 });
 
-
+/**
+ * @api {post} /login/forgot Sends an email with a key to reset the password.
+ * @apiName Forgot
+ * @apiGroup Login
+ *
+ * @apiParam {String} email User email.
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "email": "your@email.com"
+ *      }
+ *
+ * @apiSuccess(200) {String} Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message": "Success."
+ *      }
+ *
+ * @apiError(400) EmailDoesNotExist No account with that email address exists.
+ *
+ * @apiError(403) EmailAlreadySent Other email to reset password was sent recently.
+ */
 router.post('/forgot', function (req, res, next) {
     async.waterfall([
         /*Generate token*/
         function (done) {
             require('crypto').randomBytes(20, function (err, buf) {
+                var token;
                 if (!err) {
-                    var token = buf.toString('hex');
+                    token = buf.toString('hex');
                 }
                 done(err, token);
             });
@@ -84,7 +138,7 @@ router.post('/forgot', function (req, res, next) {
         function (token, done) {
             req.app.db.model('user').findOne({email: req.body.email}, function (err, user) {
                 if (err) {
-                    return done(err)
+                    return done(err);
                 }
 
                 if (!user) {
@@ -113,13 +167,13 @@ router.post('/forgot', function (req, res, next) {
                 textPath: 'forgot/email-text',
                 htmlPath: 'forgot/email-html',
                 locals: {
-                    link: req.headers.host + req.app.config.apiPath + '/login/reset/' + token,
+                    link: req.headers.host + '/login/reset/' + token,
                     projectName: req.app.config.projectName
                 },
                 email: req.body.email,
                 projectName: req.app.config.projectName,
                 success: function () {
-                    res.send({message: 'mail sent'});
+                    res.sendDefaultSuccessMessage();
                     done();
                 },
                 error: function (err) {
@@ -129,11 +183,33 @@ router.post('/forgot', function (req, res, next) {
         }
     ], function (err) {
         if (err) {
-            next(err)
+            next(err);
         }
     });
 });
 
+/**
+ * @api {post} /login/reset/:token Sets a new password in the user with token.
+ * @apiName Reset
+ * @apiGroup Login
+ *
+ * @apiParam {String} password The new user password.
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "password": "newPassword"
+ *      }
+ *
+ * @apiSuccess(200) {String} Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message": "Success."
+ *      }
+ *
+ * @apiError(401) InvalidToken Password reset token is invalid or has expired.
+ *
+ */
 router.post('/reset/:token', function (req, res, next) {
     async.waterfall([
         /*Check user*/
@@ -153,7 +229,7 @@ router.post('/reset/:token', function (req, res, next) {
 
                 user.setPassword(req.body.password, function (err, user) {
                     if (err) {
-                        return done(err)
+                        return done(err);
                     }
 
                     user.resetPassword = undefined;
@@ -171,7 +247,7 @@ router.post('/reset/:token', function (req, res, next) {
         /*Mail notification*/
         function (user, done) {
 
-            res.send({message: 'succes'});
+            res.sendDefaultSuccessMessage();
             req.app.utility.sendmail(req, res, {
                 from: req.app.config.smtp.from.name + ' <' + req.app.config.smtp.from.address + '>',
                 to: user.email,
@@ -184,17 +260,17 @@ router.post('/reset/:token', function (req, res, next) {
                 email: user.email,
                 projectName: req.app.config.projectName,
                 success: function () {
-                    console.log('Email sent')
+                    console.log('Email sent');
                 },
                 error: function (err) {
                     console.log('Error : ' + err);
                 }
             });
-            done()
+            done();
         }
     ], function (err) {
         if (err) {
-            next(err)
+            next(err);
         }
     });
 });

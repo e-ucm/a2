@@ -1,22 +1,63 @@
+'use strict';
+
 var express = require('express'),
     router = express.Router(),
     Q = require('q');
 
-/* POST contact. */
+/**
+ * @api {post} /contact Send contact mail
+ * @apiName Contact
+ * @apiGroup Contact
+ *
+ * @apiParam {String} name User name.
+ * @apiParam {String} mail User mail.
+ * @apiParam {String} text Message.
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "name": "Your Name",
+ *          "email": "your@email.com",
+ *          "text": "Your message here"
+ *      }
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message": "Success."
+ *      }
+ *
+ * @apiError(400) RequiredName Required the name field.
+ *
+ * @apiError(400) RequiredEmail Required the email field.
+ *
+ * @apiError(400) InvalidEmail Invalid email.
+ *
+ * @apiError(400) RequiredText Required the text field.
+ */
 router.post('/', function (req, res, next) {
     Q.resolve().then(function () {
+        var err;
         if (!req.body.name) {
-            throw new Error('required name');
+            err = new Error('Required name');
+            err.status = 400;
+            throw err;
         }
 
         if (!req.body.email) {
-            throw new Error('required email');
+            err = new Error('Required email');
+            err.status = 400;
+            throw err;
         } else if (!require('validator').isEmail(req.body.email)) {
-            throw new Error('invalid email');
+            err = new Error('Invalid email');
+            err.status = 400;
+            throw err;
         }
 
         if (!req.body.text) {
-            throw Error('required text');
+            err = Error('Required text');
+            err.status = 400;
+            throw err;
         }
     }).then(function () {
         req.app.utility.sendmail(req, res, {
@@ -37,14 +78,14 @@ router.post('/', function (req, res, next) {
             text: req.body.text,
             projectName: req.app.config.projectName,
             success: function () {
-                res.send({message: 'Success'});
+                res.sendDefaultSuccessMessage();
             },
             error: function (err) {
-                throw err;
+                next(err);
             }
         });
     }).fail(function (err) {
-        res.send({error: err.toString()})
+        next(err);
     });
 
 });

@@ -1,5 +1,18 @@
-extends layout
+extends page
 
 block content
-  h1= title
-  p Welcome to #{title}
+    .container.theme-showcase
+        .row-fluid
+            .col-sm-12
+                .page-header
+                    h1 #{title}
+                    p Welcome to our #{title} REST API module.
+        .row-fluid
+            .col-lg-6
+                a.btn.btn-link(href='/signup') Take a look at the SignUp page
+            .col-lg-6
+                a.btn.btn-link(href='/login') LogIn with your own count
+            .col-lg-6
+                a.btn.btn-link(href='/api') Checkout the REST API
+            .col-lg-6
+                a.btn.btn-link(href='/contact') Contact with us by email
