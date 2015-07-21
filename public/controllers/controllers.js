@@ -380,11 +380,25 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
 
             $scope.changeName = function () {
-                $http.put('/api/users/' + $scope.uId, $scope.name, {
+                $http.put('/api/users/' + $scope.uId, $scope.newName, {
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
+                    $scope.newName = undefined;
+                    refresh();
+                }).error(function (data, status) {
+                    console.error('Error on post /api/users/:userId: ' + JSON.stringify(data) + ', status: ' + status);
+                });
+            };
+
+            $scope.changeEmail = function () {
+                $http.put('/api/users/' + $scope.uId, $scope.newEmail, {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function () {
+                    $scope.newEmail = undefined;
                     refresh();
                 }).error(function (data, status) {
                     console.error('Error on post /api/users/:userId: ' + JSON.stringify(data) + ', status: ' + status);
