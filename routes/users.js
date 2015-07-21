@@ -130,15 +130,17 @@ router.get(userIdRoute, authentication.authenticated, function (req, res, next) 
 });
 
 /**
- * @api {put} /users/:userId Changes the user name.
+ * @api {put} /users/:userId Changes the user name and/or email.
  * @apiName PutUser
  * @apiGroup Users
  *
  * @apiParam {String} userId User id.
- * @apiParam {Object} name User name.
+ * @apiParam {[String]} email User email.
+ * @apiParam {[Object]} name User name.
  *
  * @apiParamExample {json} Request-Example:
  *      {
+ *          "email" : "your@email.com",
  *          "name": {
  *              "first" : "Firstname",
  *              "middle" : "Middlename",
@@ -153,7 +155,7 @@ router.get(userIdRoute, authentication.authenticated, function (req, res, next) 
  *      {
  *          "_id": "559a447831b7acec185bf513",
  *          "username": "admin",
- *          "email": "admin@email.es",
+ *          "email": "your@email.com",
  *          "timeCreated": "2015-07-06T09:03:52.636Z",
  *          "verification": {
  *             "complete": false
@@ -532,14 +534,19 @@ function updateUserInfo(userId, req, res, cb) {
         $set: {}
     };
 
-    if (req.body.first) {
-        update.$set["name.first"] = req.body.first;
+    if (req.body.email) {
+        update.$set.email = req.body.email;
     }
-    if (req.body.middle) {
-        update.$set["name.middle"] = req.body.middle;
-    }
-    if (req.body.last) {
-        update.$set["name.last"] = req.body.last;
+    if (req.body.name) {
+        if (req.body.name.first) {
+            update.$set["name.first"] = req.body.name.first;
+        }
+        if (req.body.name.middle) {
+            update.$set["name.middle"] = req.body.name.middle;
+        }
+        if (req.body.name.last) {
+            update.$set["name.last"] = req.body.name.last;
+        }
     }
 
     var options = {
@@ -566,7 +573,6 @@ function updateUserInfo(userId, req, res, cb) {
         cb(null, user);
     });
 }
-
 
 function deleteUser(userId, req, res, cb) {
 
