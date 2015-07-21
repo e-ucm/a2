@@ -35,7 +35,7 @@ var express = require('express'),
  * @apiError(401) UserNotFound User not found.
  */
 router.post('/', function (req, res, next) {
-    req.app.passport.authenticate('local', function (err, user, info) {
+    req.app.passport.authenticate('local', {session: false}, function (err, user, info) {
         if (err) {
             return next(err);
         }

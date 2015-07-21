@@ -3,7 +3,7 @@
 var Async = require('async');
 
 module.exports = exports = function pagedFindPlugin(schema) {
-    schema.statics.pagedFind = function (filter, fields, sort, limit, page, callback) {
+    schema.statics.pagedFind = function (filter, fields, removeFields, sort, limit, page, callback) {
 
         var output = {
             data: undefined,
@@ -24,7 +24,6 @@ module.exports = exports = function pagedFindPlugin(schema) {
         };
 
 
-
         var fieldsAdapter = function (fields) {
 
             if (Object.prototype.toString.call(fields) === '[object String]') {
@@ -40,10 +39,6 @@ module.exports = exports = function pagedFindPlugin(schema) {
 
                 fields = document;
             }
-
-            fields.hash = false;
-            fields.salt = false;
-            fields.__v = false;
 
             return fields;
         };
@@ -72,6 +67,11 @@ module.exports = exports = function pagedFindPlugin(schema) {
         };
 
         fields = fieldsAdapter(fields);
+        if (removeFields) {
+            removeFields.forEach(function (field) {
+                fields[field] = false;
+            });
+        }
         sort = sortAdapter(sort);
 
         var self = this;

@@ -64,7 +64,7 @@ exports = module.exports = function (app, mongoose) {
     });
     userSchema.index({username: 1}, {unique: true});
     userSchema.index({email: 1}, {unique: true});
-    userSchema.set('autoIndex', (app.get('env') === 'development'));
+    userSchema.set('autoIndex', true);
     app.db.model('user', userSchema);
 
 };
