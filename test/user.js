@@ -12,6 +12,7 @@ var app = {
 var user;
 
 describe('User  model validations', function () {
+    this.timeout(4000);
     // within before() you can run all the operations that are needed to setup your tests. In this case
     // I want to create a connection with the database, and when I'm done, I call done().
     before(function (done) {
@@ -75,6 +76,18 @@ describe('User  model validations', function () {
 
 
     // Email checking
+
+    it('should alert about duplicated user email', function (done) {
+        user.register(new user({
+            username: 'username234',
+            email: 'usermail@mail.com'
+        }), 'user_password2', function (err, result) {
+            should.not.exist(result);
+            should(err).be.an.instanceOf(Error);
+            done();
+        });
+
+    });
 
     it('should alert about missing email', function (done) {
         user.register(new user({
