@@ -285,10 +285,10 @@ router.post(userIdRolesRoute, authentication.authorized, function (req, res, nex
         checkUser: function (done) {
             checkUserExistenceAndExec(req, res, done);
         },
-        checkRoles : ['checkUser', function(done){
-            req.body.forEach(function(role){
-                req.app.acl.existsRole(role, function(err){
-                    if(err){
+        checkRoles: ['checkUser', function (done) {
+            req.body.forEach(function (role) {
+                req.app.acl.existsRole(role, function (err) {
+                    if (err) {
                         return done(err);
                     }
                 });
@@ -375,7 +375,121 @@ router.get(userIdRoute + '/:resourceName/:permissionName', authentication.author
     });
 });
 
+/**
+ * @api {post} /users/:userId/verification Send email to verify the user authenticity.
+ * @apiName VerificationMail
+ * @apiGroup Users
+ *
+ * @apiParam {String} userId User id.
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message": "Success."
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ *
+ */
+router.post(userIdRoute + '/verification', authentication.authorized, function (req, res, next) {
+    async.auto({
+        checkUser: function (done) {
+            checkUserExistenceAndExec(req, res, done);
+        },
+        getInfo: ['checkUser', function (done, results) {
+            getUserInfo(results.checkUser, req, res, done);
+        }],
+        generateToken: function (done) {
+            require('crypto').randomBytes(20, function (err, buf) {
+                var token;
+                if (!err) {
+                    token = buf.toString('hex');
+                }
+                done(err, token);
+            });
+        },
+        saveToken: ['generateToken', 'getInfo', function (done, results) {
 
+            var user = results.getInfo;
+
+            user.verification.token = results.generateToken.toString();
+            user.save(done);
+
+        }],
+        sendMail: ['saveToken', function (done, results) {
+            req.app.utility.sendmail(req, res, {
+                from: req.app.config.smtp.from.name + ' <' + req.app.config.smtp.from.address + '>',
+                to: results.getInfo.email,
+                subject: req.app.config.projectName + ' verification mail',
+                textPath: 'verification/email-text',
+                htmlPath: 'verification/email-html',
+                locals: {
+                    link: req.headers.host + '/users/:userId/verification/' + results.generateToken,
+                    projectName: req.app.config.projectName
+                },
+                email: results.getInfo.email,
+                projectName: req.app.config.projectName,
+                success: function () {
+                    res.sendDefaultSuccessMessage();
+                    done();
+                },
+                error: function (err) {
+                    done(err);
+                }
+            });
+        }]
+    }, function (err) {
+        if (err) {
+            next(err);
+        }
+    });
+});
+
+/**
+ * @api {post} /users/:userId/verification/:token Verify the user email.
+ * @apiName Verification
+ * @apiGroup Users
+ *
+ * @apiParam {String} userId User id.
+ * @apiParam {String} token Verification token.
+ *
+ * @apiSuccess(200) {String} Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message": "Success."
+ *      }
+ *
+ * @apiError(401) InvalidToken Password reset token is invalid or has expired.
+ *
+ */
+router.post(userIdRoute + '/verification/:token', function (req, res, next) {
+
+    req.app.db.model('user').findOne({
+        "verification.token": req.params.token.toString(),
+    }, function (err, user) {
+        if (err) {
+            return next(err);
+        }
+        if (!user) {
+            err = new Error('Verification token is invalid.');
+            err.status = 401;
+            return next(err);
+        }
+
+        user.verification.token = undefined;
+        user.verification.complete = true;
+        user.save(function (err) {
+            if (err) {
+                return next(err);
+            }
+            res.sendDefaultSuccessMessage();
+        });
+    });
+});
 
 function checkAuthAndExec(req, res, cb) {
     var userId = req.params.userId || '';

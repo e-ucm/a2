@@ -19,6 +19,7 @@ exports = module.exports = function (app, callback) {
         resources: [
             app.config.apiPath + '/users',
             app.config.apiPath + '/users/:userId',
+            app.config.apiPath + '/users/:userId/verification',
             app.config.apiPath + '/users/:userId/roles',
             app.config.apiPath + '/users/:userId/roles/:roleName',
             app.config.apiPath + '/users/:userId/:resourceName/:permissionName',
@@ -56,7 +57,7 @@ exports = module.exports = function (app, callback) {
     /**
      * Return a Error if the role doesn't exist
      */
-    acl.existsRole = function(roleName, cb) {
+    acl.existsRole = function (roleName, cb) {
         acl.listRoles(function (err, roles) {
             if (err) {
                 return cb(err);
