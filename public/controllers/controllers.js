@@ -106,6 +106,78 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
         }])
 
+    .controller('ApplicationsController', ['$scope', '$http', '$window', '$localStorage',
+        function ApplicationsController($scope, $http, $window, $localStorage) {
+            $scope.$storage = $localStorage;
+
+            var refresh = function () {
+
+                $http.get('/api/applications', {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function (data) {
+                    $scope.response = data;
+                }).error(function (data, status) {
+                    console.error('Error on get /api/applications: ' + JSON.stringify(data) + ', status: ' + status);
+                });
+            };
+
+            refresh();
+
+            $scope.changeName = function (appId, appName) {
+
+                $http.put('/api/applications/' + appId, {
+                    name: appName
+                }, {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function () {
+                    refresh();
+                }).error(function (data, status) {
+                    console.error('Error on put /api/applications/:appId: ' + JSON.stringify(data) + ', status: ' + status);
+                });
+            };
+
+            $scope.addApplication = function () {
+
+                $http.post('/api/applications/', {
+                    prefix: $scope.prefix,
+                    host: $scope.host
+                }, {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function (data) {
+                    var name = $scope.name;
+                    if (name) {
+                        console.log(data);
+                        $scope.changeName(data._id, name);
+                    } else {
+                        refresh();
+                    }
+                    $scope.name = '';
+                    $scope.prefix = '';
+                    $scope.host = '';
+                }).error(function (data, status) {
+                    console.error('Error on post /api/applications/:appId: ' + JSON.stringify(data) + ', status: ' + status);
+                });
+            };
+
+            $scope.deleteApplication = function (appId) {
+                $http.delete('/api/applications/' + appId, {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function () {
+                    refresh();
+                }).error(function (data, status) {
+                    console.error('Error on get /api/applications/:appId: ' + JSON.stringify(data) + ', status: ' + status);
+                });
+            };
+        }])
+
     .controller('RolesController', ['$scope', '$http', '$location', '$localStorage',
         function RolesController($scope, $http, $location, $localStorage) {
             $scope.$storage = $localStorage;

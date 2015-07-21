@@ -47,6 +47,11 @@ router.get('/users', function (req, res) {
     res.render('users');
 });
 
+/* GET applications list view. */
+router.get('/applications', function (req, res) {
+    res.render('applications');
+});
+
 /* GET roles list view. */
 router.get('/roles', function (req, res) {
     res.render('roles');
