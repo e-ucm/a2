@@ -6,21 +6,23 @@ var express = require('express'),
     router = express.Router(),
     userIdRoute = '/:userId',
     userIdRolesRoute = '/:userId/roles',
-    unselectedFields = '-salt -hash -__v';
+    unselectedFields = '-salt -hash -__v',
+    removeFields = ['salt', 'hash', '__v'];
 
 /**
  * @api {get} /users Returns all users.
  * @apiName GetUsers
  * @apiGroup Users
  *
- * @apiParam {String} [fields] The show fields separated by spaces
- * @apiParam {String} [sort=_id]
+ * @apiParam {String} [fields] The fields to be populated in the resulting objects.
+ *                              An empty string will return the complete document.
+ * @apiParam {String} [sort=_id] Place - before the field for a descending sort.
  * @apiParam {Number} [limit=20]
  * @apiParam {Number} [page=1]
  *
  * @apiParamExample {json} Request-Example:
  *      {
- *          "fields": "field",
+ *          "fields": "",
  *          "sort": "name",
  *          "limit": 20,
  *          "page": 1
@@ -45,7 +47,7 @@ var express = require('express'),
  *                  "middle": "",
  *                  "first": ""
  *              },
- *                 "roles" : ["admin"]
+ *              "roles" : ["admin"]
  *          }],
  *          "pages": {
  *              "current": 1,
@@ -72,7 +74,7 @@ router.get('/', authentication.authorized, function (req, res, next) {
     var limit = req.body.limit || 20;
     var page = req.body.page || 1;
 
-    req.app.db.model('user').pagedFind(query, fields, sort, limit, page, function (err, results) {
+    req.app.db.model('user').pagedFind(query, fields, removeFields, sort, limit, page, function (err, results) {
 
         if (err) {
             return next(err);
@@ -541,11 +543,19 @@ function updateUserInfo(userId, req, res, cb) {
     }
 
     var options = {
-        new: true
+        new: true,
+        /*
+         Since Mongoose 4.00.0 we can run validators when performing updates
+         (e.g. isEmail validator for the email attribute of UserSchema -> /schema/user)
+         when performing updates with the following option.
+         More info. can be found here http://mongoosejs.com/docs/validation.html
+         */
+        runValidators: true
     };
 
     req.app.db.model('user').findOneAndUpdate(query, update, options).select(unselectedFields).exec(function (err, user) {
         if (err) {
+            err.status = 403;
             return cb(err);
         }
         if (!user) {

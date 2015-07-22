@@ -17,6 +17,8 @@ exports = module.exports = function (app, callback) {
     var admin = {
         name: 'admin',
         resources: [
+            app.config.apiPath + '/applications',
+            app.config.apiPath + '/applications/:applicationId',
             app.config.apiPath + '/users',
             app.config.apiPath + '/users/:userId',
             app.config.apiPath + '/users/:userId/verification',

@@ -1,0 +1,37 @@
+extends ../page
+
+block content
+    .container.theme-showcase
+        .row-fluid
+            .col-sm-12
+                .page-header
+                    h1 Applications list
+                #users(ng-controller='ApplicationsController')
+                    table.table
+                        thead
+                            tr
+                                th Name
+                                th Prefix
+                                th Host
+                                th Actions
+                        tbody
+                            tr.active
+                                td
+                                    input(value='name' ng-model='name')
+                                td
+                                    input(value='prefix' ng-model='prefix')
+                                td
+                                    input(value='host' ng-model='host')
+                                td
+                                    button.btn.btn-primary(ng-click='addApplication()') Add new
+                            tr.active(ng-repeat='application in response.data')
+                                td
+                                    input(value='{{application.name}}' ng-model='application.name')
+                                td
+                                    input(value='{{application.prefix}}' ng-model='application.prefix')
+                                td
+                                    input(value='{{application.host}}' ng-model='application.host')
+                                td
+                                    button.btn(ng-click='applyChanges(application)') Apply changes
+                                    a.btn.btn-danger(ng-click='deleteApplication(application._id)')
+                                        i.fa.fa-trash-o.fa-lg  Delete

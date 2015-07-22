@@ -16,6 +16,8 @@ nav.navbar.navbar-inverse.navbar-top
                 li(ng-if='isAdmin()')
                     a.btn(ng-click="href('/users')") Users
                 li(ng-if='isAdmin()')
+                    a.btn(ng-click="href('/applications')") Applications
+                li(ng-if='isAdmin()')
                     a.btn(ng-click="href('/roles')") Roles
                 li(ng-if='!isUser()')
                     a.btn(ng-click="href('/signup')") SignUp
