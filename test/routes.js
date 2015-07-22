@@ -579,6 +579,10 @@ describe('REST API', function () {
         email: "admin" + email,
         name: name
     };
+    var invalidInfo = {
+        email: "invalidEmail",
+        name: name
+    };
 
     describe(GET + usersRoute + '/:userId', function () {
 
@@ -628,6 +632,10 @@ describe('REST API', function () {
             authPut(usersRoute + '/' + admin._id, user.token, adminInfo, FORBIDDEN, done);
         });
 
+        it("should not PUT its own user name and email with an invalid email", function (done) {
+            authPut(usersRoute + '/' + user._id, user.token, invalidInfo, FORBIDDEN, done);
+        });
+
         var validateNameInformation = function (infoData, done) {
             return function (err, res) {
                 should.not.exist(err);
@@ -654,6 +662,10 @@ describe('REST API', function () {
 
         it("should PUT a specific user name and email that is not his own", function (done) {
             authPut(usersRoute + '/' + user._id, admin.token, userInfo, SUCCESS, validateNameInformation(userInfo, done));
+        });
+
+        it("should not PUT a specific user name and email, email duplicated", function (done) {
+            authPut(usersRoute + '/' + user._id, admin.token, adminInfo, FORBIDDEN, done);
         });
     });
 
