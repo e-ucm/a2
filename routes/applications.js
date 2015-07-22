@@ -81,9 +81,7 @@ router.get('/', authentication.authorized, function (req, res, next) {
  * @apiGroup Applications
  *
  * @apiParam {String} prefix Application prefix.
- *                          E.g. gleaner
  * @apiParam {String} host Application host.
- *                          E.g. localhost:3300
  *
  * @apiParamExample {json} Request-Example:
  *      {
@@ -240,10 +238,12 @@ router.put(applicationIdRoute, authentication.authorized, function (req, res, ne
 
     var options = {
         new: true,
-        // Since Mongoose 4.0.0 we can run validators
-        // (e.g. isURL validator for the host attribute of ApplicationSchema --> /schema/application)
-        // when performing updates with the following option.
-        // More info. can be found here http://mongoosejs.com/docs/validation.html
+        /*
+         Since Mongoose 4.0.0 we can run validators
+         (e.g. isURL validator for the host attribute of ApplicationSchema --> /schema/application)
+         when performing updates with the following option.
+         More info. can be found here http://mongoosejs.com/docs/validation.html
+         */
         runValidators: true
     };
 

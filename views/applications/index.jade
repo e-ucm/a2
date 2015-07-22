@@ -27,9 +27,11 @@ block content
                             tr.active(ng-repeat='application in response.data')
                                 td
                                     input(value='{{application.name}}' ng-model='application.name')
-                                td {{application.prefix}}
-                                td {{application.host}}
                                 td
-                                    button.btn(ng-click='changeName(application._id, application.name)') Change name
+                                    input(value='{{application.prefix}}' ng-model='application.prefix')
+                                td
+                                    input(value='{{application.host}}' ng-model='application.host')
+                                td
+                                    button.btn(ng-click='applyChanges(application)') Apply changes
                                     a.btn.btn-danger(ng-click='deleteApplication(application._id)')
                                         i.fa.fa-trash-o.fa-lg  Delete

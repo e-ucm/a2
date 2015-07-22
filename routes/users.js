@@ -544,10 +544,12 @@ function updateUserInfo(userId, req, res, cb) {
 
     var options = {
         new: true,
-        // Since Mongoose 4.00.0 we can run validators when performing updates
-        // (e.g. isEmail validator for the email attribute of UserSchema -> /schema/user)
-        // when performing updates with the following option.
-        // More info. can be found here http://mongoosejs.com/docs/validation.html
+        /*
+         Since Mongoose 4.00.0 we can run validators when performing updates
+         (e.g. isEmail validator for the email attribute of UserSchema -> /schema/user)
+         when performing updates with the following option.
+         More info. can be found here http://mongoosejs.com/docs/validation.html
+         */
         runValidators: true
     };
 

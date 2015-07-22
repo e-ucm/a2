@@ -6,7 +6,7 @@ var app = require('../app.js');
 
 var port = 3333;
 
-var SUCCESS_STATUS = 200,
+var SUCCESS = 200,
     BAD_REQUEST = 400,
     UNAUTHORIZED = 401,
     FORBIDDEN = 403,
@@ -129,7 +129,7 @@ describe('REST API', function () {
                 "username": admin.username,
                 "password": admin.password,
                 "email": admin.email
-            }, SUCCESS_STATUS, function (err, res) {
+            }, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 res = JSON.parse(res.text);
                 should(res).be.an.Object();
@@ -145,7 +145,7 @@ describe('REST API', function () {
                         "username": user.username,
                         "password": user.password,
                         "email": user.email
-                    }, SUCCESS_STATUS, done);
+                    }, SUCCESS, done);
                 });
             });
         });
@@ -173,7 +173,7 @@ describe('REST API', function () {
                 "password": admin.password
             };
 
-            post(loginRoute, adminLoginData, SUCCESS_STATUS, function (err, res) {
+            post(loginRoute, adminLoginData, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 should(res).be.an.Object();
                 res = JSON.parse(res.text);
@@ -187,7 +187,7 @@ describe('REST API', function () {
                 post(loginRoute, {
                     "username": user.username,
                     "password": user.password
-                }, SUCCESS_STATUS, function (err, res) {
+                }, SUCCESS, function (err, res) {
                     res = JSON.parse(res.text);
 
                     user.token = res.user.token;
@@ -261,7 +261,7 @@ describe('REST API', function () {
                 prefix: gleanerPrefix,
                 host: gleanerHost
             };
-            authPost(applicationsRoute, admin.token, appData, SUCCESS_STATUS, function (err, res) {
+            authPost(applicationsRoute, admin.token, appData, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 res = JSON.parse(res.text);
                 should(res).be.an.Object();
@@ -290,7 +290,7 @@ describe('REST API', function () {
         });
 
         it('should correctly GET applications', function (done) {
-            get(applicationsRoute, admin.token, SUCCESS_STATUS, function (err, res) {
+            get(applicationsRoute, admin.token, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 should(res).be.an.Object();
 
@@ -341,7 +341,7 @@ describe('REST API', function () {
         };
 
         it('should GET a specific application with an authorized token', function (done) {
-            get(applicationsRoute + '/' + application._id, admin.token, SUCCESS_STATUS,
+            get(applicationsRoute + '/' + application._id, admin.token, SUCCESS,
                 validateApplicationInformation(application._id, done));
         });
     });
@@ -386,7 +386,7 @@ describe('REST API', function () {
         };
 
         it("should PUT application's name", function (done) {
-            authPut(applicationsRoute + '/' + application._id, admin.token, applicationName, SUCCESS_STATUS,
+            authPut(applicationsRoute + '/' + application._id, admin.token, applicationName, SUCCESS,
                 validateNameInformation(applicationName.name, null, null, done));
         });
 
@@ -394,7 +394,7 @@ describe('REST API', function () {
             authPost(applicationsRoute, admin.token, {
                 "prefix": "prefix",
                 "host": "http://myurl.com"
-            }, SUCCESS_STATUS, function (err, res) {
+            }, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 var result = JSON.parse(res.text);
 
@@ -402,7 +402,7 @@ describe('REST API', function () {
                 authPut(applicationsRoute + '/' + result._id, admin.token, {
                     prefix: 'new_prefix',
                     host: 'http://myurl22.com'
-                }, SUCCESS_STATUS, validateNameInformation(null, 'new_prefix', null, done));
+                }, SUCCESS, validateNameInformation(null, 'new_prefix', null, done));
             });
         });
 
@@ -447,14 +447,14 @@ describe('REST API', function () {
             authPost(applicationsRoute, admin.token, {
                 "prefix": "test-prefix",
                 "host": "http://testhost.com"
-            }, SUCCESS_STATUS, function (err, res) {
+            }, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 var result = JSON.parse(res.text);
 
                 del(applicationsRoute + '/' + result._id, 'invalid_token', UNAUTHORIZED, function (err) {
                     should.not.exist(err);
 
-                    del(applicationsRoute + '/' + result._id, admin.token, SUCCESS_STATUS,
+                    del(applicationsRoute + '/' + result._id, admin.token, SUCCESS,
                         validateDeletedApplication(result.prefix, done));
                 });
             });
@@ -473,7 +473,7 @@ describe('REST API', function () {
     var expressApp = express();
     routes.forEach(function (route) {
         expressApp.use(route, function (req, res) {
-            res.sendStatus(SUCCESS_STATUS);
+            res.sendStatus(SUCCESS);
         });
     });
     wrongRoutes.forEach(function (wrongRoute) {
@@ -496,7 +496,7 @@ describe('REST API', function () {
             routes.forEach(function (route) {
                 it('should ' + upperCaseMethod + ' (proxy) the route ' + route, function (done) {
                     request[method](gleanerProxyBaseUrl + route).set('Authorization', 'Bearer ' + user.token)
-                        .expect(SUCCESS_STATUS).end(done);
+                        .expect(SUCCESS).end(done);
                 });
             });
 
@@ -537,7 +537,7 @@ describe('REST API', function () {
         });
 
         it('should correctly GET users', function (done) {
-            get(usersRoute, admin.token, SUCCESS_STATUS, function (err, res) {
+            get(usersRoute, admin.token, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 should(res).be.an.Object();
 
@@ -597,15 +597,15 @@ describe('REST API', function () {
         };
 
         it('should GET its own user information', function (done) {
-            get(usersRoute + '/' + user._id, user.token, SUCCESS_STATUS, validateUserInformation(user._id, user.username, user.email, done));
+            get(usersRoute + '/' + user._id, user.token, SUCCESS, validateUserInformation(user._id, user.username, user.email, done));
         });
 
         it('should GET its own admin information', function (done) {
-            get(usersRoute + '/' + admin._id, admin.token, SUCCESS_STATUS, validateUserInformation(admin._id, admin.username, admin.email, done));
+            get(usersRoute + '/' + admin._id, admin.token, SUCCESS, validateUserInformation(admin._id, admin.username, admin.email, done));
         });
 
         it('should GET a specific user that its not his own information', function (done) {
-            get(usersRoute + '/' + user._id, admin.token, SUCCESS_STATUS, validateUserInformation(user._id, user.username, user.email, done));
+            get(usersRoute + '/' + user._id, admin.token, SUCCESS, validateUserInformation(user._id, user.username, user.email, done));
         });
     });
 
@@ -636,18 +636,18 @@ describe('REST API', function () {
         };
 
         it("should PUT its own user name", function (done) {
-            authPut(usersRoute + '/' + user._id, user.token, name, SUCCESS_STATUS, validateNameInformation(name, done));
+            authPut(usersRoute + '/' + user._id, user.token, name, SUCCESS, validateNameInformation(name, done));
         });
 
         it("should PUT its own admin name", function (done) {
-            authPut(usersRoute + '/' + admin._id, admin.token, name, SUCCESS_STATUS, validateNameInformation(name, done));
+            authPut(usersRoute + '/' + admin._id, admin.token, name, SUCCESS, validateNameInformation(name, done));
         });
 
         it("should PUT a specific user name that is not his own", function (done) {
             name.first += name.first;
             name.middle += name.middle;
             name.last += name.last;
-            authPut(usersRoute + '/' + user._id, admin.token, name, SUCCESS_STATUS, validateNameInformation(name, done));
+            authPut(usersRoute + '/' + user._id, admin.token, name, SUCCESS, validateNameInformation(name, done));
         });
     });
 
@@ -674,14 +674,14 @@ describe('REST API', function () {
                 "username": "testUser1",
                 "password": "testUser1Pw",
                 "email": "testUser1Pw@comp.ink"
-            }, SUCCESS_STATUS, function (err, res) {
+            }, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 var result = JSON.parse(res.text);
 
                 del(usersRoute + '/' + result.user._id, 'invalid_token', UNAUTHORIZED, function (err) {
                     should.not.exist(err);
 
-                    del(usersRoute + '/' + result.user._id, admin.token, SUCCESS_STATUS,
+                    del(usersRoute + '/' + result.user._id, admin.token, SUCCESS,
                         validateDeletedUser(result.user.username, done));
                 });
             });
@@ -692,17 +692,17 @@ describe('REST API', function () {
                 "username": "testUser1",
                 "password": "testUser1Pw",
                 "email": "testUser1Pw@comp.ink"
-            }, SUCCESS_STATUS, function (err, res) {
+            }, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 var result = JSON.parse(res.text);
 
                 post(loginRoute, {
                     "username": "testUser1",
                     "password": "testUser1Pw"
-                }, SUCCESS_STATUS, function (err, res) {
+                }, SUCCESS, function (err, res) {
                     res = JSON.parse(res.text);
                     var testUserToken = res.user.token;
-                    del(usersRoute + '/' + result.user._id, testUserToken, SUCCESS_STATUS,
+                    del(usersRoute + '/' + result.user._id, testUserToken, SUCCESS,
                         validateDeletedUser(result.user.username, done));
                 });
             });
@@ -739,11 +739,11 @@ describe('REST API', function () {
         };
 
         it("should GET his own roles being an admin", function (done) {
-            get(usersRoute + '/' + admin._id + '/roles', admin.token, SUCCESS_STATUS, validateRolesInformation(done));
+            get(usersRoute + '/' + admin._id + '/roles', admin.token, SUCCESS, validateRolesInformation(done));
         });
 
         it("should GET a specific user's roles being authorized (admin)", function (done) {
-            get(usersRoute + '/' + user._id + '/roles', admin.token, SUCCESS_STATUS, validateRolesInformation(done));
+            get(usersRoute + '/' + user._id + '/roles', admin.token, SUCCESS, validateRolesInformation(done));
         });
     });
 
@@ -762,7 +762,7 @@ describe('REST API', function () {
 
         it('should correctly GET roles', function (done) {
 
-            get(rolesRoute, admin.token, SUCCESS_STATUS, function (err, res) {
+            get(rolesRoute, admin.token, SUCCESS, function (err, res) {
                 res = JSON.parse(res.text);
                 should(res).be.an.Array();
                 done();
@@ -824,7 +824,7 @@ describe('REST API', function () {
 
         it('should correctly POST role1', function (done) {
 
-            authPost(rolesRoute, admin.token, role1, SUCCESS_STATUS, function (err, res) {
+            authPost(rolesRoute, admin.token, role1, SUCCESS, function (err, res) {
                 res = JSON.parse(res.text);
                 should(res).be.an.Array();
                 should(res).containDeep([role1.roles]);
@@ -834,7 +834,7 @@ describe('REST API', function () {
 
         it('should correctly POST role2', function (done) {
 
-            authPost(rolesRoute, admin.token, role2, SUCCESS_STATUS, function (err, res) {
+            authPost(rolesRoute, admin.token, role2, SUCCESS, function (err, res) {
                 res = JSON.parse(res.text);
                 should(res).be.an.Array();
                 should(res).containDeep([role2.roles]);
@@ -867,7 +867,7 @@ describe('REST API', function () {
 
         it('should correctly GET resources and permissions of role', function (done) {
 
-            get(validRoleRouteId, admin.token, SUCCESS_STATUS, function (err, res) {
+            get(validRoleRouteId, admin.token, SUCCESS, function (err, res) {
                 res = JSON.parse(res.text);
                 should(res).be.an.Object();
                 role2.resources.forEach(function (resource) {
@@ -913,7 +913,7 @@ describe('REST API', function () {
 
         it('should correctly POST the new resource in the role', function (done) {
 
-            authPost(validResourcesRoleId, admin.token, resource1, SUCCESS_STATUS, function (err, res) {
+            authPost(validResourcesRoleId, admin.token, resource1, SUCCESS, function (err, res) {
                 res = JSON.parse(res.text);
                 should(res).be.an.Object();
                 resource1.resources.forEach(function (resource) {
@@ -945,7 +945,7 @@ describe('REST API', function () {
 
         it('should correctly GET the permissions of resources in role', function (done) {
 
-            get(validResourcesId, admin.token, SUCCESS_STATUS, function (err, res) {
+            get(validResourcesId, admin.token, SUCCESS, function (err, res) {
                 res = JSON.parse(res.text);
                 should(res).be.an.Array();
                 resource1.permissions.forEach(function (permission) {
@@ -990,7 +990,7 @@ describe('REST API', function () {
                 var result = JSON.parse(res.text);
                 should(result.message).be.a.String();
 
-                get(usersRoute + '/' + admin._id + '/roles', admin.token, SUCCESS_STATUS, function (err, res) {
+                get(usersRoute + '/' + admin._id + '/roles', admin.token, SUCCESS, function (err, res) {
 
                     var roles = JSON.parse(res.text);
 
@@ -1002,12 +1002,12 @@ describe('REST API', function () {
         };
 
         it("should POST roles to himself being authorized", function (done) {
-            authPost(usersRoute + '/' + admin._id + '/roles', admin.token, newValidRoles, SUCCESS_STATUS,
+            authPost(usersRoute + '/' + admin._id + '/roles', admin.token, newValidRoles, SUCCESS,
                 validatePOSTroles(newValidRoles, done));
         });
 
         it("should POST roles to a specific user being authorized (admin)", function (done) {
-            authPost(usersRoute + '/' + user._id + '/roles', admin.token, newValidRoles, SUCCESS_STATUS,
+            authPost(usersRoute + '/' + user._id + '/roles', admin.token, newValidRoles, SUCCESS,
                 validatePOSTroles(newValidRoles, done));
         });
     });
@@ -1024,7 +1024,7 @@ describe('REST API', function () {
         });
 
         it("should GET response (true) from himself being authorized (admin)", function (done) {
-            get(usersRoute + '/' + admin._id + '/' + theResource + '/' + thePermission, admin.token, SUCCESS_STATUS,
+            get(usersRoute + '/' + admin._id + '/' + theResource + '/' + thePermission, admin.token, SUCCESS,
                 function (err, res) {
                     res = JSON.parse(res.text);
                     should(res).be.an.Boolean();
@@ -1034,7 +1034,7 @@ describe('REST API', function () {
         });
 
         it("should GET response (false) from himself being authorized (admin)", function (done) {
-            get(usersRoute + '/' + admin._id + '/' + theResource + '/' + noPermission, admin.token, SUCCESS_STATUS,
+            get(usersRoute + '/' + admin._id + '/' + theResource + '/' + noPermission, admin.token, SUCCESS,
                 function (err, res) {
                     res = JSON.parse(res.text);
                     should(res).be.an.Boolean();
@@ -1067,7 +1067,7 @@ describe('REST API', function () {
                 var result = JSON.parse(res.text);
                 should(result.message).be.a.String();
 
-                get(usersRoute + '/' + id + '/roles', admin.token, SUCCESS_STATUS, function (err, res) {
+                get(usersRoute + '/' + id + '/roles', admin.token, SUCCESS, function (err, res) {
 
                     var roles = JSON.parse(res.text);
 
@@ -1081,12 +1081,12 @@ describe('REST API', function () {
         var deletedRoleArray = [deletedRole];
 
         it("should DELETE roles from a specific user being authorized", function (done) {
-            del(usersRoute + '/' + user._id + '/roles/' + deletedRole, admin.token, SUCCESS_STATUS,
+            del(usersRoute + '/' + user._id + '/roles/' + deletedRole, admin.token, SUCCESS,
                 validateDELroles(deletedRoleArray, user._id, done));
         });
 
         it("should DELETE roles from himself being authorized (admin)", function (done) {
-            del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, admin.token, SUCCESS_STATUS,
+            del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, admin.token, SUCCESS,
                 validateDELroles(deletedRoleArray, admin._id, done));
         });
 
@@ -1117,7 +1117,7 @@ describe('REST API', function () {
 
         it('should correctly DELETE the resource in role', function (done) {
 
-            del(validPermissionId, admin.token, SUCCESS_STATUS, function (err, res) {
+            del(validPermissionId, admin.token, SUCCESS, function (err, res) {
                 res = JSON.parse(res.text);
                 should(res).be.an.Array();
                 should(res).not.containDeep([thePermission]);
@@ -1143,7 +1143,7 @@ describe('REST API', function () {
 
         it('should correctly DELETE the resource in role', function (done) {
 
-            del(validResourcesId, admin.token, SUCCESS_STATUS, function (err, res) {
+            del(validResourcesId, admin.token, SUCCESS, function (err, res) {
                 res = JSON.parse(res.text);
                 should(res).be.an.Object();
                 should.not.exist(res[resource1.toString()]);
@@ -1174,7 +1174,7 @@ describe('REST API', function () {
 
         it('should correctly DELETE the role', function (done) {
 
-            del(validRoleRouteId, admin.token, SUCCESS_STATUS, function (err, res) {
+            del(validRoleRouteId, admin.token, SUCCESS, function (err, res) {
                 res = JSON.parse(res.text);
                 should(res).be.an.Array();
                 should(res).not.containDeep([role2.roles]);

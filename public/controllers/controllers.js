@@ -125,10 +125,12 @@ angular.module('myApp.controllers', ['ngStorage'])
 
             refresh();
 
-            $scope.changeName = function (appId, appName) {
+            $scope.applyChanges = function (application) {
 
-                $http.put('/api/applications/' + appId, {
-                    name: appName
+                $http.put('/api/applications/' + application._id, {
+                    prefix: application.prefix,
+                    host: application.host,
+                    name: application.name
                 }, {
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
