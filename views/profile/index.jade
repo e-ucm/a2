@@ -18,17 +18,24 @@ block content
                         tbody
                             tr
                                 td
-                                    input.form-control(ng-model='name.first')
+                                    input.form-control(ng-model='newName.name.first')
                                 td
-                                    input.form-control(ng-model='name.middle')
+                                    input.form-control(ng-model='newName.name.middle')
                                 td
-                                    input.form-control(ng-model='name.last')
+                                    input.form-control(ng-model='newName.name.last')
                                 td
                                     button.btn(ng-click='changeName()') Change Name
                             tr
                                 td {{user.name.first}}
                                 td {{user.name.middle}}
                                 td {{user.name.last}}
+                            tr
+                                th
+                                    | email
+                                td
+                                    input.form-control(ng-model='newEmail.email')
+                                td
+                                    button.btn(ng-click='changeEmail()') Change Email
                     label Email
                     p {{user.email}}
                     label Id

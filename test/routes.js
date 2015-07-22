@@ -565,10 +565,23 @@ describe('REST API', function () {
 
     /** /api/users/:userId **/
 
+    var email = "new@email.com";
     var name = {
         "first": "testFirst",
         "middle": "testMiddle",
-        "last": "testLast",
+        "last": "testLast"
+    };
+    var userInfo = {
+        email: "user" + email,
+        name: name
+    };
+    var adminInfo = {
+        email: "admin" + email,
+        name: name
+    };
+    var invalidInfo = {
+        email: "invalidEmail",
+        name: name
     };
 
     describe(GET + usersRoute + '/:userId', function () {
@@ -611,15 +624,19 @@ describe('REST API', function () {
 
     describe(PUT + usersRoute + '/:userId', function () {
 
-        it("should not PUT a specific user's name with an invalid_token", function (done) {
-            authPut(usersRoute + '/' + admin._id, 'invalid_token', name, UNAUTHORIZED, done);
+        it("should not PUT a specific user's name and email with an invalid_token", function (done) {
+            authPut(usersRoute + '/' + admin._id, 'invalid_token', adminInfo, UNAUTHORIZED, done);
         });
 
-        it("should not PUT a specific user's name with an unauthorized token", function (done) {
-            authPut(usersRoute + '/' + admin._id, user.token, name, FORBIDDEN, done);
+        it("should not PUT a specific user's name and email with an unauthorized token", function (done) {
+            authPut(usersRoute + '/' + admin._id, user.token, adminInfo, FORBIDDEN, done);
         });
 
-        var validateNameInformation = function (nameData, done) {
+        it("should not PUT its own user name and email with an invalid email", function (done) {
+            authPut(usersRoute + '/' + user._id, user.token, invalidInfo, FORBIDDEN, done);
+        });
+
+        var validateNameInformation = function (infoData, done) {
             return function (err, res) {
                 should.not.exist(err);
                 should(res).be.an.Object();
@@ -627,27 +644,28 @@ describe('REST API', function () {
                 var user = JSON.parse(res.text);
 
                 validateUser(user);
-                should(user.name.first).equal(nameData.first);
-                should(user.name.middle).equal(nameData.middle);
-                should(user.name.last).equal(nameData.last);
+                should(user.name.first).equal(infoData.name.first);
+                should(user.name.middle).equal(infoData.name.middle);
+                should(user.name.last).equal(infoData.name.last);
 
                 done();
             };
         };
 
-        it("should PUT its own user name", function (done) {
-            authPut(usersRoute + '/' + user._id, user.token, name, SUCCESS, validateNameInformation(name, done));
+        it("should PUT its own user name and email", function (done) {
+            authPut(usersRoute + '/' + user._id, user.token, userInfo, SUCCESS, validateNameInformation(userInfo, done));
         });
 
-        it("should PUT its own admin name", function (done) {
-            authPut(usersRoute + '/' + admin._id, admin.token, name, SUCCESS, validateNameInformation(name, done));
+        it("should PUT its own admin name and email", function (done) {
+            authPut(usersRoute + '/' + admin._id, admin.token, adminInfo, SUCCESS, validateNameInformation(adminInfo, done));
         });
 
-        it("should PUT a specific user name that is not his own", function (done) {
-            name.first += name.first;
-            name.middle += name.middle;
-            name.last += name.last;
-            authPut(usersRoute + '/' + user._id, admin.token, name, SUCCESS, validateNameInformation(name, done));
+        it("should PUT a specific user name and email that is not his own", function (done) {
+            authPut(usersRoute + '/' + user._id, admin.token, userInfo, SUCCESS, validateNameInformation(userInfo, done));
+        });
+
+        it("should not PUT a specific user name and email, email duplicated", function (done) {
+            authPut(usersRoute + '/' + user._id, admin.token, adminInfo, FORBIDDEN, done);
         });
     });
 
