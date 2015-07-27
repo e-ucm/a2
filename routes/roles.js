@@ -364,120 +364,6 @@ router.post('/:roleName/resources', authentication.authorized, function (req, re
 });
 
 /**
- * @api {delete} /roles/:roleName/resources/:resourceName Deletes the resource with resourceName in roleName role
- * @apiName DelResource
- * @apiGroup Roles
- *
- * @apiParam {String} roleName Role name.
- * @apiParam {String} resourceName Resource to delete.
- *
- * @apiSuccess(200) Success.
- *
- * @apiSuccessExample Success-Response:
- *      HTTP/1.1 200 OK
- *      {
- *         "resources-1": [
- *              "perm-1"
- *              "perm-3"
- *         ]
- *      }
- *
- * @apiError(400) RolesDoesNotExist The role doesn't exist.
- *
- * @apiError(400) ResourceDoesNotExist The resource in the role doesn't exist.
- *
- */
-router.delete('/:roleName/resources/:resourceName', authentication.authorized, function (req, res, next) {
-    var roleName = req.params.roleName || '';
-    var resource = req.params.resourceName || '';
-
-    async.auto({
-        validate: function (done) {
-            req.app.acl.existsRole(roleName, function (err) {
-                if (err) {
-                    return done(err);
-                }
-
-                req.app.acl.whatResources(roleName, function (err, result) {
-                    if (err) {
-                        return next(err);
-                    }
-
-                    if (!result[resource]) {
-                        err = new Error('The resource ' + resource + ' in ' + roleName + " doesn't exist.");
-                        err.status = 400;
-                        return done(err);
-                    }
-
-                    done(null, result[resource]);
-                });
-            });
-        },
-        deleteResources: ['validate', function (done, results) {
-            req.app.acl.removeAllow(roleName, resource, results.validate, done);
-        }]
-    }, function (err) {
-        if (err) {
-            return next(err);
-        }
-        req.app.acl.whatResources(roleName, function (err, result) {
-            if (err) {
-                return next(err);
-            }
-            res.json(result);
-        });
-    });
-});
-
-/**
- * @api {get} /roles/:roleName/resources/:resourceName Returns the permissions of resource resourceName in role roleName.
- * @apiName GetResources
- * @apiGroup Roles
- *
- * @apiParam {String} roleName Role name.
- * @apiParam {String} resourceName Resource name.
- *
- * @apiSuccess(200) Success.
- *
- * @apiSuccessExample Success-Response:
- *      HTTP/1.1 200 OK
- *      [
- *          "permission1",
- *          "permission2",
- *          "permission3"
- *      ]
- *
- * @apiError(400) RolesDoesNotExist The role doesn't exist.
- *
- * @apiError(400) ResourceDoesNotExist The resource in role doesn't exist.
- *
- */
-router.get('/:roleName/resources/:resourceName', authentication.authorized, function (req, res, next) {
-    var roleName = req.params.roleName || '';
-    var resource = req.params.resourceName || '';
-
-    req.app.acl.existsRole(roleName, function (err) {
-        if (err) {
-            return next(err);
-        }
-
-        req.app.acl.whatResources(roleName, function (err, result) {
-            if (err) {
-                return next(err);
-            }
-
-            if (!result[resource]) {
-                err = new Error('The resource ' + resource + ' in ' + roleName + " doesn't exist.");
-                err.status = 400;
-                return next(err);
-            }
-
-            res.json(result[resource]);
-        });
-    });
-});
-
-/**
  * @api {post} /roles/:roleName/resources/:resourceName/permissions Creates new permissions.
  * @apiName PostPermissions
  * @apiGroup Roles
@@ -510,9 +396,9 @@ router.get('/:roleName/resources/:resourceName', authentication.authorized, func
  * @apiError(400) ResourceDoesNotExist The resource in role doesn't exist.
  *
  */
-router.post('/:roleName/resources/:resourceName/permissions', authentication.authorized, function (req, res, next) {
+router.post('/:roleName/resources/*/permissions', authentication.authorized, function (req, res, next) {
     var roleName = req.params.roleName || '';
-    var resource = req.params.resourceName || '';
+    var resource = req.params[0] || '';
 
     async.auto({
         checkRole: function (done) {
@@ -583,9 +469,9 @@ router.post('/:roleName/resources/:resourceName/permissions', authentication.aut
  * @apiError(403) LastPermission The permission can't be remove because is the last
  *
  */
-router.delete('/:roleName/resources/:resourceName/permissions/:permissionName', authentication.authorized, function (req, res, next) {
+router.delete('/:roleName/resources/*/permissions/:permissionName', authentication.authorized, function (req, res, next) {
     var roleName = req.params.roleName || '';
-    var resource = req.params.resourceName || '';
+    var resource = req.params[0] || '';
     var permission = req.params.permissionName || '';
 
     async.auto({
@@ -632,6 +518,121 @@ router.delete('/:roleName/resources/:resourceName/permissions/:permissionName', 
                 return next(err);
             }
             res.send(result[resource] || []);
+        });
+    });
+});
+
+
+/**
+ * @api {delete} /roles/:roleName/resources/:resourceName Deletes the resource with resourceName in roleName role
+ * @apiName DelResource
+ * @apiGroup Roles
+ *
+ * @apiParam {String} roleName Role name.
+ * @apiParam {String} resourceName Resource to delete.
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *         "resources-1": [
+ *              "perm-1"
+ *              "perm-3"
+ *         ]
+ *      }
+ *
+ * @apiError(400) RolesDoesNotExist The role doesn't exist.
+ *
+ * @apiError(400) ResourceDoesNotExist The resource in the role doesn't exist.
+ *
+ */
+router.delete('/:roleName/resources/*', authentication.authorized, function (req, res, next) {
+    var roleName = req.params.roleName || '';
+    var resource = req.params[0] || '';
+
+    async.auto({
+        validate: function (done) {
+            req.app.acl.existsRole(roleName, function (err) {
+                if (err) {
+                    return done(err);
+                }
+
+                req.app.acl.whatResources(roleName, function (err, result) {
+                    if (err) {
+                        return next(err);
+                    }
+
+                    if (!result[resource]) {
+                        err = new Error('The resource ' + resource + ' in ' + roleName + " doesn't exist.");
+                        err.status = 400;
+                        return done(err);
+                    }
+
+                    done(null, result[resource]);
+                });
+            });
+        },
+        deleteResources: ['validate', function (done, results) {
+            req.app.acl.removeAllow(roleName, resource, results.validate, done);
+        }]
+    }, function (err) {
+        if (err) {
+            return next(err);
+        }
+        req.app.acl.whatResources(roleName, function (err, result) {
+            if (err) {
+                return next(err);
+            }
+            res.json(result);
+        });
+    });
+});
+
+/**
+ * @api {get} /roles/:roleName/resources/:resourceName Returns the permissions of resource resourceName in role roleName.
+ * @apiName GetResources
+ * @apiGroup Roles
+ *
+ * @apiParam {String} roleName Role name.
+ * @apiParam {String} resourceName Resource name.
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      [
+ *          "permission1",
+ *          "permission2",
+ *          "permission3"
+ *      ]
+ *
+ * @apiError(400) RolesDoesNotExist The role doesn't exist.
+ *
+ * @apiError(400) ResourceDoesNotExist The resource in role doesn't exist.
+ *
+ */
+router.get('/:roleName/resources/*', authentication.authorized, function (req, res, next) {
+    var roleName = req.params.roleName || '';
+    var resource = req.params[0] || '';
+
+    req.app.acl.existsRole(roleName, function (err) {
+        if (err) {
+            return next(err);
+        }
+
+        req.app.acl.whatResources(roleName, function (err, result) {
+            if (err) {
+                return next(err);
+            }
+
+            if (!result[resource]) {
+                err = new Error('The resource ' + resource + ' in ' + roleName + " doesn't exist.");
+                err.status = 400;
+                return next(err);
+            }
+
+            res.json(result[resource]);
         });
     });
 });
