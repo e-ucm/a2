@@ -902,7 +902,7 @@ describe('REST API', function () {
     var validResourcesRoleId = validRoleRouteId + resourcesPath;
     var invalidResourcesRoleId = invalidRoleRouteId + resourcesPath;
 
-    var theResource = 'newResource';
+    var theResource = '/roles/:roleName/newResource';
     var thePermission = 'newPermission';
     var resource1 = {
         "resources": [
@@ -943,7 +943,7 @@ describe('REST API', function () {
         });
     });
 
-    var routeResourceId = routeResourcesRole + '/:resourceName';
+    var routeResourceId = routeResourcesRole + '/*';
     var validResourcesId = validResourcesRoleId + '/' + theResource;
     var invalidResourcesId = invalidResourcesRoleId + '/invalidResource';
     describe(GET + routeResourceId, function () {
@@ -1030,7 +1030,7 @@ describe('REST API', function () {
         });
     });
 
-    describe(GET + usersRoute + '/:userId/:resourceName/:permissionName', function () {
+    describe(GET + usersRoute + '/:userId/*/:permissionName', function () {
         var noPermission = 'noPermission';
 
         it("should not GET response with an invalid token", function (done) {
@@ -1063,7 +1063,7 @@ describe('REST API', function () {
     });
 
     describe(DEL + usersRoute + '/:userId/roles', function () {
-        var deletedRole = 'role2';
+        var deletedRole = 'role1';
 
         it("should not DELETE roles from an user with an invalid token", function (done) {
             del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, 'invalid_token', UNAUTHORIZED, done);
@@ -1120,20 +1120,20 @@ describe('REST API', function () {
     var invalidPermissionId = invalidResourcesId + permissionsPath + '/invalidPermission';
     describe(DEL + routePermissionId, function () {
 
-        it('should not DELETE the resource because of an invalid_token', function (done) {
+        it('should not DELETE the permission because of an invalid_token', function (done) {
             del(validPermissionId, 'invalid_token', UNAUTHORIZED, done);
         });
 
-        it("should not DELETE the resource, the resource in role doesn't exist", function (done) {
+        it("should not DELETE the permission, the resource in role doesn't exist", function (done) {
             del(invalidPermissionId, admin.token, BAD_REQUEST, done);
         });
 
-        it('should not DELETE the resource in role with an unauthorized token', function (done) {
+        it('should not DELETE the permission in role with an unauthorized token', function (done) {
 
             del(validPermissionId, user.token, FORBIDDEN, done);
         });
 
-        it('should correctly DELETE the resource in role', function (done) {
+        it('should correctly DELETE the permission in role', function (done) {
 
             del(validPermissionId, admin.token, SUCCESS, function (err, res) {
                 res = JSON.parse(res.text);

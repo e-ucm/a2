@@ -363,7 +363,7 @@ router.delete(userIdRolesRoute + '/:roleName', authentication.authorized, functi
  * @apiError(400) UserNotFound No account with the given user id exists.
  *
  */
-router.get(userIdRoute + '/:resourceName/:permissionName', authentication.authorized, function (req, res, next) {
+router.get(userIdRoute + '/*/:permissionName', authentication.authorized, function (req, res, next) {
     async.auto({
         checkUser: function (done) {
             checkUserExistenceAndExec(req, res, done);
@@ -674,7 +674,7 @@ function removeUserRoles(user, req, res, cb) {
 }
 
 function isAllowed(user, req, res, cb) {
-    res.app.acl.isAllowed(user.username, req.params.resourceName, req.params.permissionName, function (err, result) {
+    res.app.acl.isAllowed(user.username, req.params[0], req.params.permissionName, function (err, result) {
         if (err) {
             return cb(err);
         }
