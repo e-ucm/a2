@@ -42,12 +42,9 @@
     },
     "devDependencies": {
         "apidoc": "*",
-        "assert": "*",
-        "confidence": "*",
         "coveralls": "*",
         "handlebars": "*",
         "istanbul": "*",
-        "jquery": "*",
         "jshint": "*",
         "mocha": "*",
         "promptly": "*",
