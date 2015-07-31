@@ -471,6 +471,7 @@ describe('REST API', function () {
 
     // Creates a STUB Gleaner app
     var expressApp = express();
+    expressApp.use(require('body-parser').json());
     routes.forEach(function (route) {
         expressApp.use(route, function (req, res) {
             res.sendStatus(SUCCESS);
@@ -488,37 +489,40 @@ describe('REST API', function () {
 
     var methods = ['get', 'post', 'put', 'delete'];
 
-    var gleanerProxyBaseUrl = '/api/' + gleanerPrefix;
+    var gleanerProxyBaseUrl = '/api/proxy/' + gleanerPrefix;
+    var someData = {
+        data: "asddsa"
+    };
 
     methods.forEach(function (method) {
         var upperCaseMethod = method.toUpperCase();
         describe(upperCaseMethod + '/:proxy*', function () {
             routes.forEach(function (route) {
                 it('should ' + upperCaseMethod + ' (proxy) the route ' + route, function (done) {
-                    request[method](gleanerProxyBaseUrl + route).set('Authorization', 'Bearer ' + user.token)
+                    request[method](gleanerProxyBaseUrl + route).send(someData).set('Authorization', 'Bearer ' + user.token)
                         .expect(SUCCESS).end(done);
                 });
             });
 
             wrongRoutes.forEach(function (wrongRoute) {
                 it('should not ' + upperCaseMethod + ' (proxy) the route ' + wrongRoute, function (done) {
-                    request[method](gleanerProxyBaseUrl + wrongRoute).set('Authorization', 'Bearer ' + user.token)
+                    request[method](gleanerProxyBaseUrl + wrongRoute).send(someData).set('Authorization', 'Bearer ' + user.token)
                         .expect(UNAUTHORIZED).end(done);
                 });
             });
 
             it('should not ' + upperCaseMethod + ' (proxy) a route that does not exist', function (done) {
-                request[method](gleanerProxyBaseUrl + '/notFoundRoute').set('Authorization', 'Bearer ' + user.token)
+                request[method](gleanerProxyBaseUrl + '/notFoundRoute').send(someData).set('Authorization', 'Bearer ' + user.token)
                     .expect(NOT_FOUND).end(done);
             });
 
             it('should not ' + upperCaseMethod + ' (proxy) a route with an invalid_token', function (done) {
-                request[method](gleanerProxyBaseUrl).set('Authorization', 'Bearer invalid_token')
+                request[method](gleanerProxyBaseUrl).send(someData).set('Authorization', 'Bearer invalid_token')
                     .expect(UNAUTHORIZED).end(done);
             });
 
             it('should not ' + upperCaseMethod + ' (proxy) a route without the Authorization header', function (done) {
-                request[method](gleanerProxyBaseUrl).expect(UNAUTHORIZED).end(done);
+                request[method](gleanerProxyBaseUrl).send(someData).expect(UNAUTHORIZED).end(done);
             });
         });
     });

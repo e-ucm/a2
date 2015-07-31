@@ -16,7 +16,7 @@ var endsWith = function (source, str) {
 };
 
 /**
- * @api {post} /:prefix* Proxy everything that goes after :prefix to the application registered with the given prefix.
+ * @api {post} /proxy/:prefix* Proxy everything that goes after :prefix to the application registered with the given prefix.
  * @apiName Proxy
  * @apiGroup Proxy
  *
@@ -87,7 +87,9 @@ router.all('/:prefix*', authentication.authenticated, function (req, res, next) 
                 host += req.params[0];
 
                 proxy.web(req, res, {
-                    target: host
+                    target: host,
+                    ignorePath: true,
+                    changeOrigin: true
                 }, function (err) {
                     if (err) {
                         err.status = 503;

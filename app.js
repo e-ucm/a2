@@ -76,6 +76,14 @@ app.use(function (req, res, next) {
     next();
 });
 
+/**
+ * The proxy middleware must be executed before the body-parser middleware.
+ * This is because the body-parser will consume the request stream in order to
+ * create a new request object. This will conflict with the proxy when the
+ * requests have a JSON body (e.g. POST methods with a JSON body).
+ */
+app.use(config.apiPath + '/proxy', proxy);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -101,7 +109,6 @@ app.use(config.apiPath + '/login', login);
 app.use(config.apiPath + '/logout', logout);
 app.use(config.apiPath + '/roles', roles);
 app.use(config.apiPath + '/applications', applications);
-app.use(config.apiPath, proxy);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
