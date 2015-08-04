@@ -4,6 +4,7 @@ var express = require('express'),
     router = express.Router(),
     httpProxy = require('http-proxy'),
     authentication = require('../util/authentication'),
+    util = require('util'),
     proxyOptions = {},
     proxy = httpProxy.createProxyServer(proxyOptions);
 
@@ -63,6 +64,7 @@ var endsWith = function (source, str) {
  */
 router.all('/:prefix*', authentication.authenticated, function (req, res, next) {
     var prefix = req.params.prefix;
+
     if (prefix) {
         req.app.db.model('application').findByPrefix(prefix, function (err, application) {
             if (err) {
@@ -84,16 +86,46 @@ router.all('/:prefix*', authentication.authenticated, function (req, res, next) 
                     host = host.slice(0, host.length - 1);
                 }
 
-                host += req.params[0];
+                var resource =  prefix+req.params[0];
+                var action = req.method.toLowerCase();
+                var userId = req.user.username;
 
-                proxy.web(req, res, {
-                    target: host,
-                    ignorePath: true,
-                    changeOrigin: true
-                }, function (err) {
+                req.app.acl.isAllowed(userId, resource, action, function (err, allowed) {
                     if (err) {
-                        err.status = 503;
                         return next(err);
+                    } else if (allowed === false) {
+                        if (req.app.acl.logger) {
+                            req.app.acl.logger.debug('Not allowed ' + action + ' on ' + resource + ' by user ' + userId);
+                        }
+                        req.app.acl.allowedPermissions(req.method.toLowerCase(), resource, function (err, obj) {
+                            if (req.app.acl.logger) {
+                                req.app.acl.logger.debug('Allowed permissions: ' + util.inspect(obj));
+                            }
+                        });
+                        err = new Error('Insufficient permissions to access resource');
+                        err.status = 403;
+                        return next(err);
+                    } else {
+                        if (req.app.acl.logger) {
+                            req.app.acl.logger.debug('Allowed ' + action + ' on ' + resource + ' by user ' + userId);
+                        }
+
+                        host += req.params[0];
+
+                        if(req._parsedUrl.search) {
+                            host += req._parsedUrl.search;
+                        }
+
+                        proxy.web(req, res, {
+                            target: host,
+                            ignorePath: true,
+                            changeOrigin: true
+                        }, function (err) {
+                            if (err) {
+                                err.status = 503;
+                                return next(err);
+                            }
+                        });
                     }
                 });
             } else {
