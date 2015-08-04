@@ -128,6 +128,22 @@ router.post('/', authentication.authorized, function (req, res, next) {
                 prefix: req.body.prefix,
                 host: req.body.host
             }, done);
+        }],
+        roles: ['application', function (done) {
+            var rolesArray = req.body.roles;
+            if (rolesArray) {
+                rolesArray.forEach(function (role) {
+                    role.allows.forEach(function (allow) {
+                        var resources = allow.resources;
+                        for (var i = 0; i < resources.length; i++) {
+                            resources[i] = req.body.prefix + resources[i];
+                        }
+                    });
+                });
+                req.app.acl.allow(rolesArray, done);
+            } else {
+                done();
+            }
         }]
     }, function (err, results) {
         if (err) {
