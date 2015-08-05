@@ -125,6 +125,7 @@ router.post('/', authentication.authorized, function (req, res, next) {
         application: ['validate', function (done) {
             var ApplicationModel = req.app.db.model('application');
             ApplicationModel.create({
+                name: req.body.name || '',
                 prefix: req.body.prefix,
                 host: req.body.host
             }, done);
