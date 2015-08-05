@@ -224,11 +224,7 @@ describe('REST API', function () {
         should(application.host).be.a.String();
         should(application.prefix).be.a.String();
         should(application.timeCreated).be.a.String();
-        if (!application.name) {
-            should.not.exist(application.name);
-        } else {
-            should(application.name).be.a.String();
-        }
+        should(application.name).be.a.String();
     };
     var gleanerPort = 3300;
     var gleanerPrefix = 'gleaner';
