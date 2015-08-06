@@ -2,11 +2,11 @@ extends ../page
 
 block content
     .container.theme-showcase
-        .row-fluid
+        .row-fluid(ng-controller='ApplicationsController')
             .col-sm-12
                 .page-header
                     h1 Applications list
-                #users(ng-controller='ApplicationsController')
+                #users
                     table.table
                         thead
                             tr
@@ -15,15 +15,6 @@ block content
                                 th Host
                                 th Actions
                         tbody
-                            tr.active
-                                td
-                                    input(value='name' ng-model='name')
-                                td
-                                    input(value='prefix' ng-model='prefix')
-                                td
-                                    input(value='host' ng-model='host')
-                                td
-                                    button.btn.btn-primary(ng-click='addApplication()') Add new
                             tr.active(ng-repeat='application in response.data')
                                 td
                                     input(value='{{application.name}}' ng-model='application.name')
@@ -32,6 +23,38 @@ block content
                                 td
                                     input(value='{{application.host}}' ng-model='application.host')
                                 td
-                                    button.btn(ng-click='applyChanges(application)') Apply changes
+                                    button.btn.btn-warning(ng-click='applyChanges(application)') Apply changes
+                                td
                                     a.btn.btn-danger(ng-click='deleteApplication(application._id)')
                                         i.fa.fa-trash-o.fa-lg  Delete
+                #createRole.row-fluid
+                    table
+                        tr
+                            td.col-sm-4
+                                label Application name
+                                input.form-control(type='text' ng-model='name')
+                            td.col-sm-4
+                                label Prefix
+                                input.form-control(type='text' ng-model='prefix')
+                            td.col-sm-4
+                                label Host
+                                input.form-control(type='text' ng-model='host')
+                            td
+                                button.btn.btn-primary(ng-click='addApplication()') Add new
+                        tr
+                            table(ng-repeat='applicationRole in applicationRoles')
+                                tr
+                                    td.col-sm-4
+                                        label Role name
+                                        input.form-control(type='text' ng-model='applicationRole.roles')
+                                tr(ng-repeat='allow in applicationRole.allows')
+                                    td.col-sm-4
+                                        label Resource
+                                        input.form-control(type='text' ng-model='allow.resourceName')
+                                    td.col-sm-4
+                                        label Permission
+                                        input.form-control(type='text' ng-model='allow.permissionName')
+                                td
+                                    .btn.btn-primary(ng-click='addResourceInput(applicationRole)') More resources
+                    br
+                    button.btn.btn-primary(ng-click='addRoleInput()') More roles

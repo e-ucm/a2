@@ -125,6 +125,30 @@ angular.module('myApp.controllers', ['ngStorage'])
 
             refresh();
 
+            $scope.applicationRoles = [{
+                roles: '',
+                allows: [
+                    {resourceName: '', permissionName: ''}
+                ]
+            }];
+
+            $scope.addResourceInput = function (applicationRole) {
+                if (applicationRole.allows[applicationRole.allows.length - 1].resourceName !== '') {
+                    applicationRole.allows.push({resourceName: '', permissionName: ''});
+                }
+            };
+
+            $scope.addRoleInput = function () {
+                if ($scope.applicationRoles[$scope.applicationRoles.length - 1].roles !== '') {
+                    $scope.applicationRoles.push({
+                        roles: '',
+                        allows: [
+                            {resourceName: '', permissionName: ''}
+                        ]
+                    });
+                }
+            };
+
             $scope.applyChanges = function (application) {
 
                 $http.put('/api/applications/' + application._id, {
@@ -144,24 +168,40 @@ angular.module('myApp.controllers', ['ngStorage'])
 
             $scope.addApplication = function () {
 
-                $http.post('/api/applications/', {
+                var applicationData = {
+                    name: $scope.name,
                     prefix: $scope.prefix,
                     host: $scope.host
-                }, {
+                };
+                if ($scope.applicationRoles[0].roles !== '') {
+                    applicationData.roles = [];
+                    var i = 0;
+                    $scope.applicationRoles.forEach(function (role) {
+                        var allows = [];
+                        role.allows.forEach(function (allow) {
+                            if (allow.resourceName !== '' && allow.permissionName !== '') {
+                                allows.push({
+                                    resources: [allow.resourceName],
+                                    permissions: allow.permissionName.split(' ')
+                                });
+                            }
+                        });
+                        applicationData.roles[i] = {};
+                        applicationData.roles[i].allows = allows;
+                        applicationData.roles[i].roles = role.roles;
+                        i++;
+                    });
+                }
+                $http.post('/api/applications/', applicationData, {
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
-                }).success(function (data) {
-                    var name = $scope.name;
-                    if (name) {
-                        console.log(data);
-                        $scope.changeName(data._id, name);
-                    } else {
-                        refresh();
-                    }
+                }).success(function () {
+                    $scope.applicationRoles = [{roles: '', allows: [{resourceName: '', permissionName: ['']}]}];
                     $scope.name = '';
                     $scope.prefix = '';
                     $scope.host = '';
+                    refresh();
                 }).error(function (data, status) {
                     console.error('Error on post /api/applications/:appId: ' + JSON.stringify(data) + ', status: ' + status);
                 });
@@ -215,13 +255,29 @@ angular.module('myApp.controllers', ['ngStorage'])
                 });
             };
 
+            $scope.newRoleModel = [{resourceName: '', permissionName: ['']}];
+
             getRoles();
 
+            $scope.addResourceInput = function () {
+                if ($scope.newRoleModel[$scope.newRoleModel.length - 1].resourceName !== '') {
+                    $scope.newRoleModel.push({resourceName: '', permissionName: ['']});
+                }
+            };
+
             $scope.addRole = function (roleName) {
+                $scope.allows = [];
+                $scope.newRoleModel.forEach(function (resourceModel) {
+                    if (resourceModel.resourceName !== '' && resourceModel.permissionName !== ['']) {
+                        $scope.allows.push({
+                            resources: [resourceModel.resourceName],
+                            permissions: resourceModel.permissionName.split(' ')
+                        });
+                    }
+                });
                 $scope.item = {
                     roles: $scope.newRole.name,
-                    resources: [$scope.newRole.resource],
-                    permissions: [$scope.newRole.permission]
+                    allows: $scope.allows
                 };
 
                 $http.post('/api/roles/', $scope.item, {
@@ -232,10 +288,13 @@ angular.module('myApp.controllers', ['ngStorage'])
                     var role = $scope.rolesList[$scope.newRole.name] = {};
                     role.name = $scope.newRole.name;
                     role.info = {};
-                    role.info[$scope.newRole.resource] = [$scope.newRole.permission];
+                    $scope.newRoleModel.forEach(function (resourceModel) {
+                        role.info[resourceModel.resourceName] = resourceModel.permissionName.split(' ');
+                    });
                     $scope.newRole.name = '';
                     $scope.newRole.resource = '';
                     $scope.newRole.permission = '';
+                    $scope.newRoleModel = [{resourceName: '', permissionName: ['']}];
                 }).error(function (data, status) {
                     console.error('Error on get /api/roles/' + roleName + ' ' + JSON.stringify(data) + ', status: ' + status);
                 });
@@ -244,7 +303,7 @@ angular.module('myApp.controllers', ['ngStorage'])
             $scope.addResource = function (roleName) {
                 $scope.item = {resources: [], permissions: []};
                 $scope.item.resources.push($scope.newRec[roleName]);
-                $scope.item.permissions.push($scope.newRecPer[roleName]);
+                $scope.item.permissions = $scope.newRecPer[roleName].split(' ');
 
                 $http.post('/api/roles/' + roleName + '/resources', $scope.item, {
                     headers: {
@@ -255,7 +314,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                     if (!role.info) {
                         role.info = {};
                     }
-                    role.info[$scope.newRec[roleName]] = [$scope.newRecPer[roleName]];
+                    role.info[$scope.newRec[roleName]] = $scope.newRecPer[roleName].split(' ');
                     $scope.newRec[roleName] = '';
                     $scope.newRecPer[roleName] = '';
                 }).error(function (data, status) {
@@ -264,15 +323,15 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
 
             $scope.addPermission = function (roleName, resourceName) {
-                $scope.item = {permissions: []};
-                $scope.item.permissions.push($scope.newPer[resourceName]);
+                $scope.item = {};
+                $scope.item.permissions = $scope.newPer[resourceName].split(' ');
                 $http.post('/api/roles/' + roleName + '/resources/' + resourceName + '/permissions', $scope.item, {
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     var role = $scope.rolesList[roleName].info;
-                    role[resourceName].push($scope.newPer[resourceName]);
+                    role[resourceName] = role[resourceName].concat($scope.newPer[resourceName].split(' '));
                     $scope.newPer[resourceName] = '';
                 }).error(function (data, status) {
                     console.error('Error on post /api/roles/' + roleName + '/resources/' + resourceName + '/permissions/ ' + JSON.stringify(data) + ', status: ' + status);
