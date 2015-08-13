@@ -69,6 +69,21 @@ app.use(config.apiPath + '/*', jwtCheck.unless({
     ]
 }));
 
+// enable cross-origin resource sharing - CORS http://enable-cors.org/index.html
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.header("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, DELETE");
+    res.header("Access-Control-Allow-Credentials", true);
+
+    if ('OPTIONS' === req.method) {
+        res.sendStatus(200);
+    }
+    else {
+        next();
+    }
+});
+
 app.use(function (req, res, next) {
     if (req.user) {
         return tokenStorage.middleware(req, res, next);
