@@ -132,9 +132,19 @@ angular.module('myApp.controllers', ['ngStorage'])
                 ]
             }];
 
+            $scope.anonymousRoutes = [{
+                val: ''
+            }];
+
             $scope.addResourceInput = function (applicationRole) {
                 if (applicationRole.allows[applicationRole.allows.length - 1].resourceName !== '') {
                     applicationRole.allows.push({resourceName: '', permissionName: ''});
+                }
+            };
+
+            $scope.addAnonymousRouteInput = function () {
+                if ($scope.anonymousRoutes[$scope.anonymousRoutes.length - 1].val !== '') {
+                    $scope.anonymousRoutes.push({val: ''});
                 }
             };
 
@@ -192,12 +202,19 @@ angular.module('myApp.controllers', ['ngStorage'])
                         i++;
                     });
                 }
+                if ($scope.anonymousRoutes[0].val !== '') {
+                    applicationData.anonymous = [];
+                    $scope.anonymousRoutes.forEach(function(field) {
+                        applicationData.anonymous.push(field.val);
+                    });
+                }
                 $http.post('/api/applications/', applicationData, {
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     $scope.applicationRoles = [{roles: '', allows: [{resourceName: '', permissionName: ['']}]}];
+                    $scope.anonymousRoutes = [''];
                     $scope.name = '';
                     $scope.prefix = '';
                     $scope.host = '';
