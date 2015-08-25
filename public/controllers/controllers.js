@@ -132,9 +132,19 @@ angular.module('myApp.controllers', ['ngStorage'])
                 ]
             }];
 
+            $scope.anonymousRoutes = [{
+                route: ''
+            }];
+
             $scope.addResourceInput = function (applicationRole) {
                 if (applicationRole.allows[applicationRole.allows.length - 1].resourceName !== '') {
                     applicationRole.allows.push({resourceName: '', permissionName: ''});
+                }
+            };
+
+            $scope.addAnonymousRouteInput = function () {
+                if ($scope.anonymousRoutes[$scope.anonymousRoutes.length - 1].route !== '') {
+                    $scope.anonymousRoutes.push({route: ''});
                 }
             };
 
@@ -154,7 +164,8 @@ angular.module('myApp.controllers', ['ngStorage'])
                 $http.put('/api/applications/' + application._id, {
                     prefix: application.prefix,
                     host: application.host,
-                    name: application.name
+                    name: application.name,
+                    anonymous: [application.anonymousRoute]
                 }, {
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
@@ -192,12 +203,19 @@ angular.module('myApp.controllers', ['ngStorage'])
                         i++;
                     });
                 }
+                if ($scope.anonymousRoutes[0].route !== '') {
+                    applicationData.anonymous = [];
+                    $scope.anonymousRoutes.forEach(function(field) {
+                        applicationData.anonymous.push(field.route);
+                    });
+                }
                 $http.post('/api/applications/', applicationData, {
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     $scope.applicationRoles = [{roles: '', allows: [{resourceName: '', permissionName: ['']}]}];
+                    $scope.anonymousRoutes = [{route: ''}];
                     $scope.name = '';
                     $scope.prefix = '';
                     $scope.host = '';

@@ -19,6 +19,8 @@ exports = module.exports = function (app, mongoose) {
         name: {
             type: String
         },
+        anonymous: [String],    // Anonymous(unprotected) routes defined by the application
+        routes: [String],       // Protected routes defined by the application
         timeCreated: {
             type: Date,
             default: Date.now

@@ -6,13 +6,14 @@ block content
             .col-sm-12
                 .page-header
                     h1 Applications list
-                #users
+                #applications
                     table.table
                         thead
                             tr
                                 th Name
                                 th Prefix
                                 th Host
+                                th Route allowing unidentified requests
                                 th Actions
                         tbody
                             tr.active(ng-repeat='application in response.data')
@@ -22,6 +23,9 @@ block content
                                     input(value='{{application.prefix}}' ng-model='application.prefix')
                                 td
                                     input(value='{{application.host}}' ng-model='application.host')
+                                td
+                                    label {{application.anonymous.join(", ")}}
+                                    input(value='{{application.anonymousRoute}}' ng-model='application.anonymousRoute')
                                 td
                                     button.btn.btn-warning(ng-click='applyChanges(application)') Apply changes
                                 td
@@ -56,5 +60,15 @@ block content
                                         input.form-control(type='text' ng-model='allow.permissionName')
                                 td
                                     .btn.btn-primary(ng-click='addResourceInput(applicationRole)') More resources
+                        tr
+                            td
+                                button.btn.btn-primary(ng-click='addRoleInput()') More roles
+                        tr
+                            table(ng-repeat='anonymousRoute in anonymousRoutes')
+                                tr
+                                    td.col-sm-4
+                                        label Route allowing unidentified requests
+                                        input.form-control(type='text' ng-model='anonymousRoute.route')
+                            td
+                                .btn.btn-primary(ng-click='addAnonymousRouteInput()') More routes
                     br
-                    button.btn.btn-primary(ng-click='addRoleInput()') More roles

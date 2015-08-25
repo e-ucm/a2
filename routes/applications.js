@@ -38,7 +38,8 @@ var express = require('express'),
  *              "name": "Gleaner App.",
  *              "prefix": "gleaner",
  *              "host": "localhost:3300",
- *              "timeCreated": "2015-07-06T09:03:52.636Z",
+ *              "anonymous": [],
+ *              "timeCreated": "2015-07-06T09:03:52.636Z"
  *          }],
  *          "pages": {
  *              "current": 1,
@@ -82,6 +83,7 @@ router.get('/', authentication.authorized, function (req, res, next) {
  *
  * @apiParam {String} prefix Application prefix.
  * @apiParam {String} host Application host.
+ * @apiParam {Array<String>} anonymous Express-like routes for whom unidentified (anonymous) requests will be forwarded anyway.
  *
  * @apiParamExample {json} Request-Example:
  *      {
@@ -97,7 +99,8 @@ router.get('/', authentication.authorized, function (req, res, next) {
  *          "_id": "559a447831b7acec185bf513",
  *          "prefix": "gleaner",
  *          "host": "localhost:3300",
- *          "timeCreated": "2015-07-06T09:03:52.636Z",
+ *          "anonymous": [],
+ *          "timeCreated": "2015-07-06T09:03:52.636Z"
  *      }
  *
  * @apiError(400) PrefixRequired Prefix required!.
@@ -122,30 +125,39 @@ router.post('/', authentication.authorized, function (req, res, next) {
 
             done();
         },
-        application: ['validate', function (done) {
-            var ApplicationModel = req.app.db.model('application');
-            ApplicationModel.create({
-                name: req.body.name || '',
-                prefix: req.body.prefix,
-                host: req.body.host
-            }, done);
-        }],
-        roles: ['application', function (done) {
+        roles: ['validate', function (done) {
             var rolesArray = req.body.roles;
+            var routes = [];
             if (rolesArray) {
                 rolesArray.forEach(function (role) {
                     role.allows.forEach(function (allow) {
                         var resources = allow.resources;
                         for (var i = 0; i < resources.length; i++) {
                             resources[i] = req.body.prefix + resources[i];
+                            routes.push(resources[i]);
                         }
                     });
                 });
-                req.app.acl.allow(rolesArray, done);
+                req.app.acl.allow(rolesArray, function (err) {
+                    if (err) {
+                        return done(err);
+                    }
+                    return done(null, routes);
+                });
             } else {
-                done();
+                done(null, routes);
             }
-        }]
+        }],
+        application: ['roles', function (done, results) {
+            var ApplicationModel = req.app.db.model('application');
+            ApplicationModel.create({
+                name: req.body.name || '',
+                prefix: req.body.prefix,
+                host: req.body.host,
+                anonymous: req.body.anonymous || [],
+                routes: results.roles
+            }, done);
+        }],
     }, function (err, results) {
         if (err) {
             err.status = 400;
@@ -157,7 +169,8 @@ router.post('/', authentication.authorized, function (req, res, next) {
             _id: application._id,
             prefix: application.prefix,
             host: application.host,
-            timeCreated: application.timeCreated
+            timeCreated: application.timeCreated,
+            anonymous: application.anonymous
         });
     });
 });
@@ -178,7 +191,8 @@ router.post('/', authentication.authorized, function (req, res, next) {
  *          "name": "My App Name",
  *          "prefix": "gleaner",
  *          "host": "localhost:3300",
- *          "timeCreated": "2015-07-06T09:03:52.636Z",
+ *          "anonymous": [],
+ *          "timeCreated": "2015-07-06T09:03:52.636Z"
  *      }
  *
  * @apiError(400) ApplicationNotFound No application with the given user id exists.
@@ -199,6 +213,10 @@ router.get(applicationIdRoute, authentication.authorized, function (req, res, ne
     });
 });
 
+function isArray(obj) {
+    return Object.prototype.toString.call(obj) === '[object Array]';
+}
+
 /**
  * @api {put} /applications/:applicationId Changes the application name.
  * @apiName PutApplication
@@ -206,6 +224,10 @@ router.get(applicationIdRoute, authentication.authorized, function (req, res, ne
  *
  * @apiParam {String} applicationId ApplicationId id.
  * @apiParam {String} name The new name.
+ * @apiParam {String} prefix Application prefix.
+ * @apiParam {String} host Application host.
+ * @apiParam {Array<String>} anonymous Express-like routes for whom unidentified (anonymous) requests will be forwarded anyway.
+ *                                      The routes from this array will be added only if they're not present yet.
  *
  * @apiParamExample {json} Request-Example:
  *      {
@@ -221,7 +243,8 @@ router.get(applicationIdRoute, authentication.authorized, function (req, res, ne
  *          "name": "Gleaner App.",
  *          "prefix": "gleaner",
  *          "host": "localhost:3300",
- *          "timeCreated": "2015-07-06T09:03:52.636Z",
+ *          "anonymous": [],
+ *          "timeCreated": "2015-07-06T09:03:52.636Z"
  *      }
  *
  * @apiError(400) ApplicationNotFound No application with the given application id exists.
@@ -251,6 +274,9 @@ router.put(applicationIdRoute, authentication.authorized, function (req, res, ne
     }
     if (req.body.host) {
         update.$set.host = req.body.host;
+    }
+    if(isArray(req.body.anonymous)) {
+        update.$addToSet = { anonymous: { $each: req.body.anonymous.filter(Boolean) } };
     }
 
     var options = {

@@ -54,21 +54,6 @@ if (app.get('env') === 'development') {
     app.use(logger('dev'));
 }
 
-var jwtCheck = jwt({
-    secret: config.cryptoKey
-});
-
-app.use(config.apiPath + '/*', jwtCheck.unless({
-    path: [
-        // REST API: match some unprotected routes such as /contact, /login, /signup, etc.
-        config.apiPath + '/contact',
-        config.apiPath + '/login',
-        config.apiPath + '/login/forgot',
-        new RegExp(config.apiPath + '\/login\/reset\/.*'),
-        config.apiPath + '/signup'
-    ]
-}));
-
 // enable cross-origin resource sharing - CORS http://enable-cors.org/index.html
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -84,11 +69,19 @@ app.use(function(req, res, next) {
     }
 });
 
-app.use(function (req, res, next) {
-    if (req.user) {
-        return tokenStorage.middleware(req, res, next);
-    }
-    next();
+var jwtCheck = jwt({
+    secret: config.cryptoKey
+});
+
+var jwtMiddleware = jwtCheck.unless({
+    path: [
+        // REST API: match some unprotected routes such as /contact, /login, /signup, etc.
+        config.apiPath + '/contact',
+        config.apiPath + '/login',
+        config.apiPath + '/login/forgot',
+        new RegExp(config.apiPath + '\/login\/reset\/.*'),
+        config.apiPath + '/signup'
+    ]
 });
 
 /**
@@ -97,7 +90,16 @@ app.use(function (req, res, next) {
  * create a new request object. This will conflict with the proxy when the
  * requests have a JSON body (e.g. POST methods with a JSON body).
  */
-app.use(config.apiPath + '/proxy', proxy);
+app.use(config.apiPath + '/proxy', proxy(jwtMiddleware));
+
+app.use(config.apiPath + '/*', jwtMiddleware);
+
+app.use(function (req, res, next) {
+    if (req.user) {
+        return tokenStorage.middleware(req, res, next);
+    }
+    next();
+});
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
