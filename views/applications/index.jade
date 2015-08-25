@@ -13,6 +13,7 @@ block content
                                 th Name
                                 th Prefix
                                 th Host
+                                th Route allowing unidentified requests
                                 th Actions
                         tbody
                             tr.active(ng-repeat='application in response.data')
@@ -22,6 +23,9 @@ block content
                                     input(value='{{application.prefix}}' ng-model='application.prefix')
                                 td
                                     input(value='{{application.host}}' ng-model='application.host')
+                                td
+                                    label {{application.anonymous.join(", ")}}
+                                    input(value='{{application.anonymousRoute}}' ng-model='application.anonymousRoute')
                                 td
                                     button.btn.btn-warning(ng-click='applyChanges(application)') Apply changes
                                 td

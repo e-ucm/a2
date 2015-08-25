@@ -164,7 +164,8 @@ angular.module('myApp.controllers', ['ngStorage'])
                 $http.put('/api/applications/' + application._id, {
                     prefix: application.prefix,
                     host: application.host,
-                    name: application.name
+                    name: application.name,
+                    anonymous: [application.anonymousRoute]
                 }, {
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token

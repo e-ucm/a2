@@ -213,6 +213,10 @@ router.get(applicationIdRoute, authentication.authorized, function (req, res, ne
     });
 });
 
+function isArray(obj) {
+    return Object.prototype.toString.call(obj) === '[object Array]';
+}
+
 /**
  * @api {put} /applications/:applicationId Changes the application name.
  * @apiName PutApplication
@@ -222,6 +226,8 @@ router.get(applicationIdRoute, authentication.authorized, function (req, res, ne
  * @apiParam {String} name The new name.
  * @apiParam {String} prefix Application prefix.
  * @apiParam {String} host Application host.
+ * @apiParam {Array<String>} anonymous Express-like routes for whom unidentified (anonymous) requests will be forwarded anyway.
+ *                                      The routes from this array will be added only if they're not present yet.
  *
  * @apiParamExample {json} Request-Example:
  *      {
@@ -268,6 +274,9 @@ router.put(applicationIdRoute, authentication.authorized, function (req, res, ne
     }
     if (req.body.host) {
         update.$set.host = req.body.host;
+    }
+    if(isArray(req.body.anonymous)) {
+        update.$addToSet = { anonymous: { $each: req.body.anonymous.filter(Boolean) } };
     }
 
     var options = {

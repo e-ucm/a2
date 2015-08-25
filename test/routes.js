@@ -425,6 +425,33 @@ describe('REST API', function () {
             });
         });
 
+        it("should PUT a specific application's anonymous routes array", function (done) {
+            var anonymousRoutes = ['/r1', '/r2', ''];
+            var srcRoutes = ['/r1', '/rX'];
+            authPost(applicationsRoute, admin.token, {
+                "prefix": "prefix2",
+                "host": "http://myurl2.com",
+                "anonymous": srcRoutes
+            }, SUCCESS, function (err, res) {
+                should.not.exist(err);
+                var result = JSON.parse(res.text);
+
+                testApplication._id = result._id;
+                authPut(applicationsRoute + '/' + result._id, admin.token, {
+                    anonymous: anonymousRoutes
+                }, SUCCESS, function(err, res) {
+                    should.not.exist(err);
+                    var app = JSON.parse(res.text);
+
+                    should(app.anonymous.length).equal(srcRoutes.length + 1);
+                    should(app.anonymous).not.containDeep(anonymousRoutes);
+                    should(app.anonymous).containDeep(['/r2']);
+                    should(app.anonymous).containDeep(srcRoutes);
+                    done();
+                });
+            });
+        });
+
         it("should not PUT a specific application's duplicated prefix", function (done) {
             authPut(applicationsRoute + '/' + testApplication._id, admin.token, {
                 prefix: gleanerPrefix
