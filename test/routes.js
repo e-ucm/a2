@@ -226,9 +226,10 @@ describe('REST API', function () {
         should(application.timeCreated).be.a.String();
         should(application.name).be.a.String();
     };
-    var gleanerPort = 3300;
+    var gleanerPort = 3309;
     var gleanerPrefix = 'gleaner';
     var gleanerHost = 'localhost:' + gleanerPort;
+    var anonymousRoute = '/anonymousRoute';
     var gleanerRoles = [
         {
             "roles": "gleanerUser",
@@ -272,7 +273,8 @@ describe('REST API', function () {
             var appData = {
                 prefix: gleanerPrefix,
                 host: gleanerHost,
-                roles: gleanerRoles
+                roles: gleanerRoles,
+                anonymous: [anonymousRoute]
             };
             authPost(applicationsRoute, admin.token, appData, SUCCESS, function (err, res) {
                 should.not.exist(err);
@@ -492,6 +494,9 @@ describe('REST API', function () {
     expressApp.use(route, function (req, res) {
         res.sendStatus(SUCCESS);
     });
+    expressApp.use(anonymousRoute, function (req, res) {
+        res.sendStatus(SUCCESS);
+    });
 
     expressApp.listen(gleanerPort);
 
@@ -511,7 +516,7 @@ describe('REST API', function () {
                     .expect(SUCCESS).end(done);
             });
 
-            it('should not' + upperCaseMethod + ' (proxy) the route ' + forbiddenRoute, function (done) {
+            it('should not ' + upperCaseMethod + ' (proxy) the route ' + forbiddenRoute, function (done) {
                 request[method](gleanerProxyBaseUrl + forbiddenRoute).send(someData).set('Authorization', 'Bearer ' + user.token)
                     .expect(FORBIDDEN).end(done);
             });
@@ -523,6 +528,22 @@ describe('REST API', function () {
 
             it('should not ' + upperCaseMethod + ' (proxy) a route without the Authorization header', function (done) {
                 request[method](gleanerProxyBaseUrl).send(someData).expect(UNAUTHORIZED).end(done);
+            });
+        });
+    });
+
+    describe("ALL /:proxy/:prefix* for anonymous routes", function () {
+        it("should ALL application's anonymous routes", function (done) {
+            methods.forEach(function (method) {
+                request[method](gleanerProxyBaseUrl + anonymousRoute).send(someData)
+                    .expect(SUCCESS).end(function (err) {
+                        if (err) {
+                            return done(err);
+                        }
+                        if (method === 'delete') {
+                            done();
+                        }
+                    });
             });
         });
     });
