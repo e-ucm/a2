@@ -133,7 +133,7 @@ angular.module('myApp.controllers', ['ngStorage'])
             }];
 
             $scope.anonymousRoutes = [{
-                val: ''
+                route: ''
             }];
 
             $scope.addResourceInput = function (applicationRole) {
@@ -143,8 +143,8 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
 
             $scope.addAnonymousRouteInput = function () {
-                if ($scope.anonymousRoutes[$scope.anonymousRoutes.length - 1].val !== '') {
-                    $scope.anonymousRoutes.push({val: ''});
+                if ($scope.anonymousRoutes[$scope.anonymousRoutes.length - 1].route !== '') {
+                    $scope.anonymousRoutes.push({route: ''});
                 }
             };
 
@@ -202,10 +202,10 @@ angular.module('myApp.controllers', ['ngStorage'])
                         i++;
                     });
                 }
-                if ($scope.anonymousRoutes[0].val !== '') {
+                if ($scope.anonymousRoutes[0].route !== '') {
                     applicationData.anonymous = [];
                     $scope.anonymousRoutes.forEach(function(field) {
-                        applicationData.anonymous.push(field.val);
+                        applicationData.anonymous.push(field.route);
                     });
                 }
                 $http.post('/api/applications/', applicationData, {
@@ -214,7 +214,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                     }
                 }).success(function () {
                     $scope.applicationRoles = [{roles: '', allows: [{resourceName: '', permissionName: ['']}]}];
-                    $scope.anonymousRoutes = [''];
+                    $scope.anonymousRoutes = [{route: ''}];
                     $scope.name = '';
                     $scope.prefix = '';
                     $scope.host = '';

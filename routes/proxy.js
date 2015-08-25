@@ -30,7 +30,7 @@ exports = module.exports = function (jwtMiddleware) {
             var userId = req.user.username;
 
             var routes = application.routes;
-            if(routes) {
+            if (routes) {
                 var options = {
                     sensitive: true,
                     strict: false,
@@ -170,7 +170,7 @@ exports = module.exports = function (jwtMiddleware) {
                 }
 
                 var anonymous = application.anonymous;
-                if(anonymous) {
+                if (anonymous) {
                     var appRoute = req.params[0];
                     var options = {
                         sensitive: true,
@@ -216,5 +216,4 @@ exports = module.exports = function (jwtMiddleware) {
     });
 
     return router;
-}
-;
+};
