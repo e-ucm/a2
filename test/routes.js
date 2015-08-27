@@ -519,9 +519,11 @@ describe('REST API', function () {
     expressApp.use(require('body-parser').json());
 
     expressApp.use(route, function (req, res) {
+        should(req.headers['x-gleaner-user']).equal(user.username);
         res.sendStatus(SUCCESS);
     });
     expressApp.use(anonymousRoute, function (req, res) {
+        should.not.exist(req.headers['x-gleaner-user']);
         res.sendStatus(SUCCESS);
     });
 
@@ -563,10 +565,9 @@ describe('REST API', function () {
         it("should ALL application's anonymous routes", function (done) {
             methods.forEach(function (method) {
                 request[method](gleanerProxyBaseUrl + anonymousRoute).send(someData)
-                    .expect(SUCCESS).end(function (err) {
-                        if (err) {
-                            return done(err);
-                        }
+                    .expect(SUCCESS).end(function (err, res) {
+                        should.not.exist(err);
+                        should(res.text).equal('OK');
                         if (method === 'delete') {
                             done();
                         }

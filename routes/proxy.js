@@ -7,6 +7,9 @@ var express = require('express'),
     pathToRe = require('path-to-regexp'),
     proxy = httpProxy.createProxyServer(proxyOptions);
 
+proxy.on('proxyRes', function () {
+    proxy.removeAllListeners('proxyReq');
+});
 
 exports = module.exports = function (jwtMiddleware) {
 
@@ -38,6 +41,9 @@ exports = module.exports = function (jwtMiddleware) {
                 };
                 for (var i = 0; i < routes.length; ++i) {
                     var path = routes[i];
+                    if (!path) {
+                        continue;
+                    }
 
                     var regExp = pathToRe(path, [], options);
 
@@ -96,6 +102,13 @@ exports = module.exports = function (jwtMiddleware) {
 
         if (req._parsedUrl.search) {
             host += req._parsedUrl.search;
+        }
+
+        if (req.user) {
+            var username = req.user.username;
+            proxy.on('proxyReq', function (proxyReq, req, res, options) {
+                proxyReq.setHeader('X-Gleaner-User', username);
+            });
         }
 
         proxy.web(req, res, {
@@ -179,6 +192,9 @@ exports = module.exports = function (jwtMiddleware) {
                     };
                     for (var i = 0; i < anonymous.length; ++i) {
                         var path = anonymous[i];
+                        if (!path) {
+                            continue;
+                        }
 
                         var regExp = pathToRe(path, [], options);
 
