@@ -83,7 +83,7 @@ router.get('/', authentication.authorized, function (req, res, next) {
  *
  * @apiParam {String} prefix Application prefix.
  * @apiParam {String} host Application host.
- * @apiParam {Array<String>} anonymous Express-like routes for whom unidentified (anonymous) requests will be forwarded anyway.
+ * @apiParam {String[]} anonymous Express-like routes for whom unidentified (anonymous) requests will be forwarded anyway.
  *
  * @apiParamExample {json} Request-Example:
  *      {
@@ -180,7 +180,7 @@ router.post('/', authentication.authorized, function (req, res, next) {
  * @apiName GetApplication
  * @apiGroup Applications
  *
- * @apiParam {String} applicationId ApplicationId id.
+ * @apiParam {String} applicationId Application id.
  *
  * @apiSuccess(200) Success.
  *
@@ -226,7 +226,7 @@ function isArray(obj) {
  * @apiParam {String} name The new name.
  * @apiParam {String} prefix Application prefix.
  * @apiParam {String} host Application host.
- * @apiParam {Array<String>} anonymous Express-like routes for whom unidentified (anonymous) requests will be forwarded anyway.
+ * @apiParam {String[]} anonymous Express-like routes for whom unidentified (anonymous) requests will be forwarded anyway.
  *                                      The routes from this array will be added only if they're not present yet.
  *
  * @apiParamExample {json} Request-Example:
@@ -275,8 +275,8 @@ router.put(applicationIdRoute, authentication.authorized, function (req, res, ne
     if (req.body.host) {
         update.$set.host = req.body.host;
     }
-    if(isArray(req.body.anonymous)) {
-        update.$addToSet = { anonymous: { $each: req.body.anonymous.filter(Boolean) } };
+    if (isArray(req.body.anonymous)) {
+        update.$addToSet = {anonymous: {$each: req.body.anonymous.filter(Boolean)}};
     }
 
     var options = {
