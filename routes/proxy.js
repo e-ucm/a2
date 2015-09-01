@@ -183,6 +183,7 @@ exports = module.exports = function (jwtMiddleware) {
                 }
 
                 var anonymous = application.anonymous;
+                var forward = false;
                 if (anonymous) {
                     var appRoute = req.params[0];
                     var options = {
@@ -200,22 +201,23 @@ exports = module.exports = function (jwtMiddleware) {
 
                         var match = regExp.exec(appRoute);
                         if (match) {
-                            return proxyRequest(application, req, res, next, true);
+                            forward = true;
+                            break;
                         }
                     }
                 }
 
                 jwtMiddleware(req, res, function (err) {
                     if (err) {
-                        return next(err);
+                        return forward ? proxyRequest(application, req, res, next, forward) : next(err);
                     }
                     if (req.user) {
                         req.app.tokenStorage.middleware(req, res, function (err) {
                             if (err) {
-                                return next(err);
+                                return forward ? proxyRequest(application, req, res, next, forward) : next(err);
                             }
 
-                            proxyRequest(application, req, res, next, false);
+                            proxyRequest(application, req, res, next, forward);
                         });
                     } else {
                         err = new Error('User is not authenticated!');
