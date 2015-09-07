@@ -205,7 +205,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                 }
                 if ($scope.anonymousRoutes[0].route !== '') {
                     applicationData.anonymous = [];
-                    $scope.anonymousRoutes.forEach(function(field) {
+                    $scope.anonymousRoutes.forEach(function (field) {
                         applicationData.anonymous.push(field.route);
                     });
                 }
@@ -236,6 +236,135 @@ angular.module('myApp.controllers', ['ngStorage'])
                     console.error('Error on get /api/applications/:appId: ' + JSON.stringify(data) + ', status: ' + status);
                 });
             };
+
+            $scope.emotionsApplication = {
+                "name": "emotions",
+                "prefix": "emotions",
+                "host": "http://localhost:3232/api",
+                anonymous: [
+                    '/emotions'
+                ]
+            };
+
+            $scope.gleanerApplication = {
+                "name": "gleaner",
+                "prefix": "gleaner",
+                "host": "http://localhost:3300/api",
+                "roles": [
+                    {
+                        "roles": "student",
+                        "allows": [
+                            {
+                                "resources": [
+                                    "/games",
+                                    "/games/:gameId/versions",
+                                    "/games/:gameId/versions/:versionId",
+                                    "/games/:gameId/versions/:versionId/sessions/my",
+                                    "/sessions/:sessionId/results"
+                                ],
+                                "permissions": [
+                                    "get"
+                                ]
+                            },
+                            {
+                                "resources": [
+                                    "/sessions/:sessionId"
+                                ],
+                                "permissions": [
+                                    "put",
+                                    "get"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "roles": "teacher",
+                        "allows": [
+                            {
+                                "resources": [
+                                    "/games/games",
+                                    "/games/:gameId/versions",
+                                    "/games/:gameId/versions/:versionId",
+                                    "/games/:gameId/versions/:versionId/sessions/my",
+                                    "/sessions/:sessionId/results"
+
+                                ],
+                                "permissions": [
+                                    "get"
+                                ]
+                            },
+                            {
+                                "resources": [
+                                    "/sessions/:sessionId",
+                                    "/sessions/:sessionId/remove",
+                                    "/sessions/:sessionId/results/:resultsId"
+                                ],
+                                "permissions": [
+                                    "*"
+                                ]
+                            },
+                            {
+                                "resources": [
+                                    "/games/:gameId/versions/:versionId/sessions",
+                                    "/sessions/:sessionId/:event"
+                                ],
+                                "permissions": [
+                                    "post"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "roles": "developer",
+                        "allows": [
+                            {
+                                "resources": [
+                                    "/games/my",
+                                    "/games/:gameId",
+                                    "/games/:gameId/versions",
+                                    "/games/:gameId/versions/:versionId"
+                                ],
+                                "permissions": [
+                                    "*"
+                                ]
+                            },
+                            {
+                                "resources": [
+                                    "/games/:gameId/versions/:versionId/sessions",
+                                    "/sessions/:sessionId"
+                                ],
+                                "permissions": [
+                                    "get"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                anonymous: [
+                    '/collector/start/:trackingCode',
+                    '/collector/track'
+                ]
+            };
+
+            $scope.applicationString = JSON.stringify($scope.gleanerApplication, null, 4);
+
+            $scope.addScriptApplication = function () {
+                var data = JSON.parse($scope.applicationString);
+                $http.post('/api/applications/', data, {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function () {
+                    refresh();
+                }).error(function (data, status) {
+                    console.error('Error on post /api/applications/:appId: ' + JSON.stringify(data) + ', status: ' + status);
+                });
+            };
+
+            $scope.selectApp = function (sctript) {
+                $scope.applicationString = JSON.stringify(sctript, null, 4);
+            };
+
         }])
 
     .controller('RolesController', ['$scope', '$http', '$location', '$localStorage',
