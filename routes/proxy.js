@@ -37,7 +37,7 @@ exports = module.exports = function (jwtMiddleware) {
                 var options = {
                     sensitive: true,
                     strict: false,
-                    end: false
+                    end: true
                 };
                 for (var i = 0; i < routes.length; ++i) {
                     var path = routes[i];
@@ -46,9 +46,7 @@ exports = module.exports = function (jwtMiddleware) {
                     }
 
                     var regExp = pathToRe(path, [], options);
-
                     var match = regExp.exec(resource);
-
                     if (match) {
                         resource = path;
                         break;
@@ -189,7 +187,7 @@ exports = module.exports = function (jwtMiddleware) {
                     var options = {
                         sensitive: true,
                         strict: false,
-                        end: false
+                        end: true
                     };
                     for (var i = 0; i < anonymous.length; ++i) {
                         var path = anonymous[i];
