@@ -1,0 +1,61 @@
+#createRole.row-fluid
+    style.
+        .lpad {
+            padding-left: 5px;
+        }
+
+        .gpad {
+            padding-left: 30px;
+        }
+    .page-header
+        h3 Create new Application
+    table(padding-left='12cm')
+        tbody
+            tr
+                td.lpad
+                    label Application name
+                    input.form-control(type='text' ng-model='name')
+                td.lpad
+                    label Prefix
+                    input.form-control(type='text' ng-model='prefix')
+                td.lpad
+                    label Host
+                    input.form-control(type='text' ng-model='host')
+            tr
+                td
+                    h4 New Roles
+            tr
+                table.border(ng-repeat='applicationRole in applicationRoles')
+                    tr
+                        td.gpad
+                            label Role name
+                            input.form-control(type='text' ng-model='applicationRole.roles')
+                    tr(ng-repeat='allow in applicationRole.allows')
+                        td.gpad
+                            label Resource
+                            input.form-control(type='text' ng-model='allow.resourceName')
+                        td.lpad
+                            label Permission
+                            input.form-control(type='text' ng-model='allow.permissionName')
+                    td.gpad
+                        br
+                        button.btn.btn-default(ng-click='addResourceInput(applicationRole)') More resources
+            tr
+                td
+                    br
+                    button.btn.btn-default(ng-click='addRoleInput()') More roles
+            tr
+                table.border(ng-repeat='anonymousRoute in anonymousRoutes')
+                    tr
+                        td
+                            br
+                            label Route allowing unidentified requests
+                            input.form-control(type='text' ng-model='anonymousRoute.route')
+                td
+                    br
+                    button.btn.btn-default(ng-click='addAnonymousRouteInput()') More routes
+            tr
+                td
+                    br
+                    br
+                    button.btn.btn-primary(ng-click='addApplication()') Add application

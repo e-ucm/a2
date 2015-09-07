@@ -31,44 +31,14 @@ block content
                                 td
                                     a.btn.btn-danger(ng-click='deleteApplication(application._id)')
                                         i.fa.fa-trash-o.fa-lg  Delete
-                #createRole.row-fluid
-                    table
-                        tr
-                            td.col-sm-4
-                                label Application name
-                                input.form-control(type='text' ng-model='name')
-                            td.col-sm-4
-                                label Prefix
-                                input.form-control(type='text' ng-model='prefix')
-                            td.col-sm-4
-                                label Host
-                                input.form-control(type='text' ng-model='host')
-                            td
-                                button.btn.btn-primary(ng-click='addApplication()') Add new
-                        tr
-                            table(ng-repeat='applicationRole in applicationRoles')
-                                tr
-                                    td.col-sm-4
-                                        label Role name
-                                        input.form-control(type='text' ng-model='applicationRole.roles')
-                                tr(ng-repeat='allow in applicationRole.allows')
-                                    td.col-sm-4
-                                        label Resource
-                                        input.form-control(type='text' ng-model='allow.resourceName')
-                                    td.col-sm-4
-                                        label Permission
-                                        input.form-control(type='text' ng-model='allow.permissionName')
-                                td
-                                    .btn.btn-primary(ng-click='addResourceInput(applicationRole)') More resources
-                        tr
-                            td
-                                button.btn.btn-primary(ng-click='addRoleInput()') More roles
-                        tr
-                            table(ng-repeat='anonymousRoute in anonymousRoutes')
-                                tr
-                                    td.col-sm-4
-                                        label Route allowing unidentified requests
-                                        input.form-control(type='text' ng-model='anonymousRoute.route')
-                            td
-                                .btn.btn-primary(ng-click='addAnonymousRouteInput()') More routes
-                    br
+                #menu
+                .col-sm-12
+                    include menu
+                .col-sm-12.tab-content
+                    #boxes.tab-pane.active
+                        include boxes
+                    #text-area.tab-pane
+                        include text-area
+
+
+
