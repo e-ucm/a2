@@ -134,7 +134,9 @@ router.post('/', authentication.authorized, function (req, res, next) {
                         var resources = allow.resources;
                         for (var i = 0; i < resources.length; i++) {
                             resources[i] = req.body.prefix + resources[i];
-                            routes.push(resources[i]);
+                            if (routes.indexOf(resources[i]) === -1) {
+                                routes.push(resources[i]);
+                            }
                         }
                     });
                 });
