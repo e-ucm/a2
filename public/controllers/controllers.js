@@ -330,6 +330,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                             },
                             {
                                 "resources": [
+                                    "/games/statements",
                                     "/games/:gameId/versions/:versionId/sessions",
                                     "/sessions/:sessionId"
                                 ],
