@@ -110,6 +110,7 @@ angular.module('myApp.controllers', ['ngStorage'])
         function ApplicationsController($scope, $http, $window, $localStorage) {
             $scope.$storage = $localStorage;
 
+            $scope.proxyRoute = $window.location.host + "/proxy/";
             var refresh = function () {
 
                 $http.get('/api/applications', {
@@ -306,7 +307,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                             {
                                 "resources": [
                                     "/games/:gameId/versions/:versionId/sessions",
-                                    "/sessions/:sessionId/:event"
+                                    "/sessions/:sessionId/event/:event"
                                 ],
                                 "permissions": [
                                     "post"
@@ -335,6 +336,14 @@ angular.module('myApp.controllers', ['ngStorage'])
                                 ],
                                 "permissions": [
                                     "get"
+                                ]
+                            },
+                            {
+                                "resources": [
+                                    "/games"
+                                ],
+                                "permissions": [
+                                    "post"
                                 ]
                             }
                         ]
