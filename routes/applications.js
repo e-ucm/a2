@@ -159,7 +159,7 @@ router.post('/', authentication.authorized, function (req, res, next) {
                 anonymous: req.body.anonymous || [],
                 routes: results.roles
             }, done);
-        }],
+        }]
     }, function (err, results) {
         if (err) {
             err.status = 400;
