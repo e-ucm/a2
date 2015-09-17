@@ -168,8 +168,6 @@ router.post('/', authentication.authorized, function (req, res, next) {
  *          ],
  *      }
  *
- * @apiError(400) RolesDoesNotExist The role doesn't exist.
- *
  * @apiError(400) RoleExists The role {roleName}  doesn't exist.
  *
  */
@@ -185,11 +183,7 @@ router.get('/:roleName', authentication.authorized, function (req, res, next) {
                 if (err) {
                     done(err);
                 }
-                if (JSON.stringify(result) === "{}") {
-                    err = new Error("The role " + roleName + " doesn't exist.");
-                    err.status = 400;
-                    return next(err);
-                }
+
                 done(null, result);
             });
         }]
