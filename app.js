@@ -55,7 +55,7 @@ if (app.get('env') === 'development') {
 }
 
 // enable cross-origin resource sharing - CORS http://enable-cors.org/index.html
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Authorization2");
     res.header("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, DELETE");
@@ -135,27 +135,12 @@ app.use(function (req, res, next) {
 });
 
 // error handlers
-
-if (app.get('env') === 'development') {
-
-    // development error handler
-    // will print stacktrace
-    app.use(function (err, req, res, next) {
-        res.status(err.status || 500);
-        res.render('error', {
-            message: err.message,
-            error: err
-        });
+// production error handler
+// no stacktraces leaked to user
+app.use(function (err, req, res, next) {
+    res.status(err.status || 500).send({
+        message: err.message
     });
-} else {
-
-    // production error handler
-    // no stacktraces leaked to user
-    app.use(function (err, req, res, next) {
-        res.status(err.status || 500).send({
-            message: err.message
-        });
-    });
-}
+});
 
 module.exports = app;
