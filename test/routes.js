@@ -439,7 +439,7 @@ describe('REST API', function () {
                 testApplication._id = result._id;
                 authPut(applicationsRoute + '/' + result._id, admin.token, {
                     anonymous: anonymousRoutes
-                }, SUCCESS, function(err, res) {
+                }, SUCCESS, function (err, res) {
                     should.not.exist(err);
                     var app = JSON.parse(res.text);
 
@@ -468,42 +468,6 @@ describe('REST API', function () {
             authPut(applicationsRoute + '/' + testApplication._id, admin.token, {
                 host: 'invalid_url'
             }, 403, done);
-        });
-    });
-
-    describe(DEL + applicationsRoute + '/:applicationId', function () {
-
-        var validateDeletedApplication = function (prefix, done) {
-            return function (err, res) {
-                should.not.exist(err);
-                should(res).be.an.Object();
-
-                res = JSON.parse(res.text);
-                should(res.message).be.a.String();
-
-                app.db.model('application').findByPrefix(prefix, function (error, app) {
-                    should.not.exist(error);
-                    should.not.exist(app);
-                    done();
-                });
-            };
-        };
-
-        it('should DELETE an application correctly with an authorized token', function (done) {
-            authPost(applicationsRoute, admin.token, {
-                "prefix": "test-prefix",
-                "host": "http://testhost.com"
-            }, SUCCESS, function (err, res) {
-                should.not.exist(err);
-                var result = JSON.parse(res.text);
-
-                del(applicationsRoute + '/' + result._id, 'invalid_token', UNAUTHORIZED, function (err) {
-                    should.not.exist(err);
-
-                    del(applicationsRoute + '/' + result._id, admin.token, SUCCESS,
-                        validateDeletedApplication(result.prefix, done));
-                });
-            });
         });
     });
 
@@ -722,64 +686,6 @@ describe('REST API', function () {
         });
     });
 
-    describe(DEL + usersRoute + '/:userId', function () {
-
-        var validateDeletedUser = function (username, done) {
-            return function (err, res) {
-                should.not.exist(err);
-                should(res).be.an.Object();
-
-                res = JSON.parse(res.text);
-                should(res.message).be.a.String();
-
-                app.db.model('user').findByUsername(username, function (error, user) {
-                    should.not.exist(error);
-                    should.not.exist(user);
-                    done();
-                });
-            };
-        };
-
-        it('should DELETE an user correctly with an authorized token', function (done) {
-            post(signupRoute, {
-                "username": "testUser1",
-                "password": "testUser1Pw",
-                "email": "testUser1Pw@comp.ink"
-            }, SUCCESS, function (err, res) {
-                should.not.exist(err);
-                var result = JSON.parse(res.text);
-
-                del(usersRoute + '/' + result.user._id, 'invalid_token', UNAUTHORIZED, function (err) {
-                    should.not.exist(err);
-
-                    del(usersRoute + '/' + result.user._id, admin.token, SUCCESS,
-                        validateDeletedUser(result.user.username, done));
-                });
-            });
-        });
-
-        it('should DELETE himself', function (done) {
-            post(signupRoute, {
-                "username": "testUser1",
-                "password": "testUser1Pw",
-                "email": "testUser1Pw@comp.ink"
-            }, SUCCESS, function (err, res) {
-                should.not.exist(err);
-                var result = JSON.parse(res.text);
-
-                post(loginRoute, {
-                    "username": "testUser1",
-                    "password": "testUser1Pw"
-                }, SUCCESS, function (err, res) {
-                    res = JSON.parse(res.text);
-                    var testUserToken = res.user.token;
-                    del(usersRoute + '/' + result.user._id, testUserToken, SUCCESS,
-                        validateDeletedUser(result.user.username, done));
-                });
-            });
-        });
-    });
-
     /** /api/users/:userId/roles **/
 
     describe(GET + usersRoute + '/:userId/roles', function () {
@@ -841,19 +747,24 @@ describe('REST API', function () {
         });
     });
 
+    var appRoleRoute = "gleaner/resource-4";
+    var notAppRoleRoute = "noApp/resource-5";
     var role1 = {
         "roles": "role1",
         "allows": [
             {"resources": "resource-1", "permissions": ["permission-1", "permission-3"]},
-            {"resources": ["resource-2", "resource-3"], "permissions": ["permission-2"]}
+            {"resources": ["resource-2", "resource-3", appRoleRoute, notAppRoleRoute], "permissions": ["permission-2"]}
         ]
     };
+
     var role2 = {
         "roles": "role2",
         "resources": [
             "resource-1",
             "resource-2",
-            "resource-3"
+            "resource-3",
+            appRoleRoute,
+            notAppRoleRoute
         ],
         "permissions": [
             "permission-1",
@@ -899,7 +810,13 @@ describe('REST API', function () {
                 res = JSON.parse(res.text);
                 should(res).be.an.Array();
                 should(res).containDeep([role1.roles]);
-                done();
+                get(applicationsRoute + '/' + application._id, admin.token, SUCCESS, function (err, res) {
+                    res = JSON.parse(res.text);
+                    should(res).be.an.Object();
+                    should(res.routes).containDeep([appRoleRoute]);
+                    should(res.routes).not.containDeep([notAppRoleRoute]);
+                    done();
+                });
             });
         });
 
@@ -909,7 +826,13 @@ describe('REST API', function () {
                 res = JSON.parse(res.text);
                 should(res).be.an.Array();
                 should(res).containDeep([role2.roles]);
-                done();
+                get(applicationsRoute + '/' + application._id, admin.token, SUCCESS, function (err, res) {
+                    res = JSON.parse(res.text);
+                    should(res).be.an.Object();
+                    should(res.routes).containDeep([appRoleRoute]);
+                    should(res.routes).not.containDeep([notAppRoleRoute]);
+                    done();
+                });
             });
         });
 
@@ -1115,6 +1038,105 @@ describe('REST API', function () {
         });
     });
 
+    /**DELETES**/
+
+    /** DELETES /api/applications **/
+    describe(DEL + applicationsRoute + '/:applicationId', function () {
+
+        var validateDeletedApplication = function (prefix, done) {
+            return function (err, res) {
+                should.not.exist(err);
+                should(res).be.an.Object();
+
+                res = JSON.parse(res.text);
+                should(res.message).be.a.String();
+
+                app.db.model('application').findByPrefix(prefix, function (error, app) {
+                    should.not.exist(error);
+                    should.not.exist(app);
+                    get(rolesRoute + '/' + role1.roles, admin.token, SUCCESS, function (err, res) {
+                        res = JSON.parse(res.text);
+                        should(res).be.an.Object();
+                        should.not.exist(res[appRoleRoute]);
+
+                        done();
+                    });
+                });
+            };
+        };
+
+        it('should DELETE an application correctly with an authorized token', function (done) {
+
+            del(applicationsRoute + '/' + application._id, 'invalid_token', UNAUTHORIZED, function (err) {
+                should.not.exist(err);
+
+                del(applicationsRoute + '/' + application._id, admin.token, SUCCESS,
+                    validateDeletedApplication(application.prefix, done));
+            });
+
+        });
+    });
+
+    /** DELETE /api/users **/
+    describe(DEL + usersRoute + '/:userId', function () {
+
+        var validateDeletedUser = function (username, done) {
+            return function (err, res) {
+                should.not.exist(err);
+                should(res).be.an.Object();
+
+                res = JSON.parse(res.text);
+                should(res.message).be.a.String();
+
+                app.db.model('user').findByUsername(username, function (error, user) {
+                    should.not.exist(error);
+                    should.not.exist(user);
+                    done();
+                });
+            };
+        };
+
+        it('should DELETE an user correctly with an authorized token', function (done) {
+            post(signupRoute, {
+                "username": "testUser1",
+                "password": "testUser1Pw",
+                "email": "testUser1Pw@comp.ink"
+            }, SUCCESS, function (err, res) {
+                should.not.exist(err);
+                var result = JSON.parse(res.text);
+
+                del(usersRoute + '/' + result.user._id, 'invalid_token', UNAUTHORIZED, function (err) {
+                    should.not.exist(err);
+
+                    del(usersRoute + '/' + result.user._id, admin.token, SUCCESS,
+                        validateDeletedUser(result.user.username, done));
+                });
+            });
+        });
+
+        it('should DELETE himself', function (done) {
+            post(signupRoute, {
+                "username": "testUser1",
+                "password": "testUser1Pw",
+                "email": "testUser1Pw@comp.ink"
+            }, SUCCESS, function (err, res) {
+                should.not.exist(err);
+                var result = JSON.parse(res.text);
+
+                post(loginRoute, {
+                    "username": "testUser1",
+                    "password": "testUser1Pw"
+                }, SUCCESS, function (err, res) {
+                    res = JSON.parse(res.text);
+                    var testUserToken = res.user.token;
+                    del(usersRoute + '/' + result.user._id, testUserToken, SUCCESS,
+                        validateDeletedUser(result.user.username, done));
+                });
+            });
+        });
+    });
+
+    /** DELETE role in /api/users **/
     describe(DEL + usersRoute + '/:userId/roles', function () {
         var deletedRole = 'role1';
 
@@ -1166,7 +1188,7 @@ describe('REST API', function () {
         });
     });
 
-    /** DELETES /api/roles **/
+    /** DELETE /api/roles **/
     var permissionsPath = '/permissions';
     var routePermissionId = routeResourceId + permissionsPath + '/:permissionName';
     var validPermissionId = validResourcesId + permissionsPath + '/' + thePermission;
