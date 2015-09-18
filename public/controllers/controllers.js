@@ -256,7 +256,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                         "allows": [
                             {
                                 "resources": [
-                                    "/games",
+                                    "/games/public",
                                     "/games/:gameId/versions",
                                     "/games/:gameId/versions/:versionId",
                                     "/games/:gameId/versions/:versionId/sessions/my",
@@ -282,7 +282,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                         "allows": [
                             {
                                 "resources": [
-                                    "/games",
+                                    "/games/public",
                                     "/games/:gameId/versions",
                                     "/games/:gameId/versions/:versionId",
                                     "/games/:gameId/versions/:versionId/sessions/my",
