@@ -12,5 +12,11 @@ before_script:
 
 script:
   - npm run-script test-travis
+  - npm run gen-apidoc
 
-after_success: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+after_success:
+  - "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
+  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && bash ./bin/deploy-gh-pages.sh
+env:
+  global:
+    - secure: "ZIm57VINbbVwQo059wC3DB0f7ODLppC8HefscvO9SwhOsCwUDjz/10O8Xm55MvmwqYVMloUmQvaSk5MJTFP9gyUcgVCFKgtc6t1u9jpem1kioRKnAE8DZOyNMf61L9vT3SHLoOvkRqidUEdFOmtixrxz+6s29p3PULSuIFIuFzyjChmj4n5lolGCHrGPTeG8FC8xX8GfTKe+CDqINU2lx0Tahxx9o9dUygAG13arT7fnqpNsxdrFO5DUscddV1TJ5W5XSlO5Z9zRMBdKLo+m7ISHu/1VyuHnwIuZ8dX972+Pa8PdH7cSqw5tOOW+woZv/KSdQr07fHs6ryg2MFkAQerx+U6hzhy+iXM/g6bxTpQA+SUhgM3xTKBjcxUrHvDH9fbPYO6lG/Srrti1Ojasdxv7MwI03z4/iU8hP1swcrQOa4j7pYbtoyAFCKiCc5W5Dcrjq2kuwVxUxAkpnCOtuCvAnN9Nwz5De6XrFWFVe8s1/BAvid7mNJbiBIJHpK1SDBhebGeiuODcx4iSK6V5eisBVunRCBsL4WkVnjY+vEE7veIcde/rHKiWj/F0o6ULKDXmLVzd/Wgtbk72rbxm40I4ag2joZXpYHTuLf0h/Xag3DHyEogrQBct5zItN5zfCc+MV9hnAiwHYJRzi3xHqbIxeGGQtTVslKUNx0GL5as="
