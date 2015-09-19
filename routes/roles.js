@@ -126,6 +126,7 @@ router.post('/', authentication.authorized, function (req, res, next) {
                     done(err, result);
                 });
             }
+            updateAppRoutes(req);
         }]
     }, function (err) {
         if (err) {
@@ -167,8 +168,6 @@ router.post('/', authentication.authorized, function (req, res, next) {
  *          ],
  *      }
  *
- * @apiError(400) RolesDoesNotExist The role doesn't exist.
- *
  * @apiError(400) RoleExists The role {roleName}  doesn't exist.
  *
  */
@@ -184,11 +183,7 @@ router.get('/:roleName', authentication.authorized, function (req, res, next) {
                 if (err) {
                     done(err);
                 }
-                if (JSON.stringify(result) === "{}") {
-                    err = new Error("The role " + roleName + " doesn't exist.");
-                    err.status = 400;
-                    return next(err);
-                }
+
                 done(null, result);
             });
         }]
@@ -309,7 +304,7 @@ router.delete('/:roleName', authentication.authorized, function (req, res, next)
  *      HTTP/1.1 200 OK
  *      {
  *         "resources-1": [
- *              "perm-1"
+ *              "perm-1",
  *              "perm-3"
  *         ],
  *         "resources-2": [
@@ -349,6 +344,7 @@ router.post('/:roleName/resources', authentication.authorized, function (req, re
             } else {
                 req.app.acl.allow(roleName, req.body.resources, req.body.permissions, done);
             }
+            updateAppRoutes(req);
         }]
     }, function (err) {
         if (err) {
@@ -362,6 +358,59 @@ router.post('/:roleName/resources', authentication.authorized, function (req, re
         });
     });
 });
+
+/**
+ * Given a role or object with resources/allows, this method added the new Routes to the correct application
+ * (if the route starts by existing prefix and it doesn't contain the route yet).
+ *
+ * @param req
+ */
+function updateAppRoutes(req) {
+    var resources = [];
+    if (req.body.allows) {
+        req.body.allows.forEach(function (obj) {
+            resources = resources.concat(obj.resources);
+        });
+    } else {
+        resources = req.body.resources;
+    }
+
+    var newAppRoutes = {};
+    resources.forEach(function (resc) {
+        if (resc[0] !== '/') {
+            var appName = resc.split('/')[0];
+            var app = newAppRoutes[appName] = newAppRoutes[appName] ? newAppRoutes[appName] : {};
+            if (!app.routes) {
+                app.routes = [];
+            }
+            app.routes.push(resc);
+        }
+    });
+    var prefixes = Object.getOwnPropertyNames(newAppRoutes);
+    var ApplicationModel = req.app.db.model('application');
+
+    prefixes.forEach(function (prefix) {
+        ApplicationModel.findOne({
+            prefix: prefix
+        }, 'routes', function (err, data) {
+            if (err) {
+                return;
+            }
+            if (data) {
+                if (!data.routes) {
+                    data.routes = [];
+                }
+                newAppRoutes[prefix].routes.forEach(function (r) {
+                    if (data.routes.indexOf(r) === -1) {
+                        data.routes.push(r);
+                    }
+                });
+
+                data.save();
+            }
+        });
+    });
+}
 
 /**
  * @api {post} /roles/:roleName/resources/:resourceName/permissions Creates new permissions.

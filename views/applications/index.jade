@@ -15,8 +15,9 @@ block content
                                 th Host
                                 th Route allowing unidentified requests
                                 th Actions
-                        tbody
-                            tr.active(ng-repeat='application in response.data')
+                                th
+                        tbody(ng-repeat='application in response.data')
+                            tr.active
                                 td
                                     input(value='{{application.name}}' ng-model='application.name')
                                 td
@@ -34,6 +35,11 @@ block content
                                 td
                                     a.btn.btn-danger(ng-click='deleteApplication(application._id)')
                                         i.fa.fa-trash-o.fa-lg  Delete
+                                td
+                                    button.btn.btn-info(ng-show='application.routes.length>0' ng-click='show=!show' title="Show the routes")
+                                        i.fa.fa-search {{application.routes.length}}
+                            tr(ng-if='show' ng-repeat='route in application.routes')
+                                td.info(colspan=7) {{route}}
                 #menu
                 .col-sm-12
                     include menu

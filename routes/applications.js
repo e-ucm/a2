@@ -159,7 +159,7 @@ router.post('/', authentication.authorized, function (req, res, next) {
                 anonymous: req.body.anonymous || [],
                 routes: results.roles
             }, done);
-        }],
+        }]
     }, function (err, results) {
         if (err) {
             err.status = 400;
@@ -332,14 +332,18 @@ router.delete(applicationIdRoute, authentication.authorized, function (req, res,
         _id: applicationId
     };
 
-    req.app.db.model('application').findOneAndRemove(query, function (err, user) {
+    req.app.db.model('application').findOneAndRemove(query, function (err, app) {
         if (err) {
             return next(err);
         }
-        if (!user) {
+        if (!app) {
             err = new Error('No application with the given application id exists.');
             err.status = 400;
             return next(err);
+        } else {
+            app.routes.forEach(function (route) {
+                req.app.acl.removeResource(route);
+            });
         }
 
         res.sendDefaultSuccessMessage();
