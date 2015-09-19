@@ -11,7 +11,7 @@ block content
                         thead
                             tr
                                 th Name
-                                th Prefix
+                                th.col-sm-12 Prefix
                                 th Host
                                 th Route allowing unidentified requests
                                 th Actions
@@ -21,6 +21,9 @@ block content
                                     input(value='{{application.name}}' ng-model='application.name')
                                 td
                                     input(value='{{application.prefix}}' ng-model='application.prefix')
+                                    br
+                                    p
+                                        i {{proxyRoute}}{{application.prefix}}/
                                 td
                                     input(value='{{application.host}}' ng-model='application.host')
                                 td
