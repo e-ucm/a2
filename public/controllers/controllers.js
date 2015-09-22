@@ -4,8 +4,8 @@
 
 angular.module('myApp.controllers', ['ngStorage'])
 
-    .controller('ToolbarController', ['$scope', '$http', '$window', '$timeout', '$localStorage',
-        function ToolbarController($scope, $http, $window, $timeout, $localStorage) {
+    .controller('ToolbarCtrl', ['$scope', '$http', '$window', '$timeout', '$localStorage',
+        function ($scope, $http, $window, $timeout, $localStorage) {
             $scope.$storage = $localStorage;
 
             $scope.isAdmin = function () {
@@ -36,14 +36,14 @@ angular.module('myApp.controllers', ['ngStorage'])
                         $scope.href('/login');
                     }, 110);
                 }).error(function (data, status) {
-                    console.error('Error on get /api/logout ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on ToolbarCtrl, GET /api/logout \n', data);
                 });
             };
 
         }])
 
-    .controller('LoginController', ['$scope', '$http', '$window', '$timeout', '$localStorage',
-        function LoginController($scope, $http, $window, $timeout, $localStorage) {
+    .controller('LoginCtrl', ['$scope', '$http', '$window', '$timeout', '$localStorage',
+        function ($scope, $http, $window, $timeout, $localStorage) {
             $scope.$storage = $localStorage;
 
             $scope.login = function () {
@@ -65,11 +65,11 @@ angular.module('myApp.controllers', ['ngStorage'])
                             $window.location.href = '/users/' + $scope.$storage.user._id;
                         }, 110);
                     }).error(function (data, status) {
-                        console.error('Error on get /api/users/:userId/roles: ' + JSON.stringify(data) + ', status: ' + status);
+                        console.error('Status:', status, ', Error on LoginCtrl, GET /api/users/' + data.user._id + '/roles \n', data);
 
                     });
                 }).error(function (data, status) {
-                    console.error('Error on post /api/login: ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on LoginCtrl, POST /api/login \n', data);
                 });
             };
         }])
@@ -87,7 +87,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                         $scope.errorResponse = '';
                         $window.location.href = '/login';
                     }).error(function (data, status) {
-                        console.error('Error on post /signup: ' + JSON.stringify(data) + ', status: ' + status);
+                        console.error('Status:', status, ', Error on SignupCtrl, POST /signup \n', data);
                         $scope.errorResponse = data.message;
                     });
                 }
@@ -102,21 +102,21 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
         }])
 
-    .controller('ResetController', ['$scope', '$http', '$window',
-        function ResetController($scope, $http, $window) {
+    .controller('ResetCtrl', ['$scope', '$http', '$window',
+        function ($scope, $http, $window) {
 
             $scope.resetPassword = function () {
                 $http.post('/api/login/reset/' + $scope.tkn, $scope.password, {})
                     .success(function () {
                         $window.location.href = '/login';
                     }).error(function (data, status) {
-                        console.error('Error on post /api/reset/:token: ' + JSON.stringify(data) + ', status: ' + status);
+                        console.error('Status:', status, ', Error on ResetCtrl, POST /api/reset/' + $scope.tkn + '\n', data);
                     });
             };
         }])
 
-    .controller('UsersController', ['$scope', '$http', '$window', '$localStorage',
-        function UsersController($scope, $http, $window, $localStorage) {
+    .controller('UsersCtrl', ['$scope', '$http', '$window', '$localStorage',
+        function ($scope, $http, $window, $localStorage) {
             $scope.$storage = $localStorage;
 
             $http.get('/api/users', {
@@ -126,7 +126,7 @@ angular.module('myApp.controllers', ['ngStorage'])
             }).success(function (data) {
                 $scope.response = data;
             }).error(function (data, status) {
-                console.error('Error on get /api/users: ' + JSON.stringify(data) + ', status: ' + status);
+                console.error('Status:', status, ', Error on UsersCtrl, GET /api/users \n', data);
             });
 
             $scope.edit = function (userId) {
@@ -134,8 +134,8 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
         }])
 
-    .controller('ApplicationsController', ['$scope', '$http', '$window', '$localStorage',
-        function ApplicationsController($scope, $http, $window, $localStorage) {
+    .controller('ApplicationsCtrl', ['$scope', '$http', '$window', '$localStorage',
+        function ($scope, $http, $window, $localStorage) {
             $scope.$storage = $localStorage;
 
             $scope.proxyRoute = $window.location.host + "/proxy/";
@@ -148,7 +148,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                 }).success(function (data) {
                     $scope.response = data;
                 }).error(function (data, status) {
-                    console.error('Error on get /api/applications: ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on ApplicationsCtrl, GET /api/applications \n', data);
                 });
             };
 
@@ -202,7 +202,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                 }).success(function () {
                     refresh();
                 }).error(function (data, status) {
-                    console.error('Error on put /api/applications/:appId: ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on ApplicationsCtrl, PUT /api/applications/' + application._id + '\n', data);
                 });
             };
 
@@ -250,7 +250,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                     $scope.host = '';
                     refresh();
                 }).error(function (data, status) {
-                    console.error('Error on post /api/applications/:appId: ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on ApplicationsCtrl, POST /api/applications \n', data);
                 });
             };
 
@@ -262,7 +262,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                 }).success(function () {
                     refresh();
                 }).error(function (data, status) {
-                    console.error('Error on get /api/applications/:appId: ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on ApplicationsCtrl, DEL /api/applications/' + appId + '\n', data);
                 });
             };
 
@@ -387,14 +387,14 @@ angular.module('myApp.controllers', ['ngStorage'])
 
             $scope.addScriptApplication = function () {
                 var data = JSON.parse($scope.applicationString);
-                $http.post('/api/applications/', data, {
+                $http.post('/api/applications', data, {
                     headers: {
                         'Authorization': 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     refresh();
                 }).error(function (data, status) {
-                    console.error('Error on post /api/applications/:appId: ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on ApplicationsCtrl, POST /api/applications \n', data);
                 });
             };
 
@@ -404,8 +404,8 @@ angular.module('myApp.controllers', ['ngStorage'])
 
         }])
 
-    .controller('RolesController', ['$scope', '$http', '$location', '$localStorage',
-        function RolesController($scope, $http, $location, $localStorage) {
+    .controller('RolesCtrl', ['$scope', '$http', '$location', '$localStorage',
+        function ($scope, $http, $location, $localStorage) {
             $scope.$storage = $localStorage;
 
             $scope.newPer = {};
@@ -430,11 +430,11 @@ angular.module('myApp.controllers', ['ngStorage'])
                         }).success(function (data) {
                             $scope.rolesList[role].info = data;
                         }).error(function (data, status) {
-                            console.error('Error on get /api/roles/:roleName: ' + JSON.stringify(data) + ', status: ' + status);
+                            console.error('Status:', status, ', Error on RolesCtrl, GET /api/roles/' + role + '\n', data);
                         });
                     });
                 }).error(function (data, status) {
-                    console.error('Error on get /api/roles ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on RolesCtrl, GET /api/roles \n', data);
 
                 });
             };
@@ -480,7 +480,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                     $scope.newRole.permission = '';
                     $scope.newRoleModel = [{resourceName: '', permissionName: ['']}];
                 }).error(function (data, status) {
-                    console.error('Error on get /api/roles/' + roleName + ' ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on RolesCtrl, GET /api/roles/' + roleName + ' \n', data);
                 });
             };
 
@@ -502,7 +502,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                     $scope.newRec[roleName] = '';
                     $scope.newRecPer[roleName] = '';
                 }).error(function (data, status) {
-                    console.error('Error on get /api/roles/' + roleName + '/resources ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on RolesCtrl, GET /api/roles/' + roleName + '/resources \n', data);
                 });
             };
 
@@ -518,7 +518,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                     role[resourceName] = role[resourceName].concat($scope.newPer[resourceName].split(' '));
                     $scope.newPer[resourceName] = '';
                 }).error(function (data, status) {
-                    console.error('Error on post /api/roles/' + roleName + '/resources/' + resourceName + '/permissions/ ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on RolesCtrl, POST /api/roles/' + roleName + '/resources/' + resourceName + '/permissions \n', data);
                 });
             };
 
@@ -530,7 +530,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                 }).success(function () {
                     delete $scope.rolesList[roleName];
                 }).error(function (data, status) {
-                    console.error('Error on post /api/roles/' + roleName + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on RolesCtrl, POST /api/roles/' + roleName + '\n', data);
                 });
             };
 
@@ -542,7 +542,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                 }).success(function () {
                     delete $scope.rolesList[roleName].info[resourceName];
                 }).error(function (data, status) {
-                    console.error('Error delete get /api/roles/' + roleName + '/resources/' + resourceName + ' ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on RolesCtrl, DEL /api/roles/' + roleName + '/resources/' + resourceName + '\n', data);
                 });
             };
 
@@ -555,7 +555,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                 }).success(function (data) {
                     role[resourceName] = data;
                 }).error(function (data, status) {
-                    console.error('Error on delete /api/roles/' + roleName + '/resources/' + resourceName + '/permissions/' + permission + ' ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on RolesCtrl, DEL /api/roles/' + roleName + '/resources/' + resourceName + '/permissions/' + permission + '\n', data);
                 });
             };
 
@@ -564,8 +564,8 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
         }])
 
-    .controller('ProfileController', ['$scope', '$http', '$localStorage',
-        function ProfileController($scope, $http, $localStorage) {
+    .controller('ProfileCtrl', ['$scope', '$http', '$localStorage',
+        function ($scope, $http, $localStorage) {
             $scope.$storage = $localStorage;
 
             var refresh = function () {
@@ -593,15 +593,15 @@ angular.module('myApp.controllers', ['ngStorage'])
                             }).success(function (data) {
                                 $scope.user.roles[role].info = data;
                             }).error(function (data, status) {
-                                console.error('Error on get /api/roles/:roleName: ' + JSON.stringify(data) + ', status: ' + status);
+                                console.error('Status:', status, ', Error on ProfileCtrl, GET /api/roles/' + role + '\n', data);
                             });
                         });
                     }).error(function (data, status) {
-                        console.error('Error on get /api/users/:userId/roles: ' + JSON.stringify(data) + ', status: ' + status);
+                        console.error('Status:', status, ', Error on ProfileCtrl, GET /api/users/' + data._id + '/roles \n', data);
 
                     });
                 }).error(function (data, status) {
-                    console.error('Error on get /api/users/:userId: ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on ProfileCtrl, GET /api/users/' + $scope.uId + '\n', data);
                 });
 
                 $http.get('/api/roles', {
@@ -611,7 +611,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                 }).success(function (data) {
                     $scope.appRoles = data;
                 }).error(function (data, status) {
-                    console.error('Error on get /api/roles: ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on ProfileCtrl, GET /api/roles \n', data);
                 });
             };
 
@@ -631,7 +631,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                     $scope.newName = undefined;
                     refresh();
                 }).error(function (data, status) {
-                    console.error('Error on post /api/users/:userId: ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on ProfileCtrl, PUT /api/users/' + $scope.uId + '\n', data);
                 });
             };
 
@@ -644,7 +644,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                     $scope.newEmail = undefined;
                     refresh();
                 }).error(function (data, status) {
-                    console.error('Error on post /api/users/:userId: ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on ProfileCtrl, PUT /api/users/' + $scope.uId + '\n', data);
                 });
             };
 
@@ -656,7 +656,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                 }).success(function () {
                     refresh();
                 }).error(function (data, status) {
-                    console.error('Error on post /api/users/:userId/roles: ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on ProfileCtrl, POST /api/users/' + $scope.uId + '/roles \n', data);
                 });
             };
 
@@ -668,7 +668,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                 }).success(function () {
                     refresh();
                 }).error(function (data, status) {
-                    console.error('Error on post /api/users/:userId/roles: ' + JSON.stringify(data) + ', status: ' + status);
+                    console.error('Status:', status, ', Error on ProfileCtrl, DEL /api/users/' + $scope.uId + '/roles \n', data);
                 });
             };
         }]);

@@ -12,6 +12,9 @@ var express = require('express'),
  *
  * @apiParam {String} username User username.
  * @apiParam {String} password User password.
+ *
+ * @apiPermission none
+ *
  * @apiParamExample {json} Request-Example:
  *      {
  *          "username": "username",
@@ -105,6 +108,9 @@ router.post('/', function (req, res, next) {
  * @apiGroup Login
  *
  * @apiParam {String} email User email.
+ *
+ * @apiPermission none
+ *
  * @apiParamExample {json} Request-Example:
  *      {
  *          "email": "your@email.com"
@@ -194,6 +200,9 @@ router.post('/forgot', function (req, res, next) {
  * @apiGroup Login
  *
  * @apiParam {String} password The new user password.
+ *
+ * @apiPermission none
+ *
  * @apiParamExample {json} Request-Example:
  *      {
  *          "password": "newPassword"

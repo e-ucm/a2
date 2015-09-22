@@ -20,6 +20,8 @@ var express = require('express'),
  * @apiParam {Number} [limit=20]
  * @apiParam {Number} [page=1]
  *
+ * @apiPermission admin
+ *
  * @apiParamExample {json} Request-Example:
  *      {
  *          "fields": "",
@@ -91,6 +93,8 @@ router.get('/', authentication.authorized, function (req, res, next) {
  *
  * @apiParam {String} userId User id.
  *
+ * @apiPermission none
+ *
  * @apiSuccess(200) Success.
  *
  * @apiSuccessExample Success-Response:
@@ -137,6 +141,8 @@ router.get(userIdRoute, authentication.authenticated, function (req, res, next) 
  * @apiParam {String} userId User id.
  * @apiParam {[String]} email User email.
  * @apiParam {[Object]} name User name.
+ *
+ * @apiPermission none
  *
  * @apiParamExample {json} Request-Example:
  *      {
@@ -194,6 +200,8 @@ router.put(userIdRoute, authentication.authenticated, function (req, res, next) 
  *
  * @apiParam {String} userId User id.
  *
+ * @apiPermission none
+ *
  * @apiSuccess(200) Success.
  *
  * @apiSuccessExample Success-Response:
@@ -227,6 +235,8 @@ router.delete(userIdRoute, authentication.authenticated, function (req, res, nex
  * @apiGroup Users
  *
  * @apiParam {String} userId User id.
+ *
+ * @apiPermission none
  *
  * @apiSuccess(200) Success.
  *
@@ -266,6 +276,8 @@ router.get(userIdRolesRoute, authentication.authenticated, function (req, res, n
  *
  * @apiParam {String} userId User id.
  * @apiParam {String[]} roles The new roles for the user.
+ *
+ * @apiPermission admin
  *
  * @apiParamExample {json} Request-Example:
  *      [
@@ -317,6 +329,7 @@ router.post(userIdRolesRoute, authentication.authorized, function (req, res, nex
  *
  * @apiParam {String} userId User id.
  *
+ * @apiPermission admin
  *
  * @apiSuccess(200) Success.
  *
@@ -354,6 +367,8 @@ router.delete(userIdRolesRoute + '/:roleName', authentication.authorized, functi
  * @apiParam {String} resourceName Resource name.
  * @apiParam {String} permissionName Permission name.
  *
+ * @apiPermission admin
+ *
  * @apiSuccess(200) Success.
  *
  * @apiSuccessExample Success-Response:
@@ -385,6 +400,8 @@ router.get(userIdRoute + '/*/:permissionName', authentication.authorized, functi
  * @apiGroup Users
  *
  * @apiParam {String} userId User id.
+ *
+ * @apiPermission none
  *
  * @apiSuccess(200) Success.
  *
@@ -458,6 +475,8 @@ router.post(userIdRoute + '/verification', authentication.authorized, function (
  *
  * @apiParam {String} userId User id.
  * @apiParam {String} token Verification token.
+ *
+ * @apiPermission admin
  *
  * @apiSuccess(200) {String} Success.
  *

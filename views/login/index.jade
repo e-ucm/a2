@@ -1,12 +1,12 @@
 extends ../page
 
 block content
-    .container.theme-showcase(ng-controller='ToolbarController')
+    .container.theme-showcase(ng-controller='ToolbarCtrl')
         .row-fluid(ng-if='!isUser()')
             .col-sm-6
                 .page-header
                     h1 Sign In
-                #login(ng-controller='LoginController')
+                #login(ng-controller='LoginCtrl')
                     .form-group
                         label Username:
                         input.form-control(type='text' name='username' ng-model='user.username')

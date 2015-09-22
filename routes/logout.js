@@ -9,6 +9,8 @@ var express = require('express'),
  * @apiName Logout
  * @apiGroup Logout
  *
+ * @apiPermission none
+ *
  * @apiSuccess(200) {String} Success.
  *
  * @apiSuccessExample Success-Response:
