@@ -13,6 +13,8 @@ var express = require('express'),
  * @apiParam {String[]} username User username.
  * @apiParam {String[]} password User password
  *
+ * @apiPermission none
+ *
  * @apiParamExample {json} Request-Example:
  *      {
  *          "email" : "user@email.com",
@@ -73,12 +75,13 @@ router.post('/', function (req, res, next) {
                 verification: {
                     complete: false
                 }
-            }), req.body.password, function(err, resultUser) {
-                if(err) {
-                    if(err.errors) {
+            }), req.body.password, function (err, resultUser) {
+                if (err) {
+                    if (err.errors) {
                         if (err.errors.email && err.errors.email.message) {
                             err.message = err.errors.email.message;
-                        } if (err.errors.username && err.errors.username.message) {
+                        }
+                        if (err.errors.username && err.errors.username.message) {
                             err.message = err.errors.username.message;
                         }
                     }

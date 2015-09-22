@@ -19,6 +19,8 @@ var express = require('express'),
  * @apiParam {Number} [limit=20]
  * @apiParam {Number} [page=1]
  *
+ * @apiPermission admin
+ *
  * @apiParamExample {json} Request-Example:
  *      {
  *          "fields": "",
@@ -84,6 +86,8 @@ router.get('/', authentication.authorized, function (req, res, next) {
  * @apiParam {String} prefix Application prefix.
  * @apiParam {String} host Application host.
  * @apiParam {String[]} anonymous Express-like routes for whom unidentified (anonymous) requests will be forwarded anyway.
+ *
+ * @apiPermission admin
  *
  * @apiParamExample {json} Request-Example:
  *      {
@@ -184,6 +188,8 @@ router.post('/', authentication.authorized, function (req, res, next) {
  *
  * @apiParam {String} applicationId Application id.
  *
+ * @apiPermission admin
+ *
  * @apiSuccess(200) Success.
  *
  * @apiSuccessExample Success-Response:
@@ -231,6 +237,8 @@ function isArray(obj) {
  * @apiParam {String[]} anonymous Express-like routes for whom unidentified (anonymous) requests will be forwarded anyway.
  *                                      The routes from this array will be added only if they're not present yet.
  *
+ * @apiPermission admin
+ *
  * @apiParamExample {json} Request-Example:
  *      {
  *          "name": "Gleaner App."
@@ -248,6 +256,8 @@ function isArray(obj) {
  *          "anonymous": [],
  *          "timeCreated": "2015-07-06T09:03:52.636Z"
  *      }
+ *
+ * @apiError(400) InvalidApplicationId You must provide a valid application id.
  *
  * @apiError(400) ApplicationNotFound No application with the given application id exists.
  *
@@ -312,6 +322,8 @@ router.put(applicationIdRoute, authentication.authorized, function (req, res, ne
  * @apiGroup Applications
  *
  * @apiParam {String} applicationId ApplicationId id.
+ *
+ * @apiPermission admin
  *
  * @apiSuccess(200) Success.
  *

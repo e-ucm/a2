@@ -12,6 +12,9 @@ var express = require('express'),
  * @apiParam {String} name User name.
  * @apiParam {String} mail User mail.
  * @apiParam {String} text Message.
+ *
+ * @apiPermission none
+ *
  * @apiParamExample {json} Request-Example:
  *      {
  *          "name": "Your Name",

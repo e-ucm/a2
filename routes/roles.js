@@ -10,6 +10,8 @@ var express = require('express'),
  * @apiName GetRoles
  * @apiGroup Roles
  *
+ * @apiPermission admin
+ *
  * @apiSuccess(200) {String} Success.
  *
  * @apiSuccessExample Success-Response:
@@ -39,6 +41,8 @@ router.get('/', authentication.authorized, function (req, res, next) {
  *
  * @apiParam {String} roles Role name.
  * @apiParam {Object[]} allows Object with resources and permissions.
+ *
+ * @apiPermission admin
  *
  * @apiParam {String} roles Role name.
  * @apiParam {String[]} resources Role resources.
@@ -149,6 +153,8 @@ router.post('/', authentication.authorized, function (req, res, next) {
  *
  * @apiParam {String} roleName Role name.
  *
+ * @apiPermission admin
+ *
  * @apiSuccess(200) Success.
  *
  * @apiSuccessExample Success-Response:
@@ -202,6 +208,8 @@ router.get('/:roleName', authentication.authorized, function (req, res, next) {
  * @apiGroup Roles
  *
  * @apiParam {String} roleName Role name.
+ *
+ * @apiPermission admin
  *
  * @apiSuccess(200) Success.
  *
@@ -260,6 +268,8 @@ router.delete('/:roleName', authentication.authorized, function (req, res, next)
  * @apiGroup Roles
  *
  * @apiParam {Object[]} allows Object with resources and permissions.
+ *
+ * @apiPermission admin
  *
  * @apiParam {String[]} resources Role resources.
  * @apiParam {String[]} permissions Resources permissions
@@ -421,6 +431,8 @@ function updateAppRoutes(req) {
  * @apiParam {String} resourceName Resource name.
  * @apiParam {String[]} permissions The new permissions.
  *
+ * @apiPermission admin
+ *
  * @apiParamExample {json} Request-Example:
  *      {
  *          "permission" : [
@@ -498,6 +510,8 @@ router.post('/:roleName/resources/*/permissions', authentication.authorized, fun
  * @apiParam {String} roleName Role name.
  * @apiParam {String} resourceName Resource name.
  * @apiParam {String} permissionName The permissions to delete.
+ *
+ * @apiPermission admin
  *
  * @apiSuccess(200) Success.
  *
@@ -580,6 +594,8 @@ router.delete('/:roleName/resources/*/permissions/:permissionName', authenticati
  * @apiParam {String} roleName Role name.
  * @apiParam {String} resourceName Resource to delete.
  *
+ * @apiPermission admin
+ *
  * @apiSuccess(200) Success.
  *
  * @apiSuccessExample Success-Response:
@@ -646,6 +662,8 @@ router.delete('/:roleName/resources/*', authentication.authorized, function (req
  * @apiParam {String} roleName Role name.
  * @apiParam {String} resourceName Resource name.
  *
+ * @apiPermission admin
+ *
  * @apiSuccess(200) Success.
  *
  * @apiSuccessExample Success-Response:
@@ -692,6 +710,8 @@ router.get('/:roleName/resources/*', authentication.authorized, function (req, r
  * @apiGroup Roles
  *
  * @apiParam {String} roles Role name.
+ *
+ * @apiPermission admin
  *
  * @apiSuccess(200) Success.
  *

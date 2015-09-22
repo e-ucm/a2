@@ -129,6 +129,8 @@ exports = module.exports = function (jwtMiddleware) {
      * @apiParam {String} prefix The unique prefix of a previously registered application.
      * @apiParam {String} ANY_ROUTE Relevant for the API this request will be forwarded to. The target API will receive this route.
      *
+     * @apiPermission none
+     *
      * @apiParamExample {json} Request-Example:
      *
      *      Asuming we already have a registered application with the following data:
