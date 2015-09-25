@@ -380,6 +380,11 @@ angular.module('myApp.controllers', ['ngStorage'])
                 anonymous: [
                     '/collector/start/:trackingCode',
                     '/collector/track'
+                ],
+                autoroles: [
+                    'student',
+                    'teacher',
+                    'developer'
                 ]
             };
 

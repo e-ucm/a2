@@ -160,6 +160,7 @@ router.post('/', authentication.authorized, function (req, res, next) {
                 name: req.body.name || '',
                 prefix: req.body.prefix,
                 host: req.body.host,
+                autoroles: req.body.autoroles,
                 anonymous: req.body.anonymous || [],
                 routes: results.roles
             }, done);
