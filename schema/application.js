@@ -21,6 +21,7 @@ exports = module.exports = function (app, mongoose) {
         },
         anonymous: [String],    // Anonymous(unprotected) routes defined by the application
         routes: [String],       // Protected routes defined by the application
+        autoroles: [String],    // The roles that can be auto-assigned by the users when they create a new account
         timeCreated: {
             type: Date,
             default: Date.now

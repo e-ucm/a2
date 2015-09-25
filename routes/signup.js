@@ -19,7 +19,9 @@ var express = require('express'),
  *      {
  *          "email" : "user@email.com",
  *          "username" : "user",
- *          "password" : "pass"
+ *          "password" : "pass",
+ *          "role" : "roleName",
+ *          "prefix": "applicationName"
  *      }
  *
  * @apiSuccess(200) Success.
@@ -64,7 +66,49 @@ router.post('/', function (req, res, next) {
                 return done(err);
             }
 
-            done();
+            if (req.body.role && !req.body.prefix) {
+                err = new Error('Application prefix required');
+                err.status = 400;
+                return done(err);
+            }
+
+            if (req.body.role === 'admin') {
+                err = new Error("The admin role can't be assigned");
+                err.status = 403;
+                return done(err);
+            }
+
+            if (req.body.role && req.body.prefix) {
+                req.app.acl.existsRole(req.body.role, function (err) {
+                    if (err) {
+                        err = new Error("The role " + req.body.role + " doesn't exist");
+                        err.status = 404;
+                        return done(err);
+                    } else {
+                        var AppModel = req.app.db.model('application');
+                        AppModel.findByPrefix(req.body.prefix, function (err, application) {
+                            if (err) {
+                                return done(err);
+                            }
+                            if (!application) {
+                                err = new Error("The " + req.body.prefix + " doesn't exist");
+                                err.status = 404;
+                                return done(err);
+                            }
+                            if (application.autoroles.indexOf(req.body.role) === -1) {
+                                err = new Error("The " + req.body.role + " role can't be assigned");
+                                err.status = 403;
+                                return done(err);
+                            }
+                            return done();
+                        });
+                    }
+
+                });
+            } else {
+                done();
+            }
+
         },
         user: ['validate', function (done) {
             var UserModel = req.app.db.model('user');
@@ -87,7 +131,17 @@ router.post('/', function (req, res, next) {
                     }
                     return done(err);
                 }
-                done(null, resultUser);
+                if (req.body.role && req.body.prefix) {
+                    res.app.acl.addUserRoles(req.body.username, req.body.role, function (err) {
+                        if (err) {
+                            return done(err);
+                        }
+
+                        done(null, resultUser);
+                    });
+                } else {
+                    done(null, resultUser);
+                }
             });
         }],
         welcome: ['user', function (done, results) {

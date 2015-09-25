@@ -230,9 +230,10 @@ describe('REST API', function () {
     var gleanerPrefix = 'gleaner';
     var gleanerHost = 'localhost:' + gleanerPort;
     var anonymousRoute = '/anonymousRoute';
+    var role = "gleanerUser";
     var gleanerRoles = [
         {
-            "roles": "gleanerUser",
+            "roles": role,
             "allows": [
                 {
                     "resources": [
@@ -274,6 +275,7 @@ describe('REST API', function () {
                 prefix: gleanerPrefix,
                 host: gleanerHost,
                 roles: gleanerRoles,
+                autoroles: [role],
                 anonymous: [anonymousRoute]
             };
             authPost(applicationsRoute, admin.token, appData, SUCCESS, function (err, res) {
@@ -294,6 +296,66 @@ describe('REST API', function () {
                 });
 
                 done();
+            });
+        });
+    });
+
+    //Register new user with role gleanerUser
+    describe(POST + signupRoute, function () {
+        var user = "user";
+        it("should not signUp correctly if the role doesn't exist", function (done) {
+            post(signupRoute, {
+                "username": user,
+                "password": "pass",
+                "email": "email@email.com",
+                "prefix": gleanerPrefix,
+                "role": "invalidRole"
+            }, 404, done);
+        });
+
+        it("should not signUp correctly if the role is admin", function (done) {
+            post(signupRoute, {
+                "username": user,
+                "password": "pass",
+                "email": "email@email.com",
+                "prefix": gleanerPrefix,
+                "role": "admin"
+            }, FORBIDDEN, done);
+        });
+
+        it("should not signUp correctly if the application with the prefix doesn't exist", function (done) {
+            post(signupRoute, {
+                "username": user,
+                "password": "pass",
+                "email": "email@email.com",
+                "prefix": "invalidPrefix",
+                "role": role
+            }, 404, done);
+        });
+
+        it("should not signUp correctly without a application prefix", function (done) {
+            post(signupRoute, {
+                "username": user,
+                "password": "pass",
+                "email": "email@email.com",
+                "role": "invalidRole"
+            }, BAD_REQUEST, done);
+        });
+
+        it('should signUp correctly', function (done) {
+            post(signupRoute, {
+                "username": user,
+                "password": "pass",
+                "email": "email@email.com",
+                "prefix": gleanerPrefix,
+                "role": role
+            }, SUCCESS, function (err, res) {
+                should.not.exist(err);
+                app.acl.hasRole(user, role, function (err, hasRole) {
+                    should.not.exist(err);
+                    should.equal(hasRole, true);
+                    done();
+                });
             });
         });
     });
