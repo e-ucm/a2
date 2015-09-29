@@ -5,9 +5,9 @@ exports.mongodb = {
   uri: process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || '{{mongodbUrl}}'
 };
 exports.redisdb = {
-  host: '{{redisdbHost}}',
+  host: '{{redisHost}}',
   port: {{redisPort}},
-  dbNumber: {{redisdbNumber}}
+  dbNumber: {{redisNumber}}
 };
 exports.apiPath = '{{apiPath}}';
 exports.companyName = '{{companyName}}';
