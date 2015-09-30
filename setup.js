@@ -108,21 +108,29 @@ var registerRoot = function (options, callback) {
     });
 };
 
-if (process.env.NODE_ENV === 'test') {
+if (process.env.SETUP_MODE === 'fast') {
 
+    var options = {
+        encoding: 'utf-8'
+    };
+    var source = Fs.readFileSync(configTemplatePath, options);
+    var configTemplate = Handlebars.compile(source);
+    Fs.writeFileSync(configPath, configTemplate(defaultValues));
+    Fs.writeFileSync(configTestPath, configTemplate(testValues));
+    console.log('Setup complete.');
+    process.exit(0);
+} else if (process.env.SETUP_MODE === 'register-root') {
     registerRoot(defaultValues, function (err, res) {
         if (err || !res) {
-            return console.error(err);
+            console.error(err);
+            if(err.message && err.message.indexOf('ECONNREFUSED') > -1) {
+                console.error('Could not connect to MongoDB!');
+                return process.exit(-1);
+            }
+            console.log('Did not create root user, continuing anyway!');
+            return process.exit(0);
         }
-
-        var options = {
-            encoding: 'utf-8'
-        };
-        var source = Fs.readFileSync(configTemplatePath, options);
-        var configTemplate = Handlebars.compile(source);
-        Fs.writeFileSync(configPath, configTemplate(defaultValues));
-        Fs.writeFileSync(configTestPath, configTemplate(testValues));
-        console.log('Setup complete.');
+        console.log('Root user registered successfully.');
         process.exit(0);
     });
 } else {
@@ -131,7 +139,7 @@ if (process.env.NODE_ENV === 'test') {
         projectName: function (done) {
 
             var promptOptions = {
-                default: defaultValues.projectName || 'Gleaner Users Module'
+                default: defaultValues.projectName || 'A2 Module'
             };
 
             Promptly.prompt('Project name: (' + promptOptions.default + ')', promptOptions, done);
@@ -147,7 +155,7 @@ if (process.env.NODE_ENV === 'test') {
         mongodbUrl: ['companyName', function (done) {
 
             var promptOptions = {
-                default: defaultValues.mongodbUrl || 'mongodb://localhost:27017/gleaner-users'
+                default: defaultValues.mongodbUrl || 'mongodb://localhost:27017/a2'
             };
 
             Promptly.prompt('MongoDB URL: (' + promptOptions.default + ')', promptOptions, done);
@@ -257,8 +265,8 @@ if (process.env.NODE_ENV === 'test') {
                     return done(err);
                 }
 
-                for(var result in results) {
-                    if(results.hasOwnProperty(result)) {
+                for (var result in results) {
+                    if (results.hasOwnProperty(result)) {
                         defaultValues[result] = results[result];
                     }
                 }

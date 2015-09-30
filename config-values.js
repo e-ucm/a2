@@ -14,10 +14,12 @@
  *
  * @param projectName - Used in the 'subject' of the emails received (contact form) or sent (password reset).
  * @param companyName -
+ * @param mongoHost - Used to build 'mongodbUrl'
+ * @param mongoPort - Used to build 'mongodbUrl'
  * @param mongodbUrl - Note that this value mustn't be the same in 'defaultValues' and 'testValues'.
- * @param redisdbHost -
+ * @param redisHost -
  * @param redisPort -
- * @param redisdbNumber - Note that this value mustn't be the same in 'defaultValues' and 'testValues'.
+ * @param redisNumber - Note that this value mustn't be the same in 'defaultValues' and 'testValues'.
  * @param cryptoKey - Used to create a hash from the user passwords and to sign and verify the JWT.
  * @param rootEmail - Email of the root user (the main admin).
  * @param rootPassword - Node that the root user name is 'root'.
@@ -29,13 +31,65 @@
  * @param apiPath - prefix for the REST API requests.
  */
 
+
+/**
+ * Initializes 'conf' properties with values read from the environment.
+ * The environment values must have the following format:
+ *      'prefix' + 'conf.propertyKey'
+ *          or
+ *      'prefix' + 'conf.propertyKey.toUpperCase()'
+ *
+ * 'links' is an array with values that, when appended '_PORT', can be found in the environment.
+ * Is useful for a faster parse of some values such as mongo/redis host/port.
+ *
+ * @param conf
+ * @param prefix
+ * @param links
+ */
+function initFromEnv(conf, prefix, links) {
+
+    for (var item in conf) {
+        var envItem = process.env[prefix + item];
+        if (!envItem) {
+            envItem = process.env[prefix + item.toUpperCase()];
+        }
+        if (envItem) {
+            conf[item] = envItem;
+        }
+    }
+
+    links.forEach(function (link) {
+        var linkPort = process.env[link.toUpperCase() + '_PORT'];
+        if (linkPort) {
+            /*
+             We want to end up with:
+             conf.redisHost = 172.17.0.17;
+             conf.redisPort = 6379;
+             Starting with values like this:
+             REDIS_PORT=tcp://172.17.0.17:6379
+             */
+            var values = linkPort.split('://');
+            if (values.length === 2) {
+                values = values[1].split(':');
+                if (values.length === 2) {
+                    conf[link + 'Host'] = values[0];
+                    conf[link + 'Port'] = values[1];
+                }
+            }
+        }
+    });
+}
+
+
 exports.defaultValues = {
-    projectName: 'Gleaner Users Module',
+    projectName: 'Authentication and Authorization',
     companyName: 'e-UCM Research Group',
-    mongodbUrl: 'mongodb://localhost:27017/gleaner-users',
-    redisdbHost: '127.0.0.1',
+    mongoHost: 'localhost',
+    mongoPort: '27017',
+    mongodbUrl: 'mongodb://localhost:27017/a2',
+    redisHost: '127.0.0.1',
     redisPort: '6379',
-    redisdbNumber: '0',
+    redisNumber: '0',
     cryptoKey: 'th15_15_s3cr3t_5hhhh',
     rootEmail: 'root@email.com',
     rootPassword: 'root',
@@ -48,12 +102,14 @@ exports.defaultValues = {
 };
 
 exports.testValues = {
-    projectName: 'Gleaner Users Module (Test)',
+    projectName: 'A2 Module (Test)',
     companyName: 'e-UCM Research Group (Test)',
-    mongodbUrl: 'mongodb://localhost:27017/gleaner-users-test', // This must be different than 'exports.defaultValues.mongodbUrl'
-    redisdbHost: '127.0.0.1',
+    mongoHost: 'localhost',
+    mongoPort: '27017',
+    mongodbUrl: 'mongodb://localhost:27017/a2-test', // This must be different than 'exports.defaultValues.mongodbUrl'
+    redisHost: '127.0.0.1',
     redisPort: '6379',
-    redisdbNumber: '10',         // This must be different than 'exports.defaultValues.redisdbNumber'
+    redisNumber: '10',         // This must be different than 'exports.defaultValues.redisNumber'
     cryptoKey: 'th15_15_a_t35t_5hhhh',
     rootEmail: 'root-test@email.com',
     rootPassword: 'root-test',
@@ -65,5 +121,18 @@ exports.testValues = {
     apiPath: '/api'
 };
 
+var prefix = 'A2_';
+var links = ['redis', 'mongo'];
+initFromEnv(exports.defaultValues, prefix, links);
+initFromEnv(exports.testValues, prefix, links);
 
+// Some control instructions
 
+// Ensuring that 'mongodbUrl' values are different
+exports.defaultValues.mongodbUrl = 'mongodb://' + exports.defaultValues.mongoHost + ':' + exports.defaultValues.mongoPort + "/a2";
+exports.testValues.mongodbUrl = exports.defaultValues.mongodbUrl + '-test';
+
+// Ensuring that 'redisNumber' values are different
+if (exports.defaultValues.redisNumber === exports.testValues.redisNumber) {
+    exports.testValues.redisNumber = exports.defaultValues.redisNumber + 1;
+}

@@ -1,5 +1,5 @@
 {
-    "name": "Gleaner-Users-Module",
+    "name": "Authentication-Authorization-Module",
     "version": "0.0.2",
     "private": true,
     "apidoc": {
@@ -10,10 +10,12 @@
     "author": "e-UCM Research Group",
     "license": "Apache 2.0",
     "scripts": {
+        "docker-start": "npm run fast-setup && npm run register-root && npm start",
         "start": "node ./bin/www",
         "lint": "jshint --verbose .",
         "setup": "./setup.js",
-        "fast-setup": "NODE_ENV=test ./setup.js",
+        "fast-setup": "SETUP_MODE=fast ./setup.js",
+        "register-root": "SETUP_MODE=register-root ./setup.js",
         "test": "npm run lint && NODE_ENV=test ./node_modules/mocha/bin/_mocha --recursive -R spec",
         "test-win": "npm run lint && set NODE_ENV=test&& mocha --recursive -R spec",
         "test-travis": "npm run lint && npm run fast-setup && NODE_ENV=test ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/*",
