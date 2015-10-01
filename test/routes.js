@@ -98,6 +98,16 @@ describe('REST API', function () {
         should(user.name.last).be.a.String();
     };
 
+    var healthRoute = '/api/health';
+    describe(GET + healthRoute, function () {
+        it('should return status 200', function (done) {
+            get(healthRoute, 'token', SUCCESS, function (err, res){
+                should.not.exist(err);
+                done();
+            });
+        });
+    });
+
     /** /api/signup **/
     var signupRoute = '/api/signup';
 
