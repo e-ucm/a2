@@ -10,6 +10,7 @@ var express = require('express'),
     tokenStorage = require('./tokenStorage/token-storage');
 
 var config = require((process.env.NODE_ENV === 'test') ? './config-test' : './config'),
+    health = require('./routes/health'),
     applications = require('./routes/applications'),
     views = require('./routes/index'),
     contact = require('./routes/contact'),
@@ -76,6 +77,7 @@ var jwtCheck = jwt({
 var jwtMiddleware = jwtCheck.unless({
     path: [
         // REST API: match some unprotected routes such as /contact, /login, /signup, etc.
+        config.apiPath + '/health',
         config.apiPath + '/contact',
         config.apiPath + '/login',
         config.apiPath + '/login/forgot',
@@ -126,6 +128,7 @@ app.use(config.apiPath + '/login', login);
 app.use(config.apiPath + '/logout', logout);
 app.use(config.apiPath + '/roles', roles);
 app.use(config.apiPath + '/applications', applications);
+app.use(config.apiPath + '/health', health);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
