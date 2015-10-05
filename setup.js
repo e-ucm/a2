@@ -72,8 +72,6 @@ var registerRoot = function (options, callback) {
         require('./schema/user.js')(app, mongoose);
         var UserModel = app.db.model('user');
 
-        app.db.db.dropDatabase();
-
         UserModel.register(new UserModel({
             username: username,
             email: email
