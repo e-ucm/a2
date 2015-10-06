@@ -15,20 +15,15 @@ var express = require('express'),
  * @apiGroup Users
  *
  * @apiParam {String} [fields] The fields to be populated in the resulting objects.
- *                              An empty string will return the complete document.
- * @apiParam {String} [sort=_id] Place - before the field for a descending sort.
- * @apiParam {Number} [limit=20]
- * @apiParam {Number} [page=1]
+ *                              An empty string will return the complete document (Query param).
+ * @apiParam {String} [sort=_id] Place - before the field for a descending sort (Query param).
+ * @apiParam {Number} [limit=20] (Query param)
+ * @apiParam {Number} [page=1] (Query param)
  *
  * @apiPermission admin
  *
  * @apiParamExample {json} Request-Example:
- *      {
- *          "fields": "",
- *          "sort": "name",
- *          "limit": 20,
- *          "page": 1
- *      }
+ *      api/users?limit=1&page=1
  *
  * @apiSuccess(200) Success.
  *
@@ -56,14 +51,14 @@ var express = require('express'),
  *              "prev": 0,
  *              "hasPrev": false,
  *              "next": 2,
- *              "hasNext": false,
- *              "total": 1
+ *              "hasNext": true,
+ *              "total": 3
  *         },
  *          "items": {
- *              "limit": 20,
+ *              "limit": 5,
  *              "begin": 1,
- *              "end": 1,
- *              "total": 1
+ *              "end": 3
+ *              "total": 3
  *          }
  *      }
  *
@@ -71,10 +66,10 @@ var express = require('express'),
 router.get('/', authentication.authorized, function (req, res, next) {
 
     var query = {};
-    var fields = req.body.fields || '';
-    var sort = req.body.sort || '_id';
-    var limit = req.body.limit || 20;
-    var page = req.body.page || 1;
+    var fields = req.query.fields || '';
+    var sort = req.query.sort || '_id';
+    var limit = req.query.limit || 20;
+    var page = req.query.page || 1;
 
     req.app.db.model('user').pagedFind(query, fields, removeFields, sort, limit, page, function (err, results) {
 

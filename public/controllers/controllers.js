@@ -118,20 +118,33 @@ angular.module('myApp.controllers', ['ngStorage'])
     .controller('UsersCtrl', ['$scope', '$http', '$window', '$localStorage',
         function ($scope, $http, $window, $localStorage) {
             $scope.$storage = $localStorage;
+            var pages;
+            var getUsers = function (page) {
+                $http.get('/api/users?page=' + page, {
+                    headers: {
+                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function (data) {
+                    $scope.response = data;
+                    if (!pages) {
+                        $('#user-pag').twbsPagination({
+                            totalPages: data.pages.total,
+                            visiblePages: 5,
+                            onPageClick: function (event, page) {
+                                getUsers(page);
+                            }
+                        });
+                    }
+                }).error(function (data, status) {
+                    console.error('Status:', status, ', Error on UsersCtrl, GET /api/users \n', data);
+                });
 
-            $http.get('/api/users', {
-                headers: {
-                    'Authorization': 'Bearer ' + $scope.$storage.user.token
-                }
-            }).success(function (data) {
-                $scope.response = data;
-            }).error(function (data, status) {
-                console.error('Status:', status, ', Error on UsersCtrl, GET /api/users \n', data);
-            });
-
-            $scope.edit = function (userId) {
-                $window.location.href = '/users/' + userId;
+                $scope.edit = function (userId) {
+                    $window.location.href = '/users/' + userId;
+                };
             };
+
+            getUsers(1);
         }])
 
     .controller('ApplicationsCtrl', ['$scope', '$http', '$window', '$localStorage',
