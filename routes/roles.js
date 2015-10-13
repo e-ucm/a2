@@ -112,7 +112,7 @@ router.post('/', authentication.authorized, function (req, res, next) {
                 }
 
                 if (roles.indexOf(roleName) !== -1) {
-                    err = new Error("The role " + roleName + " already exists.");
+                    err = new Error('The role ' + roleName + ' already exists.');
                     err.status = 400;
                     return done(err);
                 }
@@ -234,7 +234,7 @@ router.delete('/:roleName', authentication.authorized, function (req, res, next)
     async.auto({
         validate: function (done) {
             if (roleName === 'admin') {
-                var err = new Error("The role " + roleName + " is indestructible");
+                var err = new Error('The role ' + roleName + ' is indestructible');
                 err.status = 403;
                 return done(err);
             }
@@ -478,7 +478,7 @@ router.post('/:roleName/resources/*/permissions', authentication.authorized, fun
                 }
 
                 if (!result[resource]) {
-                    err = new Error('The resource ' + resource + ' in ' + roleName + " doesn't exist.");
+                    err = new Error('The resource ' + resource + ' in ' + roleName + ' doesn\'t exist.');
                     err.status = 400;
                     return done(err);
                 }
@@ -547,17 +547,17 @@ router.delete('/:roleName/resources/*/permissions/:permissionName', authenticati
                     return done(err);
                 }
                 if (!result[resource]) {
-                    err = new Error('The resource ' + resource + ' in ' + roleName + " doesn't exist.");
+                    err = new Error('The resource ' + resource + ' in ' + roleName + ' doesn\'t exist.');
                     err.status = 400;
                     return done(err);
                 }
 
                 if (result[resource].length < 2) {
-                    err = new Error("The permission " + permission + " can't be remove because is the last");
+                    err = new Error('The permission ' + permission + ' can\'t be remove because is the last');
                     err.status = 400;
                     return done(err);
                 } else if (result[resource].indexOf(permission) === -1) {
-                    err = new Error("The permission " + permission + ' in the resource ' + resource + ' in ' + roleName + " doesn't exist.");
+                    err = new Error('The permission ' + permission + ' in the resource ' + resource + ' in ' + roleName + ' doesn\'t exist.');
                     err.status = 400;
                     return done(err);
                 }
@@ -629,7 +629,7 @@ router.delete('/:roleName/resources/*', authentication.authorized, function (req
                     }
 
                     if (!result[resource]) {
-                        err = new Error('The resource ' + resource + ' in ' + roleName + " doesn't exist.");
+                        err = new Error('The resource ' + resource + ' in ' + roleName + ' doesn\'t exist.');
                         err.status = 400;
                         return done(err);
                     }
@@ -694,7 +694,7 @@ router.get('/:roleName/resources/*', authentication.authorized, function (req, r
             }
 
             if (!result[resource]) {
-                err = new Error('The resource ' + resource + ' in ' + roleName + " doesn't exist.");
+                err = new Error('The resource ' + resource + ' in ' + roleName + ' doesn\'t exist.');
                 err.status = 400;
                 return next(err);
             }

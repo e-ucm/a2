@@ -73,7 +73,7 @@ router.post('/', function (req, res, next) {
             }
 
             if (req.body.role === 'admin') {
-                err = new Error("The admin role can't be assigned");
+                err = new Error('The admin role can\'t be assigned');
                 err.status = 403;
                 return done(err);
             }
@@ -81,7 +81,7 @@ router.post('/', function (req, res, next) {
             if (req.body.role && req.body.prefix) {
                 req.app.acl.existsRole(req.body.role, function (err) {
                     if (err) {
-                        err = new Error("The role " + req.body.role + " doesn't exist");
+                        err = new Error('The role ' + req.body.role + ' doesn\'t exist');
                         err.status = 404;
                         return done(err);
                     } else {
@@ -91,12 +91,12 @@ router.post('/', function (req, res, next) {
                                 return done(err);
                             }
                             if (!application) {
-                                err = new Error("The " + req.body.prefix + " doesn't exist");
+                                err = new Error('The ' + req.body.prefix + ' doesn\'t exist');
                                 err.status = 404;
                                 return done(err);
                             }
                             if (application.autoroles.indexOf(req.body.role) === -1) {
-                                err = new Error("The " + req.body.role + " role can't be assigned");
+                                err = new Error('The ' + req.body.role + ' role can\'t be assigned');
                                 err.status = 403;
                                 return done(err);
                             }

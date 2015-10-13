@@ -17,29 +17,29 @@ var GET = 'GET ',
     DEL = 'DEL ';
 
 var admin = {
-    _id: "",
-    username: "admin",
-    password: "123",
-    email: "adminemail@comp.ink",
-    token: ""
+    _id: '',
+    username: 'admin',
+    password: '123',
+    email: 'adminemail@comp.ink',
+    token: ''
 };
 
 var user = {
-    _id: "",
-    username: "user_asd",
-    password: "12321",
-    email: "useremail@comp.ink",
-    token: ""
+    _id: '',
+    username: 'user_asd',
+    password: '12321',
+    email: 'useremail@comp.ink',
+    token: ''
 };
 
 var application = {
-    _id: ""
+    _id: ''
 };
 
 describe('REST API', function () {
     this.timeout(4000);
 
-    /** config **/
+    /** Config **/
 
     before(function (done) {
         app.listen(port, function (err) {
@@ -101,7 +101,7 @@ describe('REST API', function () {
     var healthRoute = '/api/health';
     describe(GET + healthRoute, function () {
         it('should return status 200', function (done) {
-            get(healthRoute, 'token', SUCCESS, function (err, res){
+            get(healthRoute, 'token', SUCCESS, function (err, res) {
                 should.not.exist(err);
                 done();
             });
@@ -114,30 +114,30 @@ describe('REST API', function () {
     describe(POST + signupRoute, function () {
         it('should not signUp correctly if the username is missing', function (done) {
             post(signupRoute, {
-                "password": admin.password,
-                "email": admin.email
+                password: admin.password,
+                email: admin.email
             }, BAD_REQUEST, done);
         });
 
         it('should not signUp correctly if the password is missing', function (done) {
             post(signupRoute, {
-                "username": admin.username,
-                "email": admin.email
+                username: admin.username,
+                email: admin.email
             }, BAD_REQUEST, done);
         });
 
         it('should not signUp correctly if the email is missing', function (done) {
             post(signupRoute, {
-                "username": admin.username,
-                "password": admin.password
+                username: admin.username,
+                password: admin.password
             }, BAD_REQUEST, done);
         });
 
         it('should signUp correctly', function (done) {
             post(signupRoute, {
-                "username": admin.username,
-                "password": admin.password,
-                "email": admin.email
+                username: admin.username,
+                password: admin.password,
+                email: admin.email
             }, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 res = JSON.parse(res.text);
@@ -151,9 +151,9 @@ describe('REST API', function () {
                 app.acl.addUserRoles(admin.username, 'admin', function (err) {
                     should.not.exist(err);
                     post(signupRoute, {
-                        "username": user.username,
-                        "password": user.password,
-                        "email": user.email
+                        username: user.username,
+                        password: user.password,
+                        email: user.email
                     }, SUCCESS, done);
                 });
             });
@@ -170,16 +170,16 @@ describe('REST API', function () {
 
         it('should return a UNAUTHORIZED status code if the credentials are incorrect', function (done) {
             post(loginRoute, {
-                "username": "asdsdf",
-                "password": "dsgfsdfg"
+                username: 'asdsdf',
+                password: 'dsgfsdfg'
             }, UNAUTHORIZED, done);
         });
 
         it('should login correctly', function (done) {
 
             var adminLoginData = {
-                "username": admin.username,
-                "password": admin.password
+                username: admin.username,
+                password: admin.password
             };
 
             post(loginRoute, adminLoginData, SUCCESS, function (err, res) {
@@ -194,8 +194,8 @@ describe('REST API', function () {
                 admin.token = res.user.token;
                 admin._id = res.user._id;
                 post(loginRoute, {
-                    "username": user.username,
-                    "password": user.password
+                    username: user.username,
+                    password: user.password
                 }, SUCCESS, function (err, res) {
                     res = JSON.parse(res.text);
 
@@ -240,20 +240,20 @@ describe('REST API', function () {
     var gleanerPrefix = 'gleaner';
     var gleanerHost = 'localhost:' + gleanerPort;
     var anonymousRoute = '/anonymousRoute';
-    var role = "gleanerUser";
+    var role = 'gleanerUser';
     var gleanerRoles = [
         {
-            "roles": role,
-            "allows": [
+            roles: role,
+            allows: [
                 {
-                    "resources": [
-                        "/route1"
+                    resources: [
+                        '/route1'
                     ],
-                    "permissions": [
-                        "post",
-                        "get",
-                        "delete",
-                        "put"
+                    permissions: [
+                        'post',
+                        'get',
+                        'delete',
+                        'put'
                     ]
                 }
             ]
@@ -276,7 +276,7 @@ describe('REST API', function () {
 
         it('should not POST an application correctly if the host is missing', function (done) {
             authPost(applicationsRoute, admin.token, {
-                'prefix': 'test-prefix'
+                prefix: 'test-prefix'
             }, BAD_REQUEST, done);
         });
 
@@ -310,55 +310,55 @@ describe('REST API', function () {
         });
     });
 
-    //Register new user with role gleanerUser
+    // Register new user with role gleanerUser
     describe(POST + signupRoute, function () {
-        var user = "user";
-        it("should not signUp correctly if the role doesn't exist", function (done) {
+        var user = 'user';
+        it('should not signUp correctly if the role doesn\'t exist', function (done) {
             post(signupRoute, {
-                "username": user,
-                "password": "pass",
-                "email": "email@email.com",
-                "prefix": gleanerPrefix,
-                "role": "invalidRole"
+                username: user,
+                password: 'pass',
+                email: 'email@email.com',
+                prefix: gleanerPrefix,
+                role: 'invalidRole'
             }, 404, done);
         });
 
-        it("should not signUp correctly if the role is admin", function (done) {
+        it('should not signUp correctly if the role is admin', function (done) {
             post(signupRoute, {
-                "username": user,
-                "password": "pass",
-                "email": "email@email.com",
-                "prefix": gleanerPrefix,
-                "role": "admin"
+                username: user,
+                password: 'pass',
+                email: 'email@email.com',
+                prefix: gleanerPrefix,
+                role: 'admin'
             }, FORBIDDEN, done);
         });
 
-        it("should not signUp correctly if the application with the prefix doesn't exist", function (done) {
+        it('should not signUp correctly if the application with the prefix doesn\'t exist', function (done) {
             post(signupRoute, {
-                "username": user,
-                "password": "pass",
-                "email": "email@email.com",
-                "prefix": "invalidPrefix",
-                "role": role
+                username: user,
+                password: 'pass',
+                email: 'email@email.com',
+                prefix: 'invalidPrefix',
+                role: role
             }, 404, done);
         });
 
-        it("should not signUp correctly without a application prefix", function (done) {
+        it('should not signUp correctly without a application prefix', function (done) {
             post(signupRoute, {
-                "username": user,
-                "password": "pass",
-                "email": "email@email.com",
-                "role": "invalidRole"
+                username: user,
+                password: 'pass',
+                email: 'email@email.com',
+                role: 'invalidRole'
             }, BAD_REQUEST, done);
         });
 
         it('should signUp correctly', function (done) {
             post(signupRoute, {
-                "username": user,
-                "password": "pass",
-                "email": "email@email.com",
-                "prefix": gleanerPrefix,
-                "role": role
+                username: user,
+                password: 'pass',
+                email: 'email@email.com',
+                prefix: gleanerPrefix,
+                role: role
             }, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 app.acl.hasRole(user, role, function (err, hasRole) {
@@ -387,19 +387,19 @@ describe('REST API', function () {
 
                 res = JSON.parse(res.text);
 
-                // data validation
+                // Data validation
                 var data = res.data;
                 should(data).be.an.Array();
                 if (data.length > 0) {
-                    // application validation
+                    // Application validation
                     var app = data[0];
                     validateApplication(app);
                 }
 
-                // pages validation
+                // Pages validation
                 validatePages(res.pages);
 
-                // items validation
+                // Items validation
                 validateItems(res.items);
                 done();
             });
@@ -447,11 +447,11 @@ describe('REST API', function () {
             name: 'Gleaner App. (test)'
         };
 
-        it("should not PUT a specific application's name with an invalid_token", function (done) {
+        it('should not PUT a specific application\'s name with an invalid_token', function (done) {
             authPut(applicationsRoute + '/' + application._id, 'invalid_token', applicationName, UNAUTHORIZED, done);
         });
 
-        it("should not PUT a specific application's name with an unauthorized token", function (done) {
+        it('should not PUT a specific application\'s name with an unauthorized token', function (done) {
             authPut(applicationsRoute + '/' + application._id, user.token, applicationName, FORBIDDEN, done);
         });
 
@@ -476,15 +476,15 @@ describe('REST API', function () {
             };
         };
 
-        it("should PUT application's name", function (done) {
+        it('should PUT application\'s name', function (done) {
             authPut(applicationsRoute + '/' + application._id, admin.token, applicationName, SUCCESS,
                 validateNameInformation(applicationName.name, null, null, done));
         });
 
-        it("should PUT a specific application's prefix and host", function (done) {
+        it('should PUT a specific application\'s prefix and host', function (done) {
             authPost(applicationsRoute, admin.token, {
-                "prefix": "prefix",
-                "host": "http://myurl.com"
+                prefix: 'prefix',
+                host: 'http://myurl.com'
             }, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 var result = JSON.parse(res.text);
@@ -497,13 +497,13 @@ describe('REST API', function () {
             });
         });
 
-        it("should PUT a specific application's anonymous routes array", function (done) {
+        it('should PUT a specific application\'s anonymous routes array', function (done) {
             var anonymousRoutes = ['/r1', '/r2', ''];
             var srcRoutes = ['/r1', '/rX'];
             authPost(applicationsRoute, admin.token, {
-                "prefix": "prefix2",
-                "host": "http://myurl2.com",
-                "anonymous": srcRoutes
+                prefix: 'prefix2',
+                host: 'http://myurl2.com',
+                anonymous: srcRoutes
             }, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 var result = JSON.parse(res.text);
@@ -524,19 +524,19 @@ describe('REST API', function () {
             });
         });
 
-        it("should not PUT a specific application's duplicated prefix", function (done) {
+        it('should not PUT a specific application\'s duplicated prefix', function (done) {
             authPut(applicationsRoute + '/' + testApplication._id, admin.token, {
                 prefix: gleanerPrefix
             }, FORBIDDEN, done);
         });
 
-        it("should not PUT a specific application's duplicated host", function (done) {
+        it('should not PUT a specific application\'s duplicated host', function (done) {
             authPut(applicationsRoute + '/' + testApplication._id, admin.token, {
                 host: gleanerHost
             }, FORBIDDEN, done);
         });
 
-        it("should not PUT an invalid host (not an URL) to a specific application", function (done) {
+        it('should not PUT an invalid host (not an URL) to a specific application', function (done) {
             authPut(applicationsRoute + '/' + testApplication._id, admin.token, {
                 host: 'invalid_url'
             }, 403, done);
@@ -569,7 +569,7 @@ describe('REST API', function () {
 
     var gleanerProxyBaseUrl = '/api/proxy/' + gleanerPrefix;
     var someData = {
-        data: "asddsa"
+        data: 'asddsa'
     };
 
     methods.forEach(function (method) {
@@ -597,8 +597,8 @@ describe('REST API', function () {
         });
     });
 
-    describe("ALL /:proxy/:prefix* for anonymous routes", function () {
-        it("should ALL application's anonymous routes", function (done) {
+    describe('ALL /:proxy/:prefix* for anonymous routes', function () {
+        it('should ALL application\'s anonymous routes', function (done) {
             methods.forEach(function (method) {
                 request[method](gleanerProxyBaseUrl + anonymousRoute).send(someData)
                     .expect(SUCCESS).end(function (err, res) {
@@ -632,20 +632,20 @@ describe('REST API', function () {
 
                 res = JSON.parse(res.text);
 
-                // data validation
+                // Data validation
                 var data = res.data;
                 should(data).be.an.Array();
                 if (data.length > 0) {
-                    // user validation
+                    // User validation
                     var user = data[0];
                     validateUser(user);
                 }
 
 
-                // pages validation
+                // Pages validation
                 validatePages(res.pages);
 
-                // items validation
+                // Items validation
                 validateItems(res.items);
                 done();
             });
@@ -654,22 +654,22 @@ describe('REST API', function () {
 
     /** /api/users/:userId **/
 
-    var email = "new@email.com";
+    var email = 'new@email.com';
     var name = {
-        "first": "testFirst",
-        "middle": "testMiddle",
-        "last": "testLast"
+        first: 'testFirst',
+        middle: 'testMiddle',
+        last: 'testLast'
     };
     var userInfo = {
-        email: "user" + email,
+        email: 'user' + email,
         name: name
     };
     var adminInfo = {
-        email: "admin" + email,
+        email: 'admin' + email,
         name: name
     };
     var invalidInfo = {
-        email: "invalidEmail",
+        email: 'invalidEmail',
         name: name
     };
 
@@ -713,15 +713,15 @@ describe('REST API', function () {
 
     describe(PUT + usersRoute + '/:userId', function () {
 
-        it("should not PUT a specific user's name and email with an invalid_token", function (done) {
+        it('should not PUT a specific user\'s name and email with an invalid_token', function (done) {
             authPut(usersRoute + '/' + admin._id, 'invalid_token', adminInfo, UNAUTHORIZED, done);
         });
 
-        it("should not PUT a specific user's name and email with an unauthorized token", function (done) {
+        it('should not PUT a specific user\'s name and email with an unauthorized token', function (done) {
             authPut(usersRoute + '/' + admin._id, user.token, adminInfo, FORBIDDEN, done);
         });
 
-        it("should not PUT its own user name and email with an invalid email", function (done) {
+        it('should not PUT its own user name and email with an invalid email', function (done) {
             authPut(usersRoute + '/' + user._id, user.token, invalidInfo, FORBIDDEN, done);
         });
 
@@ -741,19 +741,19 @@ describe('REST API', function () {
             };
         };
 
-        it("should PUT its own user name and email", function (done) {
+        it('should PUT its own user name and email', function (done) {
             authPut(usersRoute + '/' + user._id, user.token, userInfo, SUCCESS, validateNameInformation(userInfo, done));
         });
 
-        it("should PUT its own admin name and email", function (done) {
+        it('should PUT its own admin name and email', function (done) {
             authPut(usersRoute + '/' + admin._id, admin.token, adminInfo, SUCCESS, validateNameInformation(adminInfo, done));
         });
 
-        it("should PUT a specific user name and email that is not his own", function (done) {
+        it('should PUT a specific user name and email that is not his own', function (done) {
             authPut(usersRoute + '/' + user._id, admin.token, userInfo, SUCCESS, validateNameInformation(userInfo, done));
         });
 
-        it("should not PUT a specific user name and email, email duplicated", function (done) {
+        it('should not PUT a specific user name and email, email duplicated', function (done) {
             authPut(usersRoute + '/' + user._id, admin.token, adminInfo, FORBIDDEN, done);
         });
     });
@@ -787,11 +787,11 @@ describe('REST API', function () {
             };
         };
 
-        it("should GET his own roles being an admin", function (done) {
+        it('should GET his own roles being an admin', function (done) {
             get(usersRoute + '/' + admin._id + '/roles', admin.token, SUCCESS, validateRolesInformation(done));
         });
 
-        it("should GET a specific user's roles being authorized (admin)", function (done) {
+        it('should GET a specific user\'s roles being authorized (admin)', function (done) {
             get(usersRoute + '/' + user._id + '/roles', admin.token, SUCCESS, validateRolesInformation(done));
         });
     });
@@ -819,29 +819,29 @@ describe('REST API', function () {
         });
     });
 
-    var appRoleRoute = "gleaner/resource-4";
-    var notAppRoleRoute = "noApp/resource-5";
+    var appRoleRoute = 'gleaner/resource-4';
+    var notAppRoleRoute = 'noApp/resource-5';
     var role1 = {
-        "roles": "role1",
-        "allows": [
-            {"resources": "resource-1", "permissions": ["permission-1", "permission-3"]},
-            {"resources": ["resource-2", "resource-3", appRoleRoute, notAppRoleRoute], "permissions": ["permission-2"]}
+        roles: 'role1',
+        allows: [
+            {resources: 'resource-1', permissions: ['permission-1', 'permission-3']},
+            {resources: ['resource-2', 'resource-3', appRoleRoute, notAppRoleRoute], permissions: ['permission-2']}
         ]
     };
 
     var role2 = {
-        "roles": "role2",
-        "resources": [
-            "resource-1",
-            "resource-2",
-            "resource-3",
+        roles: 'role2',
+        resources: [
+            'resource-1',
+            'resource-2',
+            'resource-3',
             appRoleRoute,
             notAppRoleRoute
         ],
-        "permissions": [
-            "permission-1",
-            "permission-2",
-            "permission-3"
+        permissions: [
+            'permission-1',
+            'permission-2',
+            'permission-3'
         ]
     };
     describe(POST + rolesRoute, function () {
@@ -852,10 +852,10 @@ describe('REST API', function () {
 
         it('should not POST role, bad fields', function (done) {
             var wrongRole1 = {
-                "name": "role name",
-                "allows": [
-                    {"resources": "resource-1", "permissions": ["permission-1", "permission-3"]},
-                    {"resources": ["resource-2", "resource-3"], "permissions": ["permission-2"]}
+                name: 'role name',
+                allows: [
+                    {resources: 'resource-1', permissions: ['permission-1', 'permission-3']},
+                    {resources: ['resource-2', 'resource-3'], permissions: ['permission-2']}
                 ]
             };
 
@@ -864,7 +864,7 @@ describe('REST API', function () {
 
         it('should not POST role, bad fields', function (done) {
             var wrongRole2 = {
-                "roles": "bad role",
+                roles: 'bad role'
             };
 
             authPost(rolesRoute, admin.token, wrongRole2, BAD_REQUEST, done);
@@ -922,7 +922,7 @@ describe('REST API', function () {
             get(validRoleRouteId, 'invalid_token', UNAUTHORIZED, done);
         });
 
-        it("should not GET the resources and permissions, the role doesn't exist", function (done) {
+        it('should not GET the resources and permissions, the role doesn\'t exist', function (done) {
             get(invalidRoleRouteId, admin.token, BAD_REQUEST, done);
         });
 
@@ -953,13 +953,13 @@ describe('REST API', function () {
     var theResource = '/roles/:roleName/newResource';
     var thePermission = 'newPermission';
     var resource1 = {
-        "resources": [
+        resources: [
             theResource
         ],
-        "permissions": [
+        permissions: [
             thePermission,
-            "perm-1",
-            "perm-2"
+            'perm-1',
+            'perm-2'
         ]
     };
     describe(POST + routeResourcesRole, function () {
@@ -968,7 +968,7 @@ describe('REST API', function () {
             authPost(validResourcesRoleId, 'invalid_token', resource1, UNAUTHORIZED, done);
         });
 
-        it("should not POST resource, the role doesn't exist", function (done) {
+        it('should not POST resource, the role doesn\'t exist', function (done) {
             authPost(invalidResourcesRoleId, admin.token, resource1, BAD_REQUEST, done);
         });
 
@@ -1000,7 +1000,7 @@ describe('REST API', function () {
             get(validResourcesId, 'invalid_token', UNAUTHORIZED, done);
         });
 
-        it("should not GET the permissions of resources in role, the permission doesn't exist", function (done) {
+        it('should not GET the permissions of resources in role, the permission doesn\'t exist', function (done) {
             get(invalidResourcesId, admin.token, BAD_REQUEST, done);
         });
 
@@ -1028,23 +1028,23 @@ describe('REST API', function () {
         var newInvalidRoles = ['role1', 'role2', 'role3'];
         var newInvalidRole = ['role3'];
 
-        it("should not POST roles to an user with an invalid token", function (done) {
+        it('should not POST roles to an user with an invalid token', function (done) {
             authPost(usersRoute + '/' + admin._id + '/roles', 'invalid_token', newValidRoles, UNAUTHORIZED, done);
         });
 
-        it("should not POST roles to himself with an unauthorized token", function (done) {
+        it('should not POST roles to himself with an unauthorized token', function (done) {
             authPost(usersRoute + '/' + user._id + '/roles', user.token, newValidRoles, FORBIDDEN, done);
         });
 
-        it("should not POST roles to an user with an unauthorized token", function (done) {
+        it('should not POST roles to an user with an unauthorized token', function (done) {
             authPost(usersRoute + '/' + admin._id + '/roles', user.token, newValidRoles, FORBIDDEN, done);
         });
 
-        it("should not POST roles, some role doesn't exist", function (done) {
+        it('should not POST roles, some role doesn\'t exist', function (done) {
             authPost(usersRoute + '/' + admin._id + '/roles', admin.token, newInvalidRoles, BAD_REQUEST, done);
         });
 
-        it("should not POST roles, some role doesn't exist", function (done) {
+        it('should not POST roles, some role doesn\'t exist', function (done) {
             authPost(usersRoute + '/' + admin._id + '/roles', admin.token, newInvalidRole, BAD_REQUEST, done);
         });
 
@@ -1067,12 +1067,12 @@ describe('REST API', function () {
             };
         };
 
-        it("should POST roles to himself being authorized", function (done) {
+        it('should POST roles to himself being authorized', function (done) {
             authPost(usersRoute + '/' + admin._id + '/roles', admin.token, newValidRoles, SUCCESS,
                 validatePOSTroles(newValidRoles, done));
         });
 
-        it("should POST roles to a specific user being authorized (admin)", function (done) {
+        it('should POST roles to a specific user being authorized (admin)', function (done) {
             authPost(usersRoute + '/' + user._id + '/roles', admin.token, newValidRoles, SUCCESS,
                 validatePOSTroles(newValidRoles, done));
         });
@@ -1081,15 +1081,15 @@ describe('REST API', function () {
     describe(GET + usersRoute + '/:userId/*/:permissionName', function () {
         var noPermission = 'noPermission';
 
-        it("should not GET response with an invalid token", function (done) {
+        it('should not GET response with an invalid token', function (done) {
             get(usersRoute + '/' + admin._id + '/' + theResource + '/' + thePermission, 'invalid_token', UNAUTHORIZED, done);
         });
 
-        it("should not GET response from an user with an unauthorized token", function (done) {
+        it('should not GET response from an user with an unauthorized token', function (done) {
             get(usersRoute + '/' + admin._id + '/' + theResource + '/' + thePermission, user.token, FORBIDDEN, done);
         });
 
-        it("should GET response (true) from himself being authorized (admin)", function (done) {
+        it('should GET response (true) from himself being authorized (admin)', function (done) {
             get(usersRoute + '/' + admin._id + '/' + theResource + '/' + thePermission, admin.token, SUCCESS,
                 function (err, res) {
                     res = JSON.parse(res.text);
@@ -1099,7 +1099,7 @@ describe('REST API', function () {
                 });
         });
 
-        it("should GET response (false) from himself being authorized (admin)", function (done) {
+        it('should GET response (false) from himself being authorized (admin)', function (done) {
             get(usersRoute + '/' + admin._id + '/' + theResource + '/' + noPermission, admin.token, SUCCESS,
                 function (err, res) {
                     res = JSON.parse(res.text);
@@ -1170,9 +1170,9 @@ describe('REST API', function () {
 
         it('should DELETE an user correctly with an authorized token', function (done) {
             post(signupRoute, {
-                "username": "testUser1",
-                "password": "testUser1Pw",
-                "email": "testUser1Pw@comp.ink"
+                username: 'testUser1',
+                password: 'testUser1Pw',
+                email: 'testUser1Pw@comp.ink'
             }, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 var result = JSON.parse(res.text);
@@ -1188,16 +1188,16 @@ describe('REST API', function () {
 
         it('should DELETE himself', function (done) {
             post(signupRoute, {
-                "username": "testUser1",
-                "password": "testUser1Pw",
-                "email": "testUser1Pw@comp.ink"
+                username: 'testUser1',
+                password: 'testUser1Pw',
+                email: 'testUser1Pw@comp.ink'
             }, SUCCESS, function (err, res) {
                 should.not.exist(err);
                 var result = JSON.parse(res.text);
 
                 post(loginRoute, {
-                    "username": "testUser1",
-                    "password": "testUser1Pw"
+                    username: 'testUser1',
+                    password: 'testUser1Pw'
                 }, SUCCESS, function (err, res) {
                     res = JSON.parse(res.text);
                     var testUserToken = res.user.token;
@@ -1212,15 +1212,15 @@ describe('REST API', function () {
     describe(DEL + usersRoute + '/:userId/roles', function () {
         var deletedRole = 'role1';
 
-        it("should not DELETE roles from an user with an invalid token", function (done) {
+        it('should not DELETE roles from an user with an invalid token', function (done) {
             del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, 'invalid_token', UNAUTHORIZED, done);
         });
 
-        it("should not DELETE roles from an user with an unauthorized token", function (done) {
+        it('should not DELETE roles from an user with an unauthorized token', function (done) {
             del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, user.token, FORBIDDEN, done);
         });
 
-        it("should not DELETE roles himself with an unauthorized token", function (done) {
+        it('should not DELETE roles himself with an unauthorized token', function (done) {
             del(usersRoute + '/' + user._id + '/roles/' + deletedRole, user.token, FORBIDDEN, done);
         });
 
@@ -1245,17 +1245,17 @@ describe('REST API', function () {
 
         var deletedRoleArray = [deletedRole];
 
-        it("should DELETE roles from a specific user being authorized", function (done) {
+        it('should DELETE roles from a specific user being authorized', function (done) {
             del(usersRoute + '/' + user._id + '/roles/' + deletedRole, admin.token, SUCCESS,
                 validateDELroles(deletedRoleArray, user._id, done));
         });
 
-        it("should DELETE roles from himself being authorized (admin)", function (done) {
+        it('should DELETE roles from himself being authorized (admin)', function (done) {
             del(usersRoute + '/' + admin._id + '/roles/' + deletedRole, admin.token, SUCCESS,
                 validateDELroles(deletedRoleArray, admin._id, done));
         });
 
-        it("shouldn't DELETE the admin role from himself", function (done) {
+        it('shouldn\'t DELETE the admin role from himself', function (done) {
             del(usersRoute + '/' + admin._id + '/roles/admin', admin.token, FORBIDDEN, done);
         });
     });
@@ -1271,7 +1271,7 @@ describe('REST API', function () {
             del(validPermissionId, 'invalid_token', UNAUTHORIZED, done);
         });
 
-        it("should not DELETE the permission, the resource in role doesn't exist", function (done) {
+        it('should not DELETE the permission, the resource in role doesn\'t exist', function (done) {
             del(invalidPermissionId, admin.token, BAD_REQUEST, done);
         });
 
@@ -1297,7 +1297,7 @@ describe('REST API', function () {
             del(validResourcesId, 'invalid_token', UNAUTHORIZED, done);
         });
 
-        it("should not DELETE the resource, the resource in role doesn't exist", function (done) {
+        it('should not DELETE the resource, the resource in role doesn\'t exist', function (done) {
             del(invalidResourcesId, admin.token, BAD_REQUEST, done);
         });
 
@@ -1324,11 +1324,11 @@ describe('REST API', function () {
             del(validRoleRouteId, 'invalid_token', UNAUTHORIZED, done);
         });
 
-        it("should not DELETE the role, the role doesn't exist", function (done) {
+        it('should not DELETE the role, the role doesn\'t exist', function (done) {
             del(invalidRoleRouteId, admin.token, BAD_REQUEST, done);
         });
 
-        it("should not DELETE the role, the role is Admin", function (done) {
+        it('should not DELETE the role, the role is Admin', function (done) {
             del(adminRoleRouteId, admin.token, BAD_REQUEST, done);
         });
 

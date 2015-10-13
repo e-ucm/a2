@@ -37,7 +37,7 @@ exports = module.exports = {
                 _userId = req.user.username;
             }
             if (!_userId) {
-                err = new Error("'req.user.username' not found. Must be available after authentication.");
+                err = new Error('\'req.user.username\' not found. Must be available after authentication.');
                 return next(err);
             }
 

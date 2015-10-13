@@ -11,8 +11,9 @@
     "license": "Apache 2.0",
     "scripts": {
         "docker-start": "npm run fast-setup && npm run register-root && npm start",
+        "jscs-fix": "jscs . --fix",
         "start": "node ./bin/www",
-        "lint": "jshint --verbose .",
+        "lint": "jshint --verbose . && npm run jscs-fix",
         "setup": "./setup.js",
         "fast-setup": "SETUP_MODE=fast ./setup.js",
         "register-root": "SETUP_MODE=register-root ./setup.js",
@@ -51,6 +52,7 @@
         "coveralls": "*",
         "handlebars": "*",
         "istanbul": "*",
+        "jscs": "*",
         "jquery": "*",
         "jshint": "*",
         "mocha": "*",

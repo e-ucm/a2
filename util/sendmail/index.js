@@ -1,7 +1,7 @@
 'use strict';
 
 exports = module.exports = function (req, res, options) {
-    /* options = {
+    /* Options = {
          from: String,
          to: String,
          cc: String,
@@ -19,8 +19,7 @@ exports = module.exports = function (req, res, options) {
         res.render(options.textPath, options.locals, function (err, text) {
             if (err) {
                 callback(err, null);
-            }
-            else {
+            } else {
                 options.text = text;
                 return callback(null, 'done');
             }
@@ -31,8 +30,7 @@ exports = module.exports = function (req, res, options) {
         res.render(options.htmlPath, options.locals, function (err, html) {
             if (err) {
                 callback(err, null);
-            }
-            else {
+            } else {
                 options.html = html;
                 return callback(null, 'done');
             }
