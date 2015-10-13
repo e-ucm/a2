@@ -224,8 +224,8 @@ router.post('/reset/:token', function (req, res, next) {
         /*Check user*/
         function (done) {
             req.app.db.model('user').findOne({
-                "resetPassword.token": req.params.token.toString(),
-                "resetPassword.expires": {$gt: Date.now()}
+                'resetPassword.token': req.params.token.toString(),
+                'resetPassword.expires': {$gt: Date.now()}
             }, function (err, user) {
                 if (err) {
                     return done(err);

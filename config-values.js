@@ -129,7 +129,7 @@ initFromEnv(exports.testValues, prefix, links);
 // Some control instructions
 
 // Ensuring that 'mongodbUrl' values are different
-exports.defaultValues.mongodbUrl = 'mongodb://' + exports.defaultValues.mongoHost + ':' + exports.defaultValues.mongoPort + "/a2";
+exports.defaultValues.mongodbUrl = 'mongodb://' + exports.defaultValues.mongoHost + ':' + exports.defaultValues.mongoPort + '/a2';
 exports.testValues.mongodbUrl = exports.defaultValues.mongodbUrl + '-test';
 
 // Ensuring that 'redisNumber' values are different

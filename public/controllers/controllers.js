@@ -28,7 +28,7 @@ angular.module('myApp.controllers', ['ngStorage'])
             $scope.logout = function () {
                 $http.delete('/api/logout', {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     delete $scope.$storage.user;
@@ -54,7 +54,7 @@ angular.module('myApp.controllers', ['ngStorage'])
 
                     $http.get('/api/users/' + data.user._id + '/roles', {
                         headers: {
-                            'Authorization': 'Bearer ' + $scope.$storage.user.token
+                            Authorization: 'Bearer ' + $scope.$storage.user.token
                         }
                     }).success(function (data) {
                         $scope.$storage.user.roles = data;
@@ -121,7 +121,7 @@ angular.module('myApp.controllers', ['ngStorage'])
 
             $http.get('/api/users', {
                 headers: {
-                    'Authorization': 'Bearer ' + $scope.$storage.user.token
+                    Authorization: 'Bearer ' + $scope.$storage.user.token
                 }
             }).success(function (data) {
                 $scope.response = data;
@@ -138,12 +138,12 @@ angular.module('myApp.controllers', ['ngStorage'])
         function ($scope, $http, $window, $localStorage) {
             $scope.$storage = $localStorage;
 
-            $scope.proxyRoute = $window.location.host + "/proxy/";
+            $scope.proxyRoute = $window.location.host + '/proxy/';
             var refresh = function () {
 
                 $http.get('/api/applications', {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function (data) {
                     $scope.response = data;
@@ -197,7 +197,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                     anonymous: [application.anonymousRoute]
                 }, {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     refresh();
@@ -240,7 +240,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                 }
                 $http.post('/api/applications/', applicationData, {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     $scope.applicationRoles = [{roles: '', allows: [{resourceName: '', permissionName: ['']}]}];
@@ -257,7 +257,7 @@ angular.module('myApp.controllers', ['ngStorage'])
             $scope.deleteApplication = function (appId) {
                 $http.delete('/api/applications/' + appId, {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     refresh();
@@ -267,111 +267,111 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
 
             $scope.emotionsApplication = {
-                "name": "emotions",
-                "prefix": "emotions",
-                "host": "http://localhost:3232/api",
+                name: 'emotions',
+                prefix: 'emotions',
+                host: 'http://localhost:3232/api',
                 anonymous: [
                     '/emotions'
                 ]
             };
 
             $scope.gleanerApplication = {
-                "name": "gleaner",
-                "prefix": "gleaner",
-                "host": "http://localhost:3300/api",
-                "roles": [
+                name: 'gleaner',
+                prefix: 'gleaner',
+                host: 'http://localhost:3300/api',
+                roles: [
                     {
-                        "roles": "student",
-                        "allows": [
+                        roles: 'student',
+                        allows: [
                             {
-                                "resources": [
-                                    "/games/public",
-                                    "/games/:gameId/versions",
-                                    "/games/:gameId/versions/:versionId",
-                                    "/games/:gameId/versions/:versionId/sessions/my",
-                                    "/sessions/:sessionId/results"
+                                resources: [
+                                    '/games/public',
+                                    '/games/:gameId/versions',
+                                    '/games/:gameId/versions/:versionId',
+                                    '/games/:gameId/versions/:versionId/sessions/my',
+                                    '/sessions/:sessionId/results'
                                 ],
-                                "permissions": [
-                                    "get"
+                                permissions: [
+                                    'get'
                                 ]
                             },
                             {
-                                "resources": [
-                                    "/sessions/:sessionId"
+                                resources: [
+                                    '/sessions/:sessionId'
                                 ],
-                                "permissions": [
-                                    "put",
-                                    "get"
+                                permissions: [
+                                    'put',
+                                    'get'
                                 ]
                             }
                         ]
                     },
                     {
-                        "roles": "teacher",
-                        "allows": [
+                        roles: 'teacher',
+                        allows: [
                             {
-                                "resources": [
-                                    "/games/public",
-                                    "/games/:gameId/versions",
-                                    "/games/:gameId/versions/:versionId",
-                                    "/games/:gameId/versions/:versionId/sessions/my",
-                                    "/sessions/:sessionId/results"
+                                resources: [
+                                    '/games/public',
+                                    '/games/:gameId/versions',
+                                    '/games/:gameId/versions/:versionId',
+                                    '/games/:gameId/versions/:versionId/sessions/my',
+                                    '/sessions/:sessionId/results'
 
                                 ],
-                                "permissions": [
-                                    "get"
+                                permissions: [
+                                    'get'
                                 ]
                             },
                             {
-                                "resources": [
-                                    "/sessions/:sessionId",
-                                    "/sessions/:sessionId/remove",
-                                    "/sessions/:sessionId/results/:resultsId"
+                                resources: [
+                                    '/sessions/:sessionId',
+                                    '/sessions/:sessionId/remove',
+                                    '/sessions/:sessionId/results/:resultsId'
                                 ],
-                                "permissions": [
-                                    "*"
+                                permissions: [
+                                    '*'
                                 ]
                             },
                             {
-                                "resources": [
-                                    "/games/:gameId/versions/:versionId/sessions",
-                                    "/sessions/:sessionId/event/:event"
+                                resources: [
+                                    '/games/:gameId/versions/:versionId/sessions',
+                                    '/sessions/:sessionId/event/:event'
                                 ],
-                                "permissions": [
-                                    "post"
+                                permissions: [
+                                    'post'
                                 ]
                             }
                         ]
                     },
                     {
-                        "roles": "developer",
-                        "allows": [
+                        roles: 'developer',
+                        allows: [
                             {
-                                "resources": [
-                                    "/games/my",
-                                    "/games/:gameId",
-                                    "/games/:gameId/versions",
-                                    "/games/:gameId/versions/:versionId"
+                                resources: [
+                                    '/games/my',
+                                    '/games/:gameId',
+                                    '/games/:gameId/versions',
+                                    '/games/:gameId/versions/:versionId'
                                 ],
-                                "permissions": [
-                                    "*"
+                                permissions: [
+                                    '*'
                                 ]
                             },
                             {
-                                "resources": [
-                                    "/games/:gameId/versions/:versionId/sessions",
-                                    "/sessions/:sessionId"
+                                resources: [
+                                    '/games/:gameId/versions/:versionId/sessions',
+                                    '/sessions/:sessionId'
                                 ],
-                                "permissions": [
-                                    "get"
+                                permissions: [
+                                    'get'
                                 ]
                             },
                             {
-                                "resources": [
-                                    "/games"
+                                resources: [
+                                    '/games'
                                 ],
-                                "permissions": [
-                                    "post"
+                                permissions: [
+                                    'post'
                                 ]
                             }
                         ]
@@ -394,7 +394,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                 var data = JSON.parse($scope.applicationString);
                 $http.post('/api/applications', data, {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     refresh();
@@ -420,7 +420,7 @@ angular.module('myApp.controllers', ['ngStorage'])
             var getRoles = function () {
                 $http.get('/api/roles', {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function (data) {
                     $scope.rolesList = {};
@@ -430,7 +430,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                         };
                         $http.get('/api/roles/' + role, {
                             headers: {
-                                'Authorization': 'Bearer ' + $scope.$storage.user.token
+                                Authorization: 'Bearer ' + $scope.$storage.user.token
                             }
                         }).success(function (data) {
                             $scope.rolesList[role].info = data;
@@ -471,7 +471,7 @@ angular.module('myApp.controllers', ['ngStorage'])
 
                 $http.post('/api/roles/', $scope.item, {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     var role = $scope.rolesList[$scope.newRole.name] = {};
@@ -496,7 +496,7 @@ angular.module('myApp.controllers', ['ngStorage'])
 
                 $http.post('/api/roles/' + roleName + '/resources', $scope.item, {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     var role = $scope.rolesList[roleName] || {};
@@ -516,21 +516,22 @@ angular.module('myApp.controllers', ['ngStorage'])
                 $scope.item.permissions = $scope.newPer[resourceName].split(' ');
                 $http.post('/api/roles/' + roleName + '/resources/' + resourceName + '/permissions', $scope.item, {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     var role = $scope.rolesList[roleName].info;
                     role[resourceName] = role[resourceName].concat($scope.newPer[resourceName].split(' '));
                     $scope.newPer[resourceName] = '';
                 }).error(function (data, status) {
-                    console.error('Status:', status, ', Error on RolesCtrl, POST /api/roles/' + roleName + '/resources/' + resourceName + '/permissions \n', data);
+                    console.error('Status:', status, ', Error on RolesCtrl, POST /api/roles/' + roleName + '/resources/' +
+                        resourceName + '/permissions \n', data);
                 });
             };
 
             $scope.removeRole = function (roleName) {
                 $http.delete('/api/roles/' + roleName, {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     delete $scope.rolesList[roleName];
@@ -542,12 +543,13 @@ angular.module('myApp.controllers', ['ngStorage'])
             $scope.removeResource = function (roleName, resourceName) {
                 $http.delete('/api/roles/' + roleName + '/resources/' + resourceName, {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     delete $scope.rolesList[roleName].info[resourceName];
                 }).error(function (data, status) {
-                    console.error('Status:', status, ', Error on RolesCtrl, DEL /api/roles/' + roleName + '/resources/' + resourceName + '\n', data);
+                    console.error('Status:', status, ', Error on RolesCtrl, DEL /api/roles/' + roleName + '/resources/' +
+                        resourceName + '\n', data);
                 });
             };
 
@@ -555,12 +557,13 @@ angular.module('myApp.controllers', ['ngStorage'])
                 var role = $scope.rolesList[roleName].info;
                 $http.delete('/api/roles/' + roleName + '/resources/' + resourceName + '/permissions/' + permission, {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function (data) {
                     role[resourceName] = data;
                 }).error(function (data, status) {
-                    console.error('Status:', status, ', Error on RolesCtrl, DEL /api/roles/' + roleName + '/resources/' + resourceName + '/permissions/' + permission + '\n', data);
+                    console.error('Status:', status, ', Error on RolesCtrl, DEL /api/roles/' + roleName + '/resources/' +
+                        resourceName + '/permissions/' + permission + '\n', data);
                 });
             };
 
@@ -576,13 +579,13 @@ angular.module('myApp.controllers', ['ngStorage'])
             var refresh = function () {
                 $http.get('/api/users/' + $scope.uId, {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function (data) {
                     $scope.user = data;
                     $http.get('/api/users/' + data._id + '/roles', {
                         headers: {
-                            'Authorization': 'Bearer ' + $scope.$storage.user.token
+                            Authorization: 'Bearer ' + $scope.$storage.user.token
                         }
                     }).success(function (data) {
                         $scope.user.roles = {};
@@ -593,7 +596,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                             };
                             $http.get('/api/roles/' + role, {
                                 headers: {
-                                    'Authorization': 'Bearer ' + $scope.$storage.user.token
+                                    Authorization: 'Bearer ' + $scope.$storage.user.token
                                 }
                             }).success(function (data) {
                                 $scope.user.roles[role].info = data;
@@ -611,7 +614,7 @@ angular.module('myApp.controllers', ['ngStorage'])
 
                 $http.get('/api/roles', {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function (data) {
                     $scope.appRoles = data;
@@ -630,7 +633,7 @@ angular.module('myApp.controllers', ['ngStorage'])
             $scope.changeName = function () {
                 $http.put('/api/users/' + $scope.uId, $scope.newName, {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     $scope.newName = undefined;
@@ -643,7 +646,7 @@ angular.module('myApp.controllers', ['ngStorage'])
             $scope.changeEmail = function () {
                 $http.put('/api/users/' + $scope.uId, $scope.newEmail, {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     $scope.newEmail = undefined;
@@ -656,7 +659,7 @@ angular.module('myApp.controllers', ['ngStorage'])
             $scope.addRole = function (role) {
                 $http.post('/api/users/' + $scope.uId + '/roles', [role], {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     refresh();
@@ -668,7 +671,7 @@ angular.module('myApp.controllers', ['ngStorage'])
             $scope.removeRole = function (role) {
                 $http.delete('/api/users/' + $scope.uId + '/roles/' + role, {
                     headers: {
-                        'Authorization': 'Bearer ' + $scope.$storage.user.token
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
                     refresh();

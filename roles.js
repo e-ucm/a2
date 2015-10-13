@@ -66,7 +66,7 @@ exports = module.exports = function (app, callback) {
             }
 
             if (roles.indexOf(roleName) === -1) {
-                err = new Error("The role " + roleName + " doesn't exist.");
+                err = new Error('The role ' + roleName + ' doesn\'t exist.');
                 err.status = 400;
                 return cb(err);
             }

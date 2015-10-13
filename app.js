@@ -7,7 +7,7 @@ var express = require('express'),
     mongoose = require('mongoose'),
     passport = require('passport'),
     jwt = require('express-jwt'),
-    tokenStorage = require('./tokenStorage/token-storage');
+    TokenStorage = require('./tokenStorage/token-storage');
 
 var config = require((process.env.NODE_ENV === 'test') ? './config-test' : './config'),
     health = require('./routes/health'),
@@ -25,14 +25,14 @@ var app = express();
 
 var RedisBackend = require('./tokenStorage/redis-backend');
 var backend = new RedisBackend(config.redisdb);
-tokenStorage = new tokenStorage(backend);
+var tokenStorage = new TokenStorage(backend);
 
-//keep reference to config
+// Keep reference to config
 app.config = config;
 
 app.tokenStorage = tokenStorage;
 
-//setup utilities
+// Setup utilities
 app.utility = {};
 app.utility.sendmail = require('./util/sendmail');
 
@@ -43,29 +43,28 @@ app.db.on('connected', function () {
     console.log('Mongo db Connected!');
     require('./roles')(app);
 });
-//config data models
+// Config data models
 require('./models')(app, mongoose);
 
-// view engine setup
+// View engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-//middleware
+// Middleware
 if (app.get('env') === 'development') {
     app.use(logger('dev'));
 }
 
 // enable cross-origin resource sharing - CORS http://enable-cors.org/index.html
 app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Authorization2");
-    res.header("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, DELETE");
-    res.header("Access-Control-Allow-Credentials", true);
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Authorization2');
+    res.header('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, DELETE');
+    res.header('Access-Control-Allow-Credentials', true);
 
     if ('OPTIONS' === req.method) {
         res.sendStatus(200);
-    }
-    else {
+    } else {
         next();
     }
 });
@@ -130,14 +129,14 @@ app.use(config.apiPath + '/roles', roles);
 app.use(config.apiPath + '/applications', applications);
 app.use(config.apiPath + '/health', health);
 
-// catch 404 and forward to error handler
+// Catch 404 and forward to error handler
 app.use(function (req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;
     next(err);
 });
 
-// error handlers
+// Error handlers
 // production error handler
 // no stacktraces leaked to user
 app.use(function (err, req, res, next) {

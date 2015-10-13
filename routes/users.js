@@ -492,7 +492,7 @@ router.post(userIdRoute + '/verification', authentication.authorized, function (
 router.post(userIdRoute + '/verification/:token', function (req, res, next) {
 
     req.app.db.model('user').findOne({
-        "verification.token": req.params.token.toString(),
+        'verification.token': req.params.token.toString()
     }, function (err, user) {
         if (err) {
             return next(err);
@@ -529,7 +529,7 @@ function checkAuthAndExec(req, res, cb) {
     });
 }
 
-//User info.
+// User info.
 function getUserInfo(userId, req, res, cb) {
     req.app.db.model('user').findById(userId).select(unselectedFields).exec(function (err, user) {
         if (err) {
@@ -558,13 +558,13 @@ function updateUserInfo(userId, req, res, cb) {
     }
     if (req.body.name) {
         if (req.body.name.first) {
-            update.$set["name.first"] = req.body.name.first;
+            update.$set['name.first'] = req.body.name.first;
         }
         if (req.body.name.middle) {
-            update.$set["name.middle"] = req.body.name.middle;
+            update.$set['name.middle'] = req.body.name.middle;
         }
         if (req.body.name.last) {
-            update.$set["name.last"] = req.body.name.last;
+            update.$set['name.last'] = req.body.name.last;
         }
     }
 
@@ -678,7 +678,7 @@ function removeUserRoles(user, req, res, cb) {
     var toDelete = req.params.roleName;
     if (toDelete === 'admin') {
         if (req.user._id === user._id.toString()) {
-            var err = new Error("You can't remove the 'admin' role from yourself.");
+            var err = new Error('You can\'t remove the \'admin\' role from yourself.');
             err.status = 403;
             return cb(err);
         }
