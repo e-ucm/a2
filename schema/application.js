@@ -19,6 +19,10 @@ exports = module.exports = function (app, mongoose) {
         name: {
             type: String
         },
+        owner: {
+            type: String,
+            required: true
+        },
         anonymous: [String],    // Anonymous(unprotected) routes defined by the application
         routes: [String],       // Protected routes defined by the application
         autoroles: [String],    // The roles that can be auto-assigned by the users when they create a new account
@@ -28,6 +32,14 @@ exports = module.exports = function (app, mongoose) {
         }
     });
 
+    /**
+     * Creates an application with the given values.
+     * If the application already exists it overrides it with the new values (supposing the
+     * new application's owner is the original application's creator).
+     * @param application
+     * @param cb
+     * @returns the created/updated application.
+     */
     application.statics.create = function (application, cb) {
 
         if (!application) {
@@ -46,7 +58,22 @@ exports = module.exports = function (app, mongoose) {
             }
 
             if (existingApplication) {
-                return cb(new Error('An application with the prefix ' + application.prefix + ' already exists!'));
+                if(application.owner === existingApplication.owner) {
+                    for (var key in application) {
+                        if (key !== '_id' && application.hasOwnProperty(key)) {
+                            existingApplication[key] = application[key];
+                        }
+                    }
+                    return existingApplication.save(function (err) {
+                        if (err) {
+                            return cb(err);
+                        }
+
+                        cb(null, existingApplication);
+                    });
+                } else {
+                    return cb(new Error('You don\'t have permission to modify this application!'));
+                }
             }
 
             // Create an instance of Self in case application isn't already an instance
