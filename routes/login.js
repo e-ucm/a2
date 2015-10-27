@@ -72,7 +72,7 @@ router.post('/', function (req, res, next) {
 
                         var expirationInSec = req.app.config.tokenExpirationInSeconds;
                         var token = jwt.sign(data, req.app.config.cryptoKey, {
-                            expiresInSeconds: expirationInSec
+                            expiresIn: expirationInSec
                         });
 
                         req.app.tokenStorage.save(token, {
