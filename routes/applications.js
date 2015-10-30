@@ -79,7 +79,7 @@ router.get('/', authentication.authorized, function (req, res, next) {
 });
 
 /**
- * @api {post} /applications Register a new application.
+ * @api {post} /applications Register a new application, if an application with the same prefix already exists it will be overridden with the new values.
  * @apiName postApplications
  * @apiGroup Applications
  *
@@ -162,7 +162,8 @@ router.post('/', authentication.authorized, function (req, res, next) {
                 host: req.body.host,
                 autoroles: req.body.autoroles,
                 anonymous: req.body.anonymous || [],
-                routes: results.roles
+                routes: results.roles,
+                owner: req.user.username
             }, done);
         }]
     }, function (err, results) {
@@ -172,13 +173,7 @@ router.post('/', authentication.authorized, function (req, res, next) {
         }
 
         var application = results.application;
-        res.json({
-            _id: application._id,
-            prefix: application.prefix,
-            host: application.host,
-            timeCreated: application.timeCreated,
-            anonymous: application.anonymous
-        });
+        res.json(application);
     });
 });
 
@@ -273,7 +268,8 @@ router.put(applicationIdRoute, authentication.authorized, function (req, res, ne
 
     var applicationId = req.params.applicationId || '';
     var query = {
-        _id: applicationId
+        _id: applicationId,
+        owner: req.user.username
     };
     var update = {
         $set: {}
@@ -309,7 +305,8 @@ router.put(applicationIdRoute, authentication.authorized, function (req, res, ne
             return next(err);
         }
         if (!application) {
-            err = new Error('No application with the given application id exists.');
+            err = new Error('No application with the given application id exists or ' +
+                'you don\'t have permission to modify the given application.');
             err.status = 400;
             return next(err);
         }
@@ -342,7 +339,8 @@ router.delete(applicationIdRoute, authentication.authorized, function (req, res,
     var applicationId = req.params.applicationId || '';
 
     var query = {
-        _id: applicationId
+        _id: applicationId,
+        owner: req.user.username
     };
 
     req.app.db.model('application').findOneAndRemove(query, function (err, app) {

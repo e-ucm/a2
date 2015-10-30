@@ -283,7 +283,7 @@ describe('REST API', function () {
         it('should POST an application correctly', function (done) {
             var appData = {
                 prefix: gleanerPrefix,
-                host: gleanerHost,
+                host: gleanerHost + '2',
                 roles: gleanerRoles,
                 autoroles: [role],
                 anonymous: [anonymousRoute]
@@ -293,19 +293,36 @@ describe('REST API', function () {
                 res = JSON.parse(res.text);
                 should(res).be.an.Object();
                 should(res._id).be.an.String();
-                should.not.exist(res.name);
+                should(res.name).equal('');
                 should(res.prefix).be.an.String();
                 should.equal(res.prefix, appData.prefix);
                 should(res.host).be.an.String();
+                should(res.host).equal(gleanerHost + '2');
                 should.equal(res.host, appData.host);
+                should.equal(res.owner, admin.username);
 
                 application._id = res._id;
 
-                app.acl.addUserRoles(user.username, 'gleanerUser', function (err) {
+                appData.host = gleanerHost;
+                // Check if the application's host value is correctly updated
+                authPost(applicationsRoute, admin.token, appData, SUCCESS, function (err, res) {
                     should.not.exist(err);
-                });
+                    res = JSON.parse(res.text);
+                    should(res).be.an.Object();
+                    should(res._id).be.an.String();
+                    should(res.name).equal('');
+                    should(res.prefix).be.an.String();
+                    should.equal(res.prefix, appData.prefix);
+                    should(res.host).be.an.String();
+                    should(res.host).equal(gleanerHost);
+                    should.equal(res.host, appData.host);
+                    should.equal(res.owner, admin.username);
 
-                done();
+                    app.acl.addUserRoles(user.username, 'gleanerUser', function (err) {
+                        should.not.exist(err);
+                        done();
+                    });
+                });
             });
         });
     });
@@ -1141,11 +1158,13 @@ describe('REST API', function () {
 
             del(applicationsRoute + '/' + application._id, 'invalid_token', UNAUTHORIZED, function (err) {
                 should.not.exist(err);
+                del(applicationsRoute + '/' + application._id, user.token, FORBIDDEN, function (err) {
+                    should.not.exist(err);
 
-                del(applicationsRoute + '/' + application._id, admin.token, SUCCESS,
-                    validateDeletedApplication(application.prefix, done));
+                    del(applicationsRoute + '/' + application._id, admin.token, SUCCESS,
+                        validateDeletedApplication(application.prefix, done));
+                });
             });
-
         });
     });
 
