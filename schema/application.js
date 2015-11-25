@@ -13,8 +13,7 @@ exports = module.exports = function (app, mongoose) {
             type: String,
             unique: true,
             lowercase: true,
-            required: true,
-            validate: [require('validator').isURL, 'Invalid host! (must be an URL)']
+            required: true
         },
         name: {
             type: String
