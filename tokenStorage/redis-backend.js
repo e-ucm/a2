@@ -32,7 +32,7 @@ var RedisBackend = function (options) {
     this.middleware = function (req, res, next) {
         var token = fetchToken(req);
         if (!token) {
-            var err = new Error("Format is Authorization: Bearer [token]");
+            var err = new Error('Format is Authorization: Bearer [token]');
             err.status = 401;
             return next(err);
         }
@@ -48,7 +48,7 @@ var RedisBackend = function (options) {
                 return next();
             } else {
                 req.user = undefined;
-                err = new Error("Token doesn't exist, login into the system so it can generate a new token.");
+                err = new Error('Token doesn\'t exist, login into the system so it can generate a new token.');
                 err.status = 401;
                 next(err);
             }
@@ -65,10 +65,10 @@ var RedisBackend = function (options) {
             if (reply) {
                 client.expire(token, expirationInSec, function (err, reply) {
                     if (err) {
-                        return callback(new Error("Can not set the expire value for the token key"));
+                        return callback(new Error('Can not set the expire value for the token key'));
                     }
                     if (reply) {
-                        callback(null, token); // we have succeeded
+                        callback(null, token); // We have succeeded
                     } else {
                         callback(new Error('Expiration not set on redis'));
                     }

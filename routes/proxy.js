@@ -72,8 +72,7 @@ exports = module.exports = function (jwtMiddleware) {
                     forwardRequest(host, req, res, next);
                 }
             });
-        }
-        else {
+        } else {
             var appName = application.name;
             if (!appName) {
                 appName = application.prefix;
