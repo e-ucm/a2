@@ -41,8 +41,7 @@
         "passport-local-mongoose": "1.0.x",
         "path-to-regexp": "^1.2.x",
         "q": "*",
-        "redis": "*",
-        "validator": "^3.41.x"
+        "redis": "*"
     },
     "devDependencies": {
         "apidoc": "*",

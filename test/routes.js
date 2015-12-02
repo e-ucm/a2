@@ -552,12 +552,6 @@ describe('REST API', function () {
                 host: gleanerHost
             }, FORBIDDEN, done);
         });
-
-        it("should not PUT an invalid host (not an URL) to a specific application", function (done) {
-            authPut(applicationsRoute + '/' + testApplication._id, admin.token, {
-                host: 'invalid_url'
-            }, 403, done);
-        });
     });
 
     /** /api/:prefix* **/
