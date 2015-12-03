@@ -57,7 +57,7 @@ exports = module.exports = function (app, mongoose) {
             }
 
             if (existingApplication) {
-                if(application.owner === existingApplication.owner) {
+                if (application.owner === existingApplication.owner) {
                     for (var key in application) {
                         if (key !== '_id' && application.hasOwnProperty(key)) {
                             existingApplication[key] = application[key];

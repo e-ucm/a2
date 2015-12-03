@@ -121,7 +121,7 @@ if (process.env.SETUP_MODE === 'fast') {
     registerRoot(defaultValues, function (err, res) {
         if (err || !res) {
             console.error(err);
-            if(err.message && err.message.indexOf('ECONNREFUSED') > -1) {
+            if (err.message && err.message.indexOf('ECONNREFUSED') > -1) {
                 console.error('Could not connect to MongoDB!');
                 return process.exit(-1);
             }

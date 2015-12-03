@@ -9,18 +9,18 @@ var app = {
     }
 };
 
-var user;
+var User;
 
 describe('User  model validations', function () {
     this.timeout(4000);
-    // within before() you can run all the operations that are needed to setup your tests. In this case
+    // Within before() you can run all the operations that are needed to setup your tests. In this case
     // I want to create a connection with the database, and when I'm done, I call done().
     before(function (done) {
         // In our tests we use the test db
         app.db = mongoose.createConnection(app.config.mongodb.uri + '_tests');
         require('../schema/user')(app, mongoose);
-        user = app.db.model('user');
-        user.remove({}, function (err) {
+        User = app.db.model('user');
+        User.remove({}, function (err) {
             done(err);
         });
     });
@@ -29,7 +29,7 @@ describe('User  model validations', function () {
         app.db.db.dropDatabase();
     });
 
-    // use describe to give a title to your test suite, in this case the tile is "Model validations"
+    // Use describe to give a title to your test suite, in this case the tile is "Model validations"
     // and then specify a function in which we are going to declare all the tests
     // we want to run. Each test starts with the function it() and as a first argument
     // we have to provide a meaningful title for it, whereas as the second argument we
@@ -38,13 +38,13 @@ describe('User  model validations', function () {
     // to perform async test!
 
     it('should return a new instance when create succeeds', function (done) {
-        user.register(new user({
+        User.register(new User({
             username: 'username',
             email: 'usermail@mail.com'
         }), 'user_password', function (err, result) {
 
             should.not.exist(err);
-            should(result).be.an.instanceOf(user);
+            should(result).be.an.instanceOf(User);
 
             done();
         });
@@ -53,7 +53,7 @@ describe('User  model validations', function () {
     // Username checking
 
     it('should alert about duplicated user names', function (done) {
-        user.register(new user({
+        User.register(new User({
             username: 'username',
             email: 'email@m.com'
         }), 'user_password2', function (err, result) {
@@ -64,7 +64,7 @@ describe('User  model validations', function () {
     });
 
     it('should alert about missing username', function (done) {
-        user.register(new user({
+        User.register(new User({
             email: 'email@m.com'
         }), 'user_password23', function (err, result) {
 
@@ -78,7 +78,7 @@ describe('User  model validations', function () {
     // Email checking
 
     it('should alert about duplicated user email', function (done) {
-        user.register(new user({
+        User.register(new User({
             username: 'username234',
             email: 'usermail@mail.com'
         }), 'user_password2', function (err, result) {
@@ -90,7 +90,7 @@ describe('User  model validations', function () {
     });
 
     it('should alert about missing email', function (done) {
-        user.register(new user({
+        User.register(new User({
             username: 'username23'
         }), 'user_password23', function (err, result) {
 
@@ -101,7 +101,7 @@ describe('User  model validations', function () {
     });
 
     it('should return an error when we provide an invalid email', function (done) {
-        user.register(new user({
+        User.register(new User({
             username: 'username2',
             email: 'invalid_mail'
         }), 'user_password2', function (err, result) {

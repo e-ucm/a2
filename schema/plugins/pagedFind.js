@@ -100,7 +100,7 @@ module.exports = exports = function pagedFindPlugin(schema) {
             output.data = results.find;
             output.items.total = results.count;
 
-            // paging calculations
+            // Paging calculations
             output.pages.total = Math.ceil(output.items.total / limit);
             output.pages.next = output.pages.current + 1;
             output.pages.hasNext = output.pages.next <= output.pages.total;
