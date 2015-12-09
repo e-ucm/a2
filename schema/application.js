@@ -70,9 +70,9 @@ exports = module.exports = function (app, mongoose) {
 
                         cb(null, existingApplication);
                     });
-                } else {
-                    return cb(new Error('You don\'t have permission to modify this application!'));
                 }
+                return cb(new Error('You don\'t have permission to modify this application!'));
+
             }
 
             // Create an instance of Self in case application isn't already an instance

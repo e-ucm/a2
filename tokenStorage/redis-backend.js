@@ -46,12 +46,12 @@ var RedisBackend = function (options) {
                 var data = JSON.parse(reply);
                 req.user = _.merge(req.user, data);
                 return next();
-            } else {
-                req.user = undefined;
-                err = new Error('Token doesn\'t exist, login into the system so it can generate a new token.');
-                err.status = 401;
-                next(err);
             }
+            req.user = undefined;
+            err = new Error('Token doesn\'t exist, login into the system so it can generate a new token.');
+            err.status = 401;
+            next(err);
+
         });
 
     };

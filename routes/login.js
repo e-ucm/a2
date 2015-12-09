@@ -46,59 +46,59 @@ router.post('/', function (req, res, next) {
             err = new Error(info.message);
             err.status = 401;
             return next(err);
-        } else {
-            req.logIn(user, {session: false}, function (err) {
+        }
+        req.logIn(user, {session: false}, function (err) {
+            if (err) {
+                return next(err);
+            }
+
+            async.waterfall([
+                /*Generate a random number*/
+                function (done) {
+                    require('crypto').randomBytes(10, function (err, buf) {
+                        if (err) {
+                            return done(err);
+                        }
+                        var randNum = buf.toString('hex');
+                        done(null, randNum);
+                    });
+                },
+                /*Generate the token*/
+                function (randNum, done) {
+                    var data = {
+                        _id: user._id,
+                        randNum: randNum
+                    };
+
+                    var expirationInSec = req.app.config.tokenExpirationInSeconds;
+                    var token = jwt.sign(data, req.app.config.cryptoKey, {
+                        expiresIn: expirationInSec
+                    });
+
+                    req.app.tokenStorage.save(token, {
+                        username: user.username
+                    }, expirationInSec, done);
+                },
+                /*Send the login data*/
+                function (token, done) {
+                    res.json({
+                        user: {
+                            _id: user._id,
+                            username: user.username,
+                            email: user.email,
+                            token: token
+                        }
+                    });
+
+                    done();
+                }
+            ], function (err) {
                 if (err) {
                     return next(err);
                 }
-
-                async.waterfall([
-                    /*Generate a random number*/
-                    function (done) {
-                        require('crypto').randomBytes(10, function (err, buf) {
-                            if (err) {
-                                return done(err);
-                            }
-                            var randNum = buf.toString('hex');
-                            done(null, randNum);
-                        });
-                    },
-                    /*Generate the token*/
-                    function (randNum, done) {
-                        var data = {
-                            _id: user._id,
-                            randNum: randNum
-                        };
-
-                        var expirationInSec = req.app.config.tokenExpirationInSeconds;
-                        var token = jwt.sign(data, req.app.config.cryptoKey, {
-                            expiresIn: expirationInSec
-                        });
-
-                        req.app.tokenStorage.save(token, {
-                            username: user.username
-                        }, expirationInSec, done);
-                    },
-                    /*Send the login data*/
-                    function (token, done) {
-                        res.json({
-                            user: {
-                                _id: user._id,
-                                username: user.username,
-                                email: user.email,
-                                token: token
-                            }
-                        });
-
-                        done();
-                    }
-                ], function (err) {
-                    if (err) {
-                        return next(err);
-                    }
-                });
             });
-        }
+        });
+
     })(req, res, next);
 });
 

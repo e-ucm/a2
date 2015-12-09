@@ -57,20 +57,21 @@ exports = module.exports = function (jwtMiddleware) {
             req.app.acl.isAllowed(userId, resource, action, function (err, allowed) {
                 if (err) {
                     return next(err);
-                } else if (allowed === false) {
+                }
+                if (allowed === false) {
                     if (req.app.acl.logger) {
                         req.app.acl.logger.debug('Not allowed ' + action + ' on ' + resource + ' by user ' + userId);
                     }
                     err = new Error('Insufficient permissions to access resource');
                     err.status = 403;
                     return next(err);
-                } else {
-                    if (req.app.acl.logger) {
-                        req.app.acl.logger.debug('Allowed ' + action + ' on ' + resource + ' by user ' + userId);
-                    }
-
-                    forwardRequest(host, req, res, next);
                 }
+                if (req.app.acl.logger) {
+                    req.app.acl.logger.debug('Allowed ' + action + ' on ' + resource + ' by user ' + userId);
+                }
+
+                forwardRequest(host, req, res, next);
+
             });
         } else {
             var appName = application.name;

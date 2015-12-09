@@ -556,7 +556,9 @@ router.delete('/:roleName/resources/*/permissions/:permissionName', authenticati
                     err = new Error('The permission ' + permission + ' can\'t be remove because is the last');
                     err.status = 400;
                     return done(err);
-                } else if (result[resource].indexOf(permission) === -1) {
+                }
+
+                if (result[resource].indexOf(permission) === -1) {
                     err = new Error('The permission ' + permission + ' in the resource ' + resource + ' in ' + roleName + ' doesn\'t exist.');
                     err.status = 400;
                     return done(err);
