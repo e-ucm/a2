@@ -84,25 +84,25 @@ router.post('/', function (req, res, next) {
                         err = new Error('The role ' + req.body.role + ' doesn\'t exist');
                         err.status = 404;
                         return done(err);
-                    } else {
-                        var AppModel = req.app.db.model('application');
-                        AppModel.findByPrefix(req.body.prefix, function (err, application) {
-                            if (err) {
-                                return done(err);
-                            }
-                            if (!application) {
-                                err = new Error('The ' + req.body.prefix + ' doesn\'t exist');
-                                err.status = 404;
-                                return done(err);
-                            }
-                            if (application.autoroles.indexOf(req.body.role) === -1) {
-                                err = new Error('The ' + req.body.role + ' role can\'t be assigned');
-                                err.status = 403;
-                                return done(err);
-                            }
-                            return done();
-                        });
                     }
+                    var AppModel = req.app.db.model('application');
+                    AppModel.findByPrefix(req.body.prefix, function (err, application) {
+                        if (err) {
+                            return done(err);
+                        }
+                        if (!application) {
+                            err = new Error('The ' + req.body.prefix + ' doesn\'t exist');
+                            err.status = 404;
+                            return done(err);
+                        }
+                        if (application.autoroles.indexOf(req.body.role) === -1) {
+                            err = new Error('The ' + req.body.role + ' role can\'t be assigned');
+                            err.status = 403;
+                            return done(err);
+                        }
+                        return done();
+                    });
+
 
                 });
             } else {

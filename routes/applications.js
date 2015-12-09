@@ -351,11 +351,10 @@ router.delete(applicationIdRoute, authentication.authorized, function (req, res,
             err = new Error('No application with the given application id exists.');
             err.status = 400;
             return next(err);
-        } else {
-            app.routes.forEach(function (route) {
-                req.app.acl.removeResource(route);
-            });
         }
+        app.routes.forEach(function (route) {
+            req.app.acl.removeResource(route);
+        });
 
         res.sendDefaultSuccessMessage();
     });
