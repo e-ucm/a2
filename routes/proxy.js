@@ -87,7 +87,6 @@ exports = module.exports = function (jwtMiddleware) {
     };
 
     var forwardRequest = function (host, req, res, next) {
-
         if (!startsWith(host, 'http')) {
             host = 'http://' + host;
         }
@@ -109,16 +108,21 @@ exports = module.exports = function (jwtMiddleware) {
             });
         }
 
+        req.url ="";
+
         proxy.web(req, res, {
             target: host,
-            ignorePath: true,
-            changeOrigin: true
+            ignorePath: false,
+            changeOrigin: true,
+            prependPath: true,
+            toProxy :true
         }, function (err) {
             if (err) {
                 err.status = 503;
                 return next(err);
             }
         });
+
     };
 
     /**
