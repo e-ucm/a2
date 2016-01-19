@@ -151,7 +151,7 @@ angular.module('myApp.controllers', ['ngStorage'])
         function ($scope, $http, $window, $localStorage) {
             $scope.$storage = $localStorage;
 
-            $scope.proxyRoute = $window.location.host + '/proxy/';
+            $scope.proxyRoute = $window.location.host + '/api/proxy/';
             var refresh = function () {
 
                 $http.get('/api/applications', {
