@@ -36,6 +36,7 @@ angular.module('myApp.controllers', ['ngStorage'])
                         $scope.href('/login');
                     }, 110);
                 }).error(function (data, status) {
+                    delete $scope.$storage.user;
                     console.error('Status:', status, ', Error on ToolbarCtrl, GET /api/logout \n', data);
                 });
             };
