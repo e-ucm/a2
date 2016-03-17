@@ -108,14 +108,14 @@ exports = module.exports = function (jwtMiddleware) {
             });
         }
 
-        req.url ="";
+        req.url = '';
 
         proxy.web(req, res, {
             target: host,
             ignorePath: false,
             changeOrigin: true,
             prependPath: true,
-            toProxy :true
+            toProxy: true
         }, function (err) {
             if (err) {
                 err.status = 503;
