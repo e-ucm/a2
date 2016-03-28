@@ -1,13 +1,26 @@
 'use strict';
 
-exports = module.exports = function (app, mongoose) {
+var validator = require('validator');
+
+var validateEmail = function(email) {
+    if (email) {
+        try {
+            return validator.isEmail(email);
+        } catch (ex) {
+            return false;
+        }
+    }
+    return false;
+};
+
+module.exports = function (app, mongoose) {
     var userSchema = new mongoose.Schema({
         email: {
             type: String,
             unique: true,
             lowercase: true,
             required: true,
-            validate: [require('validator').isEmail, 'Invalid email!']
+            validate: [validateEmail, 'Invalid email!']
         },
         name: {
             first: {

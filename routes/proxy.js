@@ -11,7 +11,7 @@ proxy.on('proxyRes', function () {
     proxy.removeAllListeners('proxyReq');
 });
 
-exports = module.exports = function (jwtMiddleware) {
+module.exports = function (jwtMiddleware) {
 
     var startsWith = function (source, str) {
         return source.slice(0, str.length) === str;
@@ -108,14 +108,14 @@ exports = module.exports = function (jwtMiddleware) {
             });
         }
 
-        req.url ="";
+        req.url = '';
 
         proxy.web(req, res, {
             target: host,
             ignorePath: false,
             changeOrigin: true,
             prependPath: true,
-            toProxy :true
+            toProxy: true
         }, function (err) {
             if (err) {
                 err.status = 503;
