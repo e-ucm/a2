@@ -5,7 +5,7 @@
 Authentication & Authorization module for [Rage Analytics](https://github.com/e-ucm/rage-analytics)
 
 
-![server](https://cloud.githubusercontent.com/assets/5658058/13121389/7174889a-d5b2-11e5-9065-fe9903bbdd50.png)
+![server](https://cloud.githubusercontent.com/assets/2271676/16497985/e6b6c216-3ef9-11e6-8b9a-26aee26e629b.png)
 
 ## Design goals
 
