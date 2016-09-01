@@ -54,7 +54,7 @@
     "handlebars": "*",
     "istanbul": "*",
     "jquery": "*",
-    "jscs": "*",
+    "jscs": "2.3.5",
     "jshint": "*",
     "mocha": "*",
     "promptly": "*",
