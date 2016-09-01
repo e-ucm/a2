@@ -28,12 +28,14 @@ block content
                         thead
                             tr
                                 th Name
+                                th Username
                                 th Email
                                 th Id
                                 th Action
                         tbody
                             tr.active(ng-repeat='user in response.data')
                                 td {{user.name.first}} {{user.name.middle}} {{user.name.last}}
+                                td {{user.username}}
                                 td {{user.email}}
                                 td {{user._id}}
                                 td
