@@ -84,10 +84,11 @@ angular.module('myApp.controllers', ['ngStorage'])
                         }, 110);
                     }).error(function (data, status) {
                         console.error('Status:', status, ', Error on LoginCtrl, GET /api/users/' + data.user._id + '/roles \n', data);
-
+                        $scope.errorResponse = data.message;
                     });
                 }).error(function (data, status) {
                     console.error('Status:', status, ', Error on LoginCtrl, POST /api/login \n', data);
+                    $scope.errorResponse = data.message;
                 });
             };
         }])
