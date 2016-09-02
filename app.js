@@ -21,6 +21,7 @@ var express = require('express'),
     path = require('path'),
     logger = require('morgan'),
     bodyParser = require('body-parser'),
+    cookieParser = require('cookie-parser'),
     mongoose = require('mongoose'),
     passport = require('passport'),
     jwt = require('express-jwt'),
@@ -76,7 +77,7 @@ if (app.get('env') === 'development') {
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('X-Frame-Options', 'ALLOWALL');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Authorization2');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     res.header('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, DELETE');
     res.header('Access-Control-Allow-Credentials', true);
 
@@ -102,6 +103,8 @@ var jwtMiddleware = jwtCheck.unless({
         config.apiPath + '/signup'
     ]
 });
+
+app.use(cookieParser());
 
 /**
  * The proxy middleware must be executed before the body-parser middleware.
