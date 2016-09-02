@@ -178,6 +178,7 @@ router.post('/', authentication.authorized, function (req, res, next) {
                 prefix: req.body.prefix,
                 host: req.body.host,
                 autoroles: req.body.autoroles,
+                look: req.body.look || [],
                 anonymous: req.body.anonymous || [],
                 routes: results.roles,
                 owner: req.user.username
@@ -239,7 +240,7 @@ function isArray(obj) {
 }
 
 /**
- * @api {put} /applications/:applicationId Changes the application name.
+ * @api {put} /applications/:applicationId Changes the application values.
  * @apiName PutApplication
  * @apiGroup Applications
  *
@@ -300,6 +301,9 @@ router.put(applicationIdRoute, authentication.authorized, function (req, res, ne
     }
     if (req.body.host) {
         update.$set.host = req.body.host;
+    }
+    if (isArray(req.body.look)) {
+        update.$addToSet = {look: {$each: req.body.look.filter(Boolean)}};
     }
     if (isArray(req.body.anonymous)) {
         update.$addToSet = {anonymous: {$each: req.body.anonymous.filter(Boolean)}};
@@ -375,6 +379,147 @@ router.delete(applicationIdRoute, authentication.authorized, function (req, res,
 
         res.sendDefaultSuccessMessage();
     });
+});
+
+/**
+ * @api {put} /applications/look/:prefix Changes the application look field.
+ * @apiName PutApplicationLook
+ * @apiGroup Applications
+ *
+ * @apiParam {String} prefix Application prefix.
+ *
+ * @apiPermission admin
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "key":"_id",
+ *          "user": "dev"
+ *          "resources":["id1"],
+ *          "methods":["post","put"],
+ *          "url":"/url/*"
+ *      }
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "_id": "559a447831b7acec185bf513",
+ *          "name": "Gleaner App.",
+ *          "prefix": "gleaner",
+ *          "host": "localhost:3300",
+ *          "anonymous": [],
+ *          "look":[{
+ *              "key":"_id",
+ *              "permissions":{
+ *                 "dev":["id1","id2"]
+ *               },
+ *              "methods":["post","put"],
+ *              "url":"/url/*"
+ *          }],
+ *          "timeCreated": "2015-07-06T09:03:52.636Z"
+ *      }
+ *
+ * @apiError(400) InvalidApplicationId You must provide a valid application name.
+ *
+ * @apiError(400) ApplicationNotFound No application with the given application id exists.
+ *
+ */
+router.put('/look/:prefix', authentication.authorized, function (req, res, next) {
+    req.app.db.model('application').findByPrefix(req.params.prefix, function (err, results) {
+        if (err) {
+            return next(err);
+        }
+
+        var applicationId = results._id;
+        var query = {
+            _id: applicationId
+        };
+
+        var existKey = false;
+        var addNewUser = false;
+        var error;
+        if (results.look) {
+            results.look.forEach(function (lookObj) {
+                if (lookObj.url === req.body.url) {
+                    if (lookObj.key === req.body.key) {
+                        if (lookObj.permissions) {
+                            if (!lookObj.permissions[req.body.user]) {
+                                addNewUser = true;
+                            }
+                        }
+                        existKey = true;
+                    } else {
+                        error = new Error('URL registered but with a different key!');
+                        error.status = 400;
+                    }
+                }
+            });
+        }
+
+        if (error) {
+            return next(error);
+        }
+
+        var update;
+        if (!existKey) {
+            var objToAdd = {
+                key: req.body.key,
+                permissions: {},
+                methods: req.body.methods,
+                url: req.body.url
+            };
+            objToAdd.permissions[req.body.user] = req.body.resources;
+
+            update = {
+                $push: {
+                }
+            };
+
+            update.$push.look = objToAdd;
+        } else if (!addNewUser) {
+            var resultField = 'look.$.permissions.' + req.body.user;
+            update = {
+                $addToSet: {}
+            };
+            update.$addToSet[resultField] = { $each:  req.body.resources };
+
+            query['look.url'] = req.body.url;
+        } else {
+            var updateProp = 'look.$.permissions.' + req.body.user;
+            update = {
+                $set: {}
+            };
+            update.$set[updateProp] = req.body.resources;
+            query['look.url'] = req.body.url;
+        }
+
+        var options = {
+            new: true,
+            /*
+             Since Mongoose 4.0.0 we can run validators
+             (e.g. isURL validator for the host attribute of ApplicationSchema --> /schema/application)
+             when performing updates with the following option.
+             More info. can be found here http://mongoosejs.com/docs/validation.html
+             */
+            runValidators: true
+        };
+
+        req.app.db.model('application').findOneAndUpdate(query, update, options).select(unselectedFields).exec(function (err, application) {
+            if (err) {
+                err.status = 403;
+                return next(err);
+            }
+            if (!application) {
+                err = new Error('No application with the given application id exists or ' +
+                    'you don\'t have permission to modify the given application.');
+                err.status = 400;
+                return next(err);
+            }
+            res.json(application.look);
+        });
+    });
+
 });
 
 module.exports = router;

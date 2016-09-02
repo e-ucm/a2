@@ -36,6 +36,7 @@ exports = module.exports = function (app, callback) {
         resources: [
             app.config.apiPath + '/applications',
             app.config.apiPath + '/applications/:applicationId',
+            app.config.apiPath + '/applications/look/:prefix',
             app.config.apiPath + '/users',
             app.config.apiPath + '/users/:userId',
             app.config.apiPath + '/users/:userId/verification',

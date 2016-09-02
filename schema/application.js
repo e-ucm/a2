@@ -39,6 +39,12 @@ exports = module.exports = function (app, mongoose) {
             type: String,
             required: true
         },
+        look: [{
+            key: String,
+            permissions: Object,
+            methods: [String],
+            url: String
+        }],
         anonymous: [String],    // Anonymous(unprotected) routes defined by the application
         routes: [String],       // Protected routes defined by the application
         autoroles: [String],    // The roles that can be auto-assigned by the users when they create a new account
