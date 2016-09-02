@@ -22,10 +22,27 @@ var express = require('express'),
     httpProxy = require('http-proxy'),
     proxyOptions = {},
     pathToRe = require('path-to-regexp'),
+    bodyParser = require('body-parser'),
+
     proxy = httpProxy.createProxyServer(proxyOptions);
 
-proxy.on('proxyRes', function () {
-    proxy.removeAllListeners('proxyReq');
+
+var jsonParser = bodyParser.json({limit: '10mb'});
+
+proxy.on('proxyReq', function (proxyReq, req, res, options) {
+
+    if (req.user) {
+        var username = req.user.username;
+        proxyReq.setHeader('X-Gleaner-User', username);
+    }
+    if (req.body) {
+        var bodyData = JSON.stringify(req.body);
+        // Incase if content-type is application/x-www-form-urlencoded -> we need to change to application/json
+        proxyReq.setHeader('Content-Type', 'application/json');
+        proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+        // Stream the content
+        proxyReq.write(bodyData);
+    }
 });
 
 module.exports = function (jwtMiddleware) {
@@ -39,6 +56,7 @@ module.exports = function (jwtMiddleware) {
     };
 
     var proxyRequest = function (application, req, res, next, forward) {
+
         var host = application.host;
         if (host) {
             if (forward) {
@@ -118,13 +136,6 @@ module.exports = function (jwtMiddleware) {
             host += req._parsedUrl.search;
         }
 
-        if (req.user) {
-            var username = req.user.username;
-            proxy.on('proxyReq', function (proxyReq, req, res, options) {
-                proxyReq.setHeader('X-Gleaner-User', username);
-            });
-        }
-
         req.url = '';
 
         proxy.web(req, res, {
@@ -140,6 +151,61 @@ module.exports = function (jwtMiddleware) {
             }
         });
 
+    };
+
+    var checkLookup = function (application, req, res, next, key, user, lookupObject) {
+        return function (err) {
+            if (!err) {
+                var keys = key.split('.');
+                var keyValue = req.body;
+                var values = checkChildren(keyValue, 0, keys);
+                if (values) {
+                    var permissions = lookupObject.permissions;
+                    if (permissions) {
+                        var allowedKeys = permissions[user];
+                        if (allowedKeys) {
+                            var allowed = true;
+                            values.forEach(function(val) {
+                                allowed = allowedKeys.indexOf(val) !== -1;
+                                if (!allowed) {
+                                    return;
+                                }
+                            });
+
+                            if (allowed) {
+                                return proxyRequest(application, req, res, next, true);
+                            }
+                        }
+                    }
+                }
+            }
+
+            res.status(403).send('No permissions');
+        };
+    };
+
+    var checkChildren = function (obj, currentKey, keys) {
+        var finalValues = [];
+
+        auxiliarCheckFunction(obj, currentKey, keys, finalValues);
+
+        return finalValues;
+    };
+
+    var auxiliarCheckFunction = function (obj, currentKey, keys, finalValues) {
+        obj = obj[keys[currentKey]];
+        if (!obj) {
+            return finalValues;
+        }
+        if (obj.constructor === Array) {
+            var newIndex = currentKey + 1;
+            obj.forEach(function (o) {
+                var othersValues = auxiliarCheckFunction(o, newIndex, keys, finalValues);
+                finalValues = finalValues.concat(othersValues);
+            });
+        } else {
+            finalValues.push(obj);
+        }
     };
 
     /**
@@ -203,8 +269,42 @@ module.exports = function (jwtMiddleware) {
                     return next(err);
                 }
 
+                var lookup = application.look;
+                if (lookup) {
+                    var route = req.params[0];
+                    var option = {
+                        sensitive: true,
+                        strict: false,
+                        end: true
+                    };
+                    for (var j = 0; j < lookup.length; ++j) {
+                        var lookupObject = lookup[j];
+                        var url = lookupObject.url;
+                        if (!url) {
+                            continue;
+                        }
+
+                        var urlRegExp = pathToRe(url, [], option);
+
+                        var urlMatch = urlRegExp.exec(route);
+                        if (urlMatch) {
+                            var methods = lookupObject.methods;
+                            if (methods) {
+                                var reqMethod = req.method;
+                                if (methods.indexOf(reqMethod.toLowerCase()) !== -1) {
+                                    var key = lookupObject.key;
+                                    if (key) {
+                                        req.headers.authorization = 'Bearer ' + req.cookies.rageUserCookie;
+                                        return checkJwt(req, res, next, application, key, lookupObject);
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+
                 var anonymous = application.anonymous;
-                var forward = false;
                 if (anonymous) {
                     var appRoute = req.params[0];
                     var options = {
@@ -222,23 +322,22 @@ module.exports = function (jwtMiddleware) {
 
                         var match = regExp.exec(appRoute);
                         if (match) {
-                            forward = true;
-                            break;
+                            return proxyRequest(application, req, res, next, true);
                         }
                     }
                 }
 
                 jwtMiddleware(req, res, function (err) {
                     if (err) {
-                        return forward ? proxyRequest(application, req, res, next, forward) : next(err);
+                        return next(err);
                     }
                     if (req.user) {
                         req.app.tokenStorage.middleware(req, res, function (err) {
                             if (err) {
-                                return forward ? proxyRequest(application, req, res, next, forward) : next(err);
+                                return next(err);
                             }
 
-                            proxyRequest(application, req, res, next, forward);
+                            proxyRequest(application, req, res, next, false);
                         });
                     } else {
                         err = new Error('User is not authenticated!');
@@ -253,6 +352,27 @@ module.exports = function (jwtMiddleware) {
             return next(err);
         }
     });
+
+    var checkJwt = function (req, res, next, application, key, lookupObject) {
+        jwtMiddleware(req, res, function (err) {
+            if (err) {
+                return next(err);
+            }
+            if (req.user) {
+                req.app.tokenStorage.middleware(req, res, function (err) {
+                    if (err) {
+                        return next(err);
+                    }
+                    return jsonParser(req, null, checkLookup(application, req, res, next, key, req.user.username, lookupObject));
+                });
+            } else {
+                err = new Error('User is not authenticated!');
+                err.status = 400;
+                return next(err);
+            }
+
+        });
+    };
 
     return router;
 };
