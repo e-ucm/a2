@@ -27,8 +27,10 @@ var express = require('express'),
  * @apiGroup Signup
  *
  * @apiParam {String} email User email.
- * @apiParam {String[]} username User username.
- * @apiParam {String[]} password User password
+ * @apiParam {String} username User username.
+ * @apiParam {String} password User password
+ * @apiParam {String} role Possible role considering roles have been established with A2 for 'prefix'
+ * @apiParam {String} prefix Application prefix that has different roles that can be registered with
  *
  * @apiPermission none
  *
