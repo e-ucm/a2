@@ -115,7 +115,10 @@ exports.defaultValues = {
     smtpUsername: '',
     smtpPassword: '',
     failedLoginAttempts: 25,
-    apiPath: '/api'
+    apiPath: '/api',
+    samlPath: 'api/login/saml/callback',
+    samlEntryPoint: 'https://www.stichtingpraktijkleren.nl/federatie/module.php/core/authenticate.php?as=SPLSP-ragedan-www',
+    samlIssuer: 'SPLSP-ragedan-www'
 };
 
 exports.testValues = {
@@ -135,7 +138,10 @@ exports.testValues = {
     smtpUsername: '',
     smtpPassword: '',
     failedLoginAttempts: 25,
-    apiPath: '/api'
+    apiPath: '/api',
+    samlPath: 'api/login/saml/callback',
+    samlEntryPoint: 'https://www.stichtingpraktijkleren.nl/federatie/module.php/core/authenticate.php?as=SPLSP-ragedan-www',
+    samlIssuer: 'SPLSP-ragedan-www'
 };
 
 var prefix = 'A2_';
