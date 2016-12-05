@@ -25,7 +25,8 @@ var express = require('express'),
     mongoose = require('mongoose'),
     passport = require('passport'),
     jwt = require('express-jwt'),
-    TokenStorage = require('./tokenStorage/token-storage');
+    TokenStorage = require('./tokenStorage/token-storage'),
+    fs = require('fs');
 
 var config = require((process.env.NODE_ENV === 'test') ? './config-test' : './config'),
     health = require('./routes/health'),
@@ -98,8 +99,7 @@ var jwtMiddleware = jwtCheck.unless({
         config.apiPath + '/health',
         config.apiPath + '/contact',
         config.apiPath + '/login',
-        config.apiPath + '/login/forgot',
-        new RegExp(config.apiPath + '\/login\/reset\/.*'),
+        new RegExp(config.apiPath + '\/login\/.*'),
         config.apiPath + '/signup'
     ]
 });
@@ -149,6 +149,37 @@ app.use(config.apiPath + '/logout', logout);
 app.use(config.apiPath + '/roles', roles);
 app.use(config.apiPath + '/applications', applications);
 app.use(config.apiPath + '/health', health);
+
+/**
+ * Read all .js files from 'loginPlugins' directory
+ * and import them
+ */
+var setupLoginPlugins = function () {
+    var dirname = './loginPlugins/';
+    var files = fs.readdirSync(dirname);
+    if (!files || !files.length) {
+        console.error('Could not list the directory.', dirname);
+        return;
+    }
+
+    files.forEach(function (file) {
+        // Make one pass and make the file complete
+        var filePath = dirname + file;
+
+        var stat = fs.statSync(filePath);
+        if (!stat) {
+            console.error('Error stating file.', file);
+        } else {
+
+            if (stat.isFile()) {
+                console.log('\'%s\' is a file.', filePath);
+                var fileFunction = require(filePath);
+                app.use(config.apiPath + '/login', fileFunction(app));
+            }
+        }
+    });
+};
+setupLoginPlugins();
 
 // Catch 404 and forward to error handler
 app.use(function (req, res, next) {
