@@ -180,7 +180,9 @@ module.exports = function (jwtMiddleware) {
                 }
             }
 
-            res.status(403).send('No permissions');
+            res.status(403).json({
+                message: 'No permission to access the resource'
+            });
         };
     };
 
