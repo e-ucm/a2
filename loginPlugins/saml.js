@@ -23,6 +23,15 @@ var express = require('express'),
     async = require('async');
 var SamlStrategy = require('passport-saml').Strategy;
 
+/**
+ * Default redirect value, if not specified.
+ *  When specified as a 'callback' query key this value is replaced.
+ *
+ *  This value is used to issue a callback to the initiator of the process with the
+ *  data usefull for the login (username, email, access control token).
+ */
+var callback = 'https://localhost:3000/api/proxy/afront/loginbyplugin';
+
 
 /**
  * THIS IS A LOGIN PLUGIN FILE.
@@ -35,6 +44,18 @@ var SamlStrategy = require('passport-saml').Strategy;
  *      - The 'app' object has access to useful functions such as
  *          - 'app.passport': https://github.com/jaredhanson/passport, useful for defining new login strategies
  *          - 'app.config': with the project configuration file (config.js), useful to access configuration constants
+ *      - The 'require' modules that can be included in this file must be available at 'package.json' file of this project, e.g.
+ *        
+ *          "dependencies": {
+ *              "acl": "0.4.9",
+ *              "async": "^1.3.x",
+ *              "bcrypt": "^0.8.x"...
+ *          },
+ *          "devDependencies": {
+ *              "apidoc": "*",
+ *              "assert": "*",
+ *              "confidence": "*"...
+ *          }
  */
 
 function samlSetup(app) {
@@ -57,7 +78,13 @@ function samlSetup(app) {
                         // No user found, create a new user and assign a new role
                         return addNewUser(profile, app.db, app.acl, done);
                     }
-                    done(null, user);
+                    app.acl.userRoles(user.username.toString(), function (err, roles) {
+                        if (err) {
+                            return done(err);
+                        }
+                        user.roles = roles;
+                        done(null, user);
+                    });
                 });
             })
     );
@@ -170,6 +197,11 @@ function samlSetup(app) {
                 if (err) {
                     return callback(err);
                 }
+                if (typeof roles === 'string' || roles instanceof String) {
+                    user.roles = [roles];
+                } else {
+                    user.roles = roles;
+                }
                 callback(null, user);
             });
         });
@@ -214,23 +246,23 @@ function samlSetup(app) {
             // Faculty is for roles with educational responsibility (teachers)
             // Staff is for roles without educational responsibility (non-teachers).
             // Hybrid roles have both staff and faculty
-            if (rolesArray.indexOf('faculty') !== 0) {
+            if (rolesArray.indexOf('faculty') !== -1) {
                 return 'teacher';
             }
 
-            if (rolesArray.indexOf('student') !== 0) {
+            if (rolesArray.indexOf('student') !== -1) {
                 return 'student';
             }
 
-            if (rolesArray.indexOf('member') !== 0) {
+            if (rolesArray.indexOf('member') !== -1) {
                 return 'student';
             }
 
-            if (rolesArray.indexOf('staff') !== 0) {
+            if (rolesArray.indexOf('staff') !== -1) {
                 return 'student';
             }
 
-            if (rolesArray.indexOf('employee') !== 0) {
+            if (rolesArray.indexOf('employee') !== -1) {
                 return 'student';
             }
         }
@@ -243,7 +275,13 @@ function samlSetup(app) {
      * Route to start the 'saml' login process
      */
 
-    router.get('/saml', app.passport.authenticate('saml', {failureRedirect: '/', failureFlash: true}),
+    router.get('/saml', function (req, res, next) {
+            if (req.query.callback) {
+                callback = req.query.callback;
+            }
+            next();
+        },
+        app.passport.authenticate('saml', {failureRedirect: '/', failureFlash: true}),
         function (req, res) {
             res.redirect('/');
         }
@@ -318,14 +356,22 @@ function samlSetup(app) {
                         /*Send the login data*/
                         function (token, done) {
 
-                            res.json({
-                                user: {
-                                    _id: user._id,
-                                    username: user.username,
-                                    email: user.email,
-                                    token: token
+                            var base = callback;
+                            var id = encodeURIComponent(user._id);
+                            var username = encodeURIComponent(user.username);
+                            var email = encodeURIComponent(user.email);
+                            var tokenValue = encodeURIComponent(token);
+                            var url = base + '?id=' + id + '&username=' + username + '&email=' + email + '&token=' + tokenValue;
+
+                            if (user.roles) {
+                                if (typeof user.roles === 'string' || user.roles instanceof String) {
+                                    url += '&roles=' + user.roles;
+                                } else {
+                                    var roles = encodeURIComponent(user.roles[0]);
+                                    url += '&roles=' + roles;
                                 }
-                            });
+                            }
+                            res.redirect(url);
                             done();
                         }
                     ], function (err) {
