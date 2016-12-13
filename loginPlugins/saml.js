@@ -44,6 +44,18 @@ var callback = 'https://localhost:3000/api/proxy/afront/loginbyplugin';
  *      - The 'app' object has access to useful functions such as
  *          - 'app.passport': https://github.com/jaredhanson/passport, useful for defining new login strategies
  *          - 'app.config': with the project configuration file (config.js), useful to access configuration constants
+ *      - The 'require' modules that can be included in this file must be available at 'package.json' file of this project, e.g.
+ *
+ *          "dependencies": {
+ *              "acl": "0.4.9",
+ *              "async": "^1.3.x",
+ *              "bcrypt": "^0.8.x"...
+ *          },
+ *          "devDependencies": {
+ *              "apidoc": "*",
+ *              "assert": "*",
+ *              "confidence": "*"...
+ *          }
  */
 
 function samlSetup(app) {
