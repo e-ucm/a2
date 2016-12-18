@@ -41,10 +41,12 @@
     "morgan": "^1.6.x",
     "passport": "^0.3.x",
     "passport-local-mongoose": "3.1.x",
+    "passport-lti":"*",
     "passport-saml": "0.15.x",
     "path-to-regexp": "^1.2.x",
     "q": "*",
     "redis": "*",
+    "request": "*",
     "validator": "*"
   },
   "devDependencies": {

@@ -19,6 +19,7 @@
   "excludeFiles": [
     "public/apirest/**",
     "public/libs/**",
-    "config-example.js"
+    "config-example.js",
+    "loginPlugins/*"
   ]
 }
