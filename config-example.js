@@ -48,12 +48,3 @@ exports.smtp = {
     ssl: true
   }
 };
-exports.passport = {
-  strategy: 'saml',
-  saml: {
-    path: process.env.SAML_PATH || '{{samlPath}}',
-    entryPoint: process.env.SAML_ENTRY_POINT || '{{{samlEntryPoint}}}',
-    issuer: '{{samlIssuer}}',
-    cert: process.env.SAML_CERT || null
-  }
-};

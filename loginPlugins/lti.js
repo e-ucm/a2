@@ -302,7 +302,11 @@ function ltiSetup(app) {
         });
     });
 
-    return router;
+    return {
+        router: router,
+        name: 'LTI',
+        pluginId: 'lti'
+    };
 }
 
 module.exports = ltiSetup;
