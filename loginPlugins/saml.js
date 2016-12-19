@@ -29,8 +29,33 @@ var SamlStrategy = require('passport-saml').Strategy;
  *
  *  This value is used to issue a callback to the initiator of the process with the
  *  data usefull for the login (username, email, access control token).
+ * @type {string}
  */
 var callback = 'https://localhost:3000/api/proxy/afront/loginbyplugin';
+
+/**
+ * The 'plugin id'. Unique identifier of the plugin that is used to identify it.
+ * It's used to set up the route of this plugin, e.g. '/login/pluginId' -> (pluginId = samlnl) -> '/login/samlnl'
+ *
+ * @type {string}
+ */
+var pluginId = 'samlnl';
+
+/**
+ * Plugin name.
+ * @type {string}
+ */
+var pluginName = 'SAML Stichting Praktijkleren';
+
+/**
+ * Information for the passport configuration.
+ * @type {{path: string, entryPoint: string, issuer: string}}
+ */
+var passport = {
+    path: process.env.SAML_PATH || 'api/login/saml/callback',
+    entryPoint: process.env.SAML_ENTRY_POINT || 'https://www.stichtingpraktijkleren.nl/federatie/module.php/core/authenticate.php?as=SPLSP-ragedan-www',
+    issuer: process.env.SAML_ISSUER || 'SPLSP-ragedan-www'
+};
 
 
 /**
@@ -44,6 +69,18 @@ var callback = 'https://localhost:3000/api/proxy/afront/loginbyplugin';
  *      - The 'app' object has access to useful functions such as
  *          - 'app.passport': https://github.com/jaredhanson/passport, useful for defining new login strategies
  *          - 'app.config': with the project configuration file (config.js), useful to access configuration constants
+ *      - The 'require' modules that can be included in this file must be available at 'package.json' file of this project, e.g.
+ *
+ *          "dependencies": {
+ *              "acl": "0.4.9",
+ *              "async": "^1.3.x",
+ *              "bcrypt": "^0.8.x"...
+ *          },
+ *          "devDependencies": {
+ *              "apidoc": "*",
+ *              "assert": "*",
+ *              "confidence": "*"...
+ *          }
  */
 
 function samlSetup(app) {
@@ -52,11 +89,11 @@ function samlSetup(app) {
      * Define a new 'saml' passport Strategy
      */
 
-    app.passport.use(app.config.passport.strategy, new SamlStrategy(
+    app.passport.use(pluginId, new SamlStrategy(
             {
-                path: app.config.passport.saml.path,
-                entryPoint: app.config.passport.saml.entryPoint,
-                issuer: app.config.passport.saml.issuer
+                path: passport.path,
+                entryPoint: passport.entryPoint,
+                issuer: passport.issuer
             },
             function (profile, done) {
                 // The SAML process has finished and we have received a 'profile' object
@@ -262,14 +299,13 @@ function samlSetup(app) {
     /**
      * Route to start the 'saml' login process
      */
-
-    router.get('/saml', function (req, res, next) {
+    router.get('/' + pluginId, function (req, res, next) {
             if (req.query.callback) {
                 callback = req.query.callback;
             }
             next();
         },
-        app.passport.authenticate('saml', {failureRedirect: '/', failureFlash: true}),
+        app.passport.authenticate(pluginId, {failureRedirect: '/', failureFlash: true}),
         function (req, res) {
             res.redirect('/');
         }
@@ -299,7 +335,7 @@ function samlSetup(app) {
      * @apiError(401) UserNotFound User not found.
      */
     router.post('/saml/callback', function (req, res, next) {
-        req.app.passport.authenticate(req.app.config.passport.strategy,
+        req.app.passport.authenticate(pluginId,
             {session: false}, function (err, user, info) {
                 if (err) {
                     return next(err);
@@ -372,7 +408,11 @@ function samlSetup(app) {
             })(req, res, next);
     });
 
-    return router;
+    return {
+        router: router,
+        name: pluginName,
+        pluginId: pluginId
+    };
 }
 
 module.exports = samlSetup;

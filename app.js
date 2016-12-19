@@ -37,6 +37,7 @@ var config = require((process.env.NODE_ENV === 'test') ? './config-test' : './co
     users = require('./routes/users'),
     roles = require('./routes/roles'),
     login = require('./routes/login'),
+    loginPlugins = require('./routes/loginPlugins'),
     logout = require('./routes/logout'),
     proxy = require('./routes/proxy');
 
@@ -99,6 +100,7 @@ var jwtMiddleware = jwtCheck.unless({
         config.apiPath + '/health',
         config.apiPath + '/contact',
         config.apiPath + '/login',
+        config.apiPath + '/loginplugins',
         new RegExp(config.apiPath + '\/login\/.*'),
         config.apiPath + '/signup'
     ]
@@ -145,6 +147,7 @@ app.use(config.apiPath + '/contact', contact);
 app.use(config.apiPath + '/signup', signup);
 app.use(config.apiPath + '/users', users);
 app.use(config.apiPath + '/login', login);
+app.use(config.apiPath + '/loginplugins', loginPlugins);
 app.use(config.apiPath + '/logout', logout);
 app.use(config.apiPath + '/roles', roles);
 app.use(config.apiPath + '/applications', applications);
@@ -164,18 +167,33 @@ var setupLoginPlugins = function () {
 
     files.forEach(function (file) {
         // Make one pass and make the file complete
-        var filePath = dirname + file;
+        if (file.charAt(0) !== '_') {
+            var filePath = dirname + file;
 
-        var stat = fs.statSync(filePath);
-        if (!stat) {
-            console.error('Error stating file.', file);
-        } else {
+            var stat = fs.statSync(filePath);
+            if (!stat) {
+                console.error('Error stating file.', file);
+            } else {
 
-            if (stat.isFile()) {
-                console.log('\'%s\' is a file.', filePath);
-                var fileFunction = require(filePath);
-                app.use(config.apiPath + '/login', fileFunction(app));
+                if (stat.isFile()) {
+                    console.log('\'%s\' is a file.', filePath);
+                    var fileFunction = require(filePath);
+                    var loginPlugin = fileFunction(app);
+                    app.use(config.apiPath + '/login', loginPlugin.router);
+                    var LoginPluginModel = app.db.model('loginPlugin');
+                    LoginPluginModel.create({
+                        name: loginPlugin.name || '',
+                        pluginId: loginPlugin.pluginId
+                    }, function (err) {
+                        if (err) {
+                            return console.log('Error registering login plugin', err);
+                        }
+                        console.log('Successfully registered login plugin', loginPlugin.name, loginPlugin.pluginId);
+                    });
+                }
             }
+        } else {
+            console.log('Skipping login plugin', file);
         }
     });
 };
