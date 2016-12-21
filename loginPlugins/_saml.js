@@ -45,7 +45,7 @@ var pluginId = 'samlnl';
  * Plugin name.
  * @type {string}
  */
-var pluginName = 'SAML Stichting Praktijkleren';
+var pluginName = 'SAML';
 
 /**
  * Information for the passport configuration.

@@ -18,7 +18,11 @@
 'use strict';
 
 var express = require('express'),
-    router = express.Router();
+    router = express.Router(),
+    fs = require('fs'),
+    path = require('path');
+
+var loginPluginsData = [];
 
 /**
  * @api {get} /loginplugins Returns all the registered login plugins.
@@ -32,24 +36,58 @@ var express = require('express'),
  *      {
  *          "data": [
  *          {
- *              "_id": "559a447831b7acec185bf513",
  *              "name": "SAML Stichting Praktijkleren",
- *              "pluginId": "samlnl",
- *              "timeCreated": "2015-07-06T09:03:52.636Z"
+ *              "pluginId": "samlnl"
  *          }]
  *      }
  *
  */
 router.get('/', function (req, res, next) {
-
-    req.app.db.model('loginPlugin').find().exec(function (err, results) {
-
-        if (err) {
-            return next(err);
-        }
-
-        res.json({data: results});
-    });
+    res.json({data: loginPluginsData});
 });
 
-module.exports = router;
+
+/**
+ * Read all .js files from 'loginPlugins' directory
+ * and import them
+ */
+var setupLoginPlugins = function (app) {
+    var dirname = path.resolve(__dirname, './../loginPlugins/');
+    var files = fs.readdirSync(dirname);
+    if (!files || !files.length) {
+        console.error('Could not list the directory.', dirname);
+        return;
+    }
+
+    files.forEach(function (file) {
+        // Make one pass and make the file complete
+        if (file.charAt(0) !== '_') {
+            var filePath = path.resolve(dirname, file);
+
+            var stat = fs.statSync(filePath);
+            if (!stat) {
+                console.error('Error stating file.', file);
+            } else {
+
+                if (stat.isFile()) {
+                    console.log('\'%s\' is a file.', filePath);
+                    var fileFunction = require(filePath);
+                    var loginPlugin = fileFunction(app);
+                    app.use(app.config.apiPath + '/login', loginPlugin.router);
+                    loginPluginsData.push({
+                        name: loginPlugin.name || '',
+                        pluginId: loginPlugin.pluginId
+                    });
+                    console.log('Successfully registered login plugin', loginPlugin.name, loginPlugin.pluginId);
+                }
+            }
+        } else {
+            console.log('Skipping login plugin', file);
+        }
+    });
+};
+
+module.exports = {
+    router: router,
+    setupLoginPlugins: setupLoginPlugins
+};

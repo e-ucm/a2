@@ -25,8 +25,7 @@ var express = require('express'),
     mongoose = require('mongoose'),
     passport = require('passport'),
     jwt = require('express-jwt'),
-    TokenStorage = require('./tokenStorage/token-storage'),
-    fs = require('fs');
+    TokenStorage = require('./tokenStorage/token-storage');
 
 var config = require((process.env.NODE_ENV === 'test') ? './config-test' : './config'),
     health = require('./routes/health'),
@@ -147,57 +146,12 @@ app.use(config.apiPath + '/contact', contact);
 app.use(config.apiPath + '/signup', signup);
 app.use(config.apiPath + '/users', users);
 app.use(config.apiPath + '/login', login);
-app.use(config.apiPath + '/loginplugins', loginPlugins);
+loginPlugins.setupLoginPlugins(app);
+app.use(config.apiPath + '/loginplugins', loginPlugins.router);
 app.use(config.apiPath + '/logout', logout);
 app.use(config.apiPath + '/roles', roles);
 app.use(config.apiPath + '/applications', applications);
 app.use(config.apiPath + '/health', health);
-
-/**
- * Read all .js files from 'loginPlugins' directory
- * and import them
- */
-var setupLoginPlugins = function () {
-    var dirname = './loginPlugins/';
-    var files = fs.readdirSync(dirname);
-    if (!files || !files.length) {
-        console.error('Could not list the directory.', dirname);
-        return;
-    }
-
-    files.forEach(function (file) {
-        // Make one pass and make the file complete
-        if (file.charAt(0) !== '_') {
-            var filePath = dirname + file;
-
-            var stat = fs.statSync(filePath);
-            if (!stat) {
-                console.error('Error stating file.', file);
-            } else {
-
-                if (stat.isFile()) {
-                    console.log('\'%s\' is a file.', filePath);
-                    var fileFunction = require(filePath);
-                    var loginPlugin = fileFunction(app);
-                    app.use(config.apiPath + '/login', loginPlugin.router);
-                    var LoginPluginModel = app.db.model('loginPlugin');
-                    LoginPluginModel.create({
-                        name: loginPlugin.name || '',
-                        pluginId: loginPlugin.pluginId
-                    }, function (err) {
-                        if (err) {
-                            return console.log('Error registering login plugin', err);
-                        }
-                        console.log('Successfully registered login plugin', loginPlugin.name, loginPlugin.pluginId);
-                    });
-                }
-            }
-        } else {
-            console.log('Skipping login plugin', file);
-        }
-    });
-};
-setupLoginPlugins();
 
 // Catch 404 and forward to error handler
 app.use(function (req, res, next) {
