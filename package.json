@@ -60,6 +60,7 @@
     "jquery": "*",
     "jscs": "2.3.5",
     "jshint": "*",
+    "ims-lti": "*",
     "mocha": "*",
     "promptly": "*",
     "should": "*",

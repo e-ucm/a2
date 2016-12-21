@@ -53,8 +53,8 @@ var pluginName = 'SAML Stichting Praktijkleren';
  */
 var passport = {
     path: process.env.SAML_PATH || 'api/login/saml/callback',
-    entryPoint: process.env.SAML_ENTRY_POINT || 'https://www.stichtingpraktijkleren.nl/federatie/module.php/core/authenticate.php?as=SPLSP-ragedan-www',
-    issuer: process.env.SAML_ISSUER || 'SPLSP-ragedan-www'
+    entryPoint: process.env.SAML_ENTRY_POINT || '',
+    issuer: process.env.SAML_ISSUER || ''
 };
 
 
