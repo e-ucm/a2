@@ -115,7 +115,8 @@ exports.defaultValues = {
     smtpUsername: '',
     smtpPassword: '',
     failedLoginAttempts: 25,
-    apiPath: '/api'
+    apiPath: '/api',
+    maxSizeRequest: '1mb'
 };
 
 exports.testValues = {
@@ -135,7 +136,9 @@ exports.testValues = {
     smtpUsername: '',
     smtpPassword: '',
     failedLoginAttempts: 25,
-    apiPath: '/api'
+    apiPath: '/api',
+    maxSizeRequest: '1mb',
+    maxSizeVisualizations: '10mb'
 };
 
 var prefix = 'A2_';
