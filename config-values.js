@@ -116,7 +116,8 @@ exports.defaultValues = {
     smtpPassword: '',
     failedLoginAttempts: 25,
     apiPath: '/api',
-    maxSizeRequest: '1mb'
+    maxSizeRequest: '1mb',
+    maxSizeVisualizations: '10mb'
 };
 
 exports.testValues = {
