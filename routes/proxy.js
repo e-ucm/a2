@@ -363,7 +363,7 @@ module.exports = function (jwtMiddleware) {
                     if (err) {
                         return next(err);
                     }
-                    if(!jsonParser) {
+                    if (!jsonParser) {
                         jsonParser = bodyParser.json({limit: req.app.config.maxSizeVisualizations});
                     }
                     return jsonParser(req, null, checkLookup(application, req, res, next, key, req.user.username, lookupObject));

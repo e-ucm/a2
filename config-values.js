@@ -105,8 +105,8 @@ exports.defaultValues = {
     mongoPort: '27017',
     mongodbUrl: 'mongodb://localhost:27017/a2',
     redisHost: '127.0.0.1',
-    redisPort: '6379',
-    redisNumber: '0',
+    redisPort: 6379,
+    redisNumber: 0,
     cryptoKey: 'th15_15_s3cr3t_5hhhh',
     rootEmail: 'root@email.com',
     rootPassword: 'root',
@@ -127,8 +127,8 @@ exports.testValues = {
     mongoPort: '27017',
     mongodbUrl: 'mongodb://localhost:27017/a2-test', // This must be different than 'exports.defaultValues.mongodbUrl'
     redisHost: '127.0.0.1',
-    redisPort: '6379',
-    redisNumber: '10',         // This must be different than 'exports.defaultValues.redisNumber'
+    redisPort: 6379,
+    redisNumber: 10,         // This must be different than 'exports.defaultValues.redisNumber'
     cryptoKey: 'th15_15_a_t35t_5hhhh',
     rootEmail: 'root-test@email.com',
     rootPassword: 'root-test',

@@ -23,8 +23,8 @@ exports.mongodb = {
 };
 exports.redisdb = {
   host: '{{redisHost}}',
-  port: '{{redisPort}}',
-  dbNumber: '{{redisNumber}}'
+  port: {{redisPort}},
+  dbNumber: {{redisNumber}}
 };
 exports.maxSizeRequest =  '{{maxSizeRequest}}';
 exports.maxSizeRequest =  '{{maxSizeVisualizations}}';
