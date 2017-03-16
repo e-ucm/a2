@@ -23,11 +23,9 @@ var express = require('express'),
     proxyOptions = {},
     pathToRe = require('path-to-regexp'),
     bodyParser = require('body-parser'),
-
     proxy = httpProxy.createProxyServer(proxyOptions);
 
-
-var jsonParser = bodyParser.json({limit: '10mb'});
+var jsonParser;
 
 proxy.on('proxyReq', function (proxyReq, req, res, options) {
 
@@ -364,6 +362,9 @@ module.exports = function (jwtMiddleware) {
                 req.app.tokenStorage.middleware(req, res, function (err) {
                     if (err) {
                         return next(err);
+                    }
+                    if (!jsonParser) {
+                        jsonParser = bodyParser.json({limit: req.app.config.maxSizeVisualizations});
                     }
                     return jsonParser(req, null, checkLookup(application, req, res, next, key, req.user.username, lookupObject));
                 });

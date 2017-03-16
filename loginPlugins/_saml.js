@@ -74,7 +74,6 @@ var passport = {
  *          "dependencies": {
  *              "acl": "0.4.9",
  *              "async": "^1.3.x",
- *              "bcrypt": "^0.8.x"...
  *          },
  *          "devDependencies": {
  *              "apidoc": "*",

@@ -26,13 +26,15 @@ exports.redisdb = {
   port: {{redisPort}},
   dbNumber: {{redisNumber}}
 };
+exports.maxSizeRequest =  '{{maxSizeRequest}}';
+exports.maxSizeRequest =  '{{maxSizeVisualizations}}';
 exports.apiPath = '{{apiPath}}';
 exports.companyName = '{{companyName}}';
 exports.projectName = '{{projectName}}';
 exports.systemEmail = '{{systemEmail}}';
 exports.cryptoKey = '{{cryptoKey}}';
 exports.loginAttempts = {
-  failedLoginAttempts: {{failedLoginAttempts}}
+  failedLoginAttempts: '{{failedLoginAttempts}}'
 };
 exports.tokenExpirationInSeconds = 7 * 86400;
 exports.requireAccountVerification = false;

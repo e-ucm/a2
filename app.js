@@ -90,7 +90,8 @@ app.use(function (req, res, next) {
 });
 
 var jwtCheck = jwt({
-    secret: config.cryptoKey
+    secret: config.cryptoKey,
+    algorithms: ['HS256']
 });
 
 var jwtMiddleware = jwtCheck.unless({
@@ -124,8 +125,8 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json({limit: config.maxSizeRequest}));
+app.use(bodyParser.urlencoded({extended: false, limit: config.maxSizeRequest}));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.passport = passport;
