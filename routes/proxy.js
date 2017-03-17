@@ -163,7 +163,7 @@ module.exports = function (jwtMiddleware) {
                         var allowedKeys = permissions[user];
                         if (allowedKeys) {
                             var allowed = true;
-                            values.forEach(function(val) {
+                            values.forEach(function (val) {
                                 allowed = allowedKeys.indexOf(val) !== -1;
                                 if (!allowed) {
                                     return;
@@ -312,6 +312,17 @@ module.exports = function (jwtMiddleware) {
                         strict: false,
                         end: true
                     };
+                    var jwtCallback = function (err) {
+                        if (req.user) {
+                            return req.app.tokenStorage.middleware(req, res, function (err) {
+                                if (err) {
+                                    return next(err);
+                                }
+                                return proxyRequest(application, req, res, next, true);
+                            });
+                        }
+                        return proxyRequest(application, req, res, next, true);
+                    };
                     for (var i = 0; i < anonymous.length; ++i) {
                         var path = anonymous[i];
                         if (!path) {
@@ -322,7 +333,8 @@ module.exports = function (jwtMiddleware) {
 
                         var match = regExp.exec(appRoute);
                         if (match) {
-                            return proxyRequest(application, req, res, next, true);
+
+                            return jwtMiddleware(req, res, jwtCallback);
                         }
                     }
                 }

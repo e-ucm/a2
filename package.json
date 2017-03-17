@@ -49,7 +49,7 @@
     "validator": "*"
   },
   "devDependencies": {
-    "apidoc": "*",
+    "apidoc": "0.15.x",
     "assert": "*",
     "confidence": "*",
     "coveralls": "*",
