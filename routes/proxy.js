@@ -28,7 +28,13 @@ var express = require('express'),
 var jsonParser;
 
 proxy.on('proxyReq', function (proxyReq, req, res, options) {
-
+    var forwardHeader = req.headers['x-forwarded-host'];
+    if(!forwardHeader) {
+        var hostHeader = req.protocol + '://' + req.get('host') + '/api/proxy/' + req.params.prefix + '/';
+        proxyReq.setHeader('x-forwarded-host', hostHeader);
+    } else {
+        proxyReq.setHeader('x-forwarded-host', forwardHeader);
+    }
     if (req.user) {
         var username = req.user.username;
         proxyReq.setHeader('X-Gleaner-User', username);
