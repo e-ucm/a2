@@ -20,6 +20,7 @@
     "public/apirest/**",
     "public/libs/**",
     "config-example.js",
-    "loginPlugins/*"
+    "loginPlugins/*",
+    "public/bower/**"
   ]
 }
