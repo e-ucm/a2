@@ -7,13 +7,15 @@ ENV USER_NAME="user" \
 COPY ./ ${WORK_DIR}/
 RUN groupadd -r ${USER_NAME} \
     && useradd -r -d ${WORK_DIR} -g ${USER_NAME} ${USER_NAME} \
-    && chown -R ${USER_NAME}:${USER_NAME} ${WORK_DIR}
+    && chown -R ${USER_NAME}:${USER_NAME} ${WORK_DIR} \
+    && npm install -g bower
 ENV HOME=${WORK_DIR}
 USER ${USER_NAME}
 WORKDIR ${WORK_DIR}
 
 # get dependencies sorted out
-RUN npm install
+RUN npm install \
+    && bower install
 
 # configure & gen apidoc
 RUN npm run fast-setup \
