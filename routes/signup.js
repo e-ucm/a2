@@ -36,7 +36,7 @@ var addUsersArray = function(req, res, next, users) {
     async.each(users.users, function(userObject, callback) {
         async.auto({
             validate: function(done) {
-                validateUser(req, userObject, function(err) {
+                validateUser(req, userObject, false, function(err) {
                     if (err) {
                         usersError.push('>> ' + userObject.username + ' << ' + err);
                     }
@@ -67,7 +67,7 @@ var addUsersArray = function(req, res, next, users) {
     });
 };
 
-var validateUser = function (req, userObject, done) {
+var validateUser = function (req, userObject, forcePass, done) {
     var err;
     if (!userObject.username) {
         err = new Error('Username required!');
@@ -76,9 +76,13 @@ var validateUser = function (req, userObject, done) {
     }
 
     if (!userObject.password) {
-        err = new Error('Password required!');
-        err.status = 400;
-        return done(err);
+        if (forcePass) {
+            err = new Error('Password required!');
+            err.status = 400;
+            return done(err);
+        } else { // Generate random alphanumeric password (8 characters)
+            userObject.password = Math.random().toString(36).substr(2, 8);
+        }
     }
 
     if (!userObject.email) {
@@ -238,7 +242,7 @@ var parseUsersCSV = function (req, res, next, path, callback) {
 router.post('/', function (req, res, next) {
     async.auto({
         validate: function(done) {
-            validateUser(req, req.body, done);
+            validateUser(req, req.body, true, done);
         }, user: ['validate', function (done) {
             registerUser(req, res, req.body, done);
         }],
@@ -295,7 +299,8 @@ router.post('/', function (req, res, next) {
  * @apiPermission none
  *
  * @apiParamExample {json} Request-Example:
- *      "user": [{
+ *  {
+ *      "users": [{
  *              "username": "user1",
  *              "password": "user1Pass",
  *              "email": "user1@mail.es"
@@ -312,6 +317,7 @@ router.post('/', function (req, res, next) {
  *              "password": "user2Pass",
  *              "email": "user2@mail.es"
  *          }]
+ *  }
  *
  * @apiSuccess(200) Success.
  *
