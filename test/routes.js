@@ -177,6 +177,8 @@ describe('REST API', function () {
         });
     });
 
+
+
     /** /api/login **/
     var loginRoute = '/api/login';
 
@@ -220,6 +222,63 @@ describe('REST API', function () {
                     user._id = res.user._id;
                     done();
                 });
+            });
+        });
+    });
+
+    /** /api/signup/massive **/
+    var signupRouteMassive = signupRoute + '/massive';
+    var invalidUsers1 = { users: [] };
+    var invalidUsers2 = { users: true };
+    var badUser = { users: [{
+        username: 'userBad',
+        password: '12321'
+    },
+        {
+            username: 'userGood',
+            password: '12321',
+            email: 'useremail1@comp.ink'
+        }]
+    };
+    var users = { users: [{
+        username: 'user_1',
+        password: '12321',
+        email: 'useremail1@comp.ink'
+    },
+        {
+            username: 'user_2',
+            password: '12321',
+            email: 'useremail2@comp.ink'
+        }]
+    };
+    describe(POST + signupRouteMassive, function () {
+        it('should not signUp correctly if the users array is empty', function (done) {
+            authPost(signupRouteMassive, user.token, invalidUsers1, BAD_REQUEST, done);
+        });
+
+        it('should not signUp correctly if the users is not an array', function (done) {
+            authPost(signupRouteMassive, user.token, invalidUsers2, BAD_REQUEST, done);
+        });
+
+        it('should signUp correctly', function (done) {
+            authPost(signupRouteMassive, user.token, users, SUCCESS, function (err, res) {
+                should.not.exist(err);
+                res = JSON.parse(res.text);
+                should(res).be.an.Object();
+                should(res.errors).be.an.Array();
+                should.equal(res.errorCount, 0);
+                done();
+            });
+        });
+
+        it('should not signUp correctly an user if doesn\'t have email but should signup the others', function (done) {
+            authPost(signupRouteMassive, user.token, badUser, SUCCESS, function (err, res) {
+                should.not.exist(err);
+                res = JSON.parse(res.text);
+                should(res).be.an.Object();
+                should(res.errors).be.an.Array();
+                (0).should.be.below(res.errorCount);
+                done();
             });
         });
     });

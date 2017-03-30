@@ -1,0 +1,7 @@
+{
+  "name": "Learning-Frontend",
+  "version": "0.0.1",
+  "dependencies": {
+    "ng-file-upload": "12.2.13"
+  }
+}

@@ -5,3 +5,4 @@ node_modules/
 coverage/
 config-example.js
 /public/apirest
+/public/bower/

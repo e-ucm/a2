@@ -38,6 +38,7 @@
     "mongodb": "^2.0.x",
     "mongoose": "^4.2.x",
     "morgan": "^1.6.x",
+    "multer": "*",
     "passport": "^0.3.x",
     "passport-local-mongoose": "3.1.x",
     "passport-lti":"*",

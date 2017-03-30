@@ -21,23 +21,31 @@ block content
     .container.theme-showcase
         .row-fluid
             .col-sm-12
-                .page-header
-                    h1 Users list
-                #users(ng-controller='UsersCtrl')
-                    table.table
-                        thead
-                            tr
-                                th Name
-                                th Username
-                                th Email
-                                th Id
-                                th Action
-                        tbody
-                            tr.active(ng-repeat='user in response.data')
-                                td {{user.name.first}} {{user.name.middle}} {{user.name.last}}
-                                td {{user.username}}
-                                td {{user.email}}
-                                td {{user._id}}
-                                td
-                                    button.btn(ng-click='edit(user._id)') Edit
-                    ul.pagination-sm#user-pag
+                #users(ng-controller="UsersCtrl")
+                    .page-header
+                        h1 Users list
+                        .row
+                            .btn.btn-primary(ngf-select='' ng-model='csvFile' name='csvFile' ngf-pattern="'*'" ngf-accept="'*'"
+                            ngf-max-size='50MB' ngf-min-height='100' ngf-resize='{width: 100, height: 100}') Select
+                            button.btn.btn-primary(type='submit'  ng-click='uploadCSV()') Submit csv
+                            p {{csvFile.name}}
+                            p.btn-success {{addedFileMsn}}
+                            p.btn-danger(ng-repeat='e in addedFileError') {{e}}
+                        table.table
+                            thead
+                                tr
+                                    th Name
+                                    th Username
+                                    th Email
+                                    th Id
+                                    th Action
+                            tbody
+                                tr.active(ng-repeat='user in response.data')
+                                    td {{user.name.first}} {{user.name.middle}} {{user.name.last}}
+                                    td {{user.username}}
+                                    td {{user.email}}
+                                    td {{user._id}}
+                                    td
+                                        button.btn(ng-click='edit(user._id)') Edit
+                        ul.pagination-sm#user-pag
+

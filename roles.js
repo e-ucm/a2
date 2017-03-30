@@ -49,7 +49,8 @@ exports = module.exports = function (app, callback) {
             app.config.apiPath + '/roles/:roleName/resources/*',
             app.config.apiPath + '/roles/:roleName/resources/*/permissions',
             app.config.apiPath + '/roles/:roleName/resources/*/permissions/:permissionName',
-            app.config.apiPath + '/roles/:roleName/users'
+            app.config.apiPath + '/roles/:roleName/users',
+            app.config.apiPath + '/signup/massive'
         ],
         permissions: '*'
     };
@@ -82,7 +83,6 @@ exports = module.exports = function (app, callback) {
             if (err) {
                 return cb(err);
             }
-
             if (roles.indexOf(roleName) === -1) {
                 err = new Error('The role ' + roleName + ' doesn\'t exist.');
                 err.status = 400;

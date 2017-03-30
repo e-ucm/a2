@@ -19,9 +19,33 @@
 
 /* Controllers */
 
-angular.module('myApp.controllers', ['ngStorage'])
+angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
+    .directive('fileReader', function () {
+        return {
+            scope: {
+                fileReader: '='
+            },
+            link: function (scope, element) {
+                $(element).on('change', function (changeEvent) {
+                    var files = changeEvent.target.files;
+                    if (files.length) {
+                        var r = new FileReader();
+                        r.onload = function (e) {
+                            var contents = e.target.result;
+                            scope.$apply(function () {
+                                scope.fileReader = {
+                                    contents: contents,
+                                    name: files[0].name
+                                };
+                            });
+                        };
 
-    .controller('ToolbarCtrl', ['$scope', '$http', '$window', '$timeout', '$localStorage',
+                        r.readAsText(files[0]);
+                    }
+                });
+            }
+        };
+    }).controller('ToolbarCtrl', ['$scope', '$http', '$window', '$timeout', '$localStorage',
         function ($scope, $http, $window, $timeout, $localStorage) {
             $scope.$storage = $localStorage;
 
@@ -138,7 +162,9 @@ angular.module('myApp.controllers', ['ngStorage'])
         function ($scope, $http, $window, $localStorage) {
             $scope.$storage = $localStorage;
             var pages;
+            var lastPage;
             var getUsers = function (page) {
+                lastPage = page;
                 $http.get('/api/users?page=' + page, {
                     headers: {
                         Authorization: 'Bearer ' + $scope.$storage.user.token
@@ -164,8 +190,32 @@ angular.module('myApp.controllers', ['ngStorage'])
             };
 
             getUsers(1);
-        }])
 
+            $scope.addedFileError = [];
+            $scope.addedFileMsn = '';
+            $scope.uploadCSV = function () {
+                if ($scope.csvFile) {
+                    var formData = new FormData();
+                    formData.append('csv', $scope.csvFile);
+                    $http.post('/api/signup/massive', formData, {
+                        headers: {
+                            'Content-Type': undefined,
+                            enctype: 'multipart/form-data',
+                            Authorization: 'Bearer ' + $scope.$storage.user.token
+                        }}).success(function (data) {
+                            $scope.addedFileMsn = data.msn;
+                            if (data.errorCount > 0) {
+                                $scope.addedFileError = data.errors;
+                            } else {
+                                $scope.addedFileError = [];
+                            }
+                            getUsers(lastPage);
+                        }).error(function (data, status) {
+                        console.error('Error on post /api/signup/massive' +  JSON.stringify(data) + ', status: ' + status);
+                    });
+                }
+            };
+        }])
     .controller('ApplicationsCtrl', ['$scope', '$http', '$window', '$localStorage',
         function ($scope, $http, $window, $localStorage) {
             $scope.$storage = $localStorage;
