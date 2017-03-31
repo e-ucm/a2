@@ -195,6 +195,50 @@ router.post('/', authentication.authorized, function (req, res, next) {
     });
 });
 
+
+/**
+ * @api {get} /applications/prefix/:prefix Gets the application information.
+ * @apiName GetApplication
+ * @apiGroup Applications
+ *
+ * @apiParam {String} applicationId Application id.
+ *
+ * @apiPermission admin
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "_id": "559a447831b7acec185bf513",
+ *          "name": "My App Name",
+ *          "prefix": "gleaner",
+ *          "host": "localhost:3300",
+ *          "anonymous": [],
+ *          "timeCreated": "2015-07-06T09:03:52.636Z"
+ *      }
+ *
+ * @apiError(400) ApplicationNotFound No application with the given user id exists.
+ *
+ */
+router.get('/prefix/:prefix', authentication.authorized, function (req, res, next) {
+    req.app.db.model('application').findByPrefix(req.params.prefix).select(unselectedFields).exec(function (err, application) {
+        if (err) {
+            return next(err);
+        }
+        if (!application) {
+            err = new Error('No application with the given application prefix exists.');
+            err.status = 400;
+            return next(err);
+        }
+        res.json(application);
+    });
+});
+
+function isArray(obj) {
+    return Object.prototype.toString.call(obj) === '[object Array]';
+}
+
 /**
  * @api {get} /applications/:applicationId Gets the application information.
  * @apiName GetApplication
@@ -234,10 +278,6 @@ router.get(applicationIdRoute, authentication.authorized, function (req, res, ne
         res.json(application);
     });
 });
-
-function isArray(obj) {
-    return Object.prototype.toString.call(obj) === '[object Array]';
-}
 
 /**
  * @api {put} /applications/:applicationId Changes the application values.

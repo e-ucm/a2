@@ -35,6 +35,7 @@ exports = module.exports = function (app, callback) {
         name: 'admin',
         resources: [
             app.config.apiPath + '/applications',
+            app.config.apiPath + '/applications/prefix/:prefix',
             app.config.apiPath + '/applications/:applicationId',
             app.config.apiPath + '/applications/look/:prefix',
             app.config.apiPath + '/users',
