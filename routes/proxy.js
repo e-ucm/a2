@@ -30,13 +30,13 @@ var jsonParser;
 proxy.on('proxyReq', function (proxyReq, req, res, options) {
     var forwardHeader = req.headers['x-forwarded-host'];
     var forwardProtocol = req.headers['x-forwarded-proto'];
-    if(!forwardHeader) {
+    if (!forwardHeader) {
         var hostHeader = req.get('host') + '/api/proxy/' + req.params.prefix + '/';
         proxyReq.setHeader('x-forwarded-host', hostHeader);
     } else {
         proxyReq.setHeader('x-forwarded-host', forwardHeader);
     }
-    if(!forwardProtocol) {
+    if (!forwardProtocol) {
         var hostProtocol = req.protocol;
         proxyReq.setHeader('x-forwarded-proto', hostProtocol);
     } else {

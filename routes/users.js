@@ -206,6 +206,96 @@ router.put(userIdRoute, authentication.authenticated, function (req, res, next) 
 });
 
 /**
+ * @api {put} /users/:userId/password Changes the user password.
+ * @apiName PutUser
+ * @apiGroup Users
+ *
+ * @apiParam {String} userId User id.
+ * @apiParam {String} oldPassword.
+ * @apiParam {String} newPassword.
+ *
+ * @apiPermission none
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "password" : "old_pass",
+ *          "newPassword": "new_pass"
+ *      }
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "_id": "559a447831b7acec185bf513",
+ *          "username": "userId",
+ *          "email": "your@email.com",
+ *          "name": {
+ *              "last": "Firstname",
+ *              "middle": "Middlename",
+ *              "first": "Lastname"
+ *          },
+ *              "roles" : ["user"]
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ *
+ */
+router.put(userIdRoute + '/password', authentication.authenticated, function (req, res, next) {
+    async.auto({
+        getUser: function (done) {
+            if (!req.body.password || !req.body.newPassword) {
+                var err = new Error('Bad request, you need the current password and the new password');
+                err.status = 400;
+                return done(err);
+            }
+            req.app.db.model('user').findById(req.params.userId, function (err, user) {
+                if (err) {
+                    err = new Error('The user with ' + req.params.userId + ' id doesn\'t exist');
+                    err.status = 404;
+                    return done(err);
+                }
+                done(null, user);
+            });
+        },
+        checkOldPassword: ['getUser', function (done, results) {
+            req.body.username = results.getUser.username;
+            req.app.passport.authenticate('local', {session: false}, function (err, user, info) {
+                if (err) {
+                    return done(err);
+                }
+                if (!user) {
+                    err = new Error(info.message);
+                    err.status = 401;
+                    return done(err);
+                }
+                done();
+            })(req, res, next);
+        }],
+        putPassword: ['checkOldPassword', function (done, results) {
+            results.getUser.setPassword(req.body.newPassword, function (err, user) {
+                if (err) {
+                    return done(err);
+                }
+                user.save(function (err, result) {
+                    if (err) {
+                        return done(err);
+                    }
+
+                    done(null, result);
+                });
+            });
+
+        }]
+    }, function (err) {
+        if (err) {
+            return next(err);
+        }
+        res.json({message: 'Success'});
+    });
+});
+
+/**
  * @api {delete} /users/:userId Removes the user.
  * @apiName DeleteUser
  * @apiGroup Users
