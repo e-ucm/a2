@@ -53,6 +53,25 @@ block content
                                     input.form-control(ng-model='newEmail.email')
                                 td
                                     button.btn(ng-click='changeEmail()') Change Email
+                    h3 Change Password
+                    .row
+                        .col-sm-2
+                            p Your password
+                            p New password
+                            p Repeat new password
+                        .col-sm-2
+                            input.form-control(type='password' ng-model='pass.old')
+                            input.form-control(type='password' ng-model='pass.new')
+                            input.form-control(type='password' ng-model='pass.repeat')
+                        .col-sm-6
+                            p.alert-danger {{pass.errorIncorrect}}
+                            p.alert-danger {{pass.notEqual}}
+                    .row
+                        .col-sm-2
+                            button.btn(ng-click='changePassword()') Change password
+                    .row
+                        p.alert-success {{pass.success}}
+                    h3 Your profile
                     label Email
                     p {{user.email}}
                     label Username
