@@ -845,6 +845,39 @@ describe('REST API', function () {
         });
     });
 
+    var oldPassword = {
+        password: '12321',
+        newPassword: 'new12321'
+    };
+    var incorrectPassword = {
+        password: 'bad',
+        newPassword: 'new12321'
+    };
+    var badRequest = {
+        password: '12321'
+    };
+    describe(PUT + usersRoute + '/:userId/password', function () {
+
+        it('should not PUT a new password', function (done) {
+            authPut(usersRoute + '/' + user._id + '/password', user.token, incorrectPassword, UNAUTHORIZED, done);
+        });
+
+        it('should not PUT a new password with bad id', function (done) {
+            authPut(usersRoute + '/12345/password', user.token, incorrectPassword, 404, done);
+        });
+
+        it('should not PUT a new password', function (done) {
+            authPut(usersRoute + '/' + user._id + '/password', user.token, badRequest, BAD_REQUEST, done);
+        });
+
+        it('should PUT a new password', function (done) {
+            authPut(usersRoute + '/' + user._id + '/password', user.token, oldPassword, SUCCESS, function (err, res) {
+                should.not.exist(err);
+                authPut(usersRoute + '/' + user._id + '/password', user.token, oldPassword, UNAUTHORIZED, done);
+            });
+        });
+    });
+
     /** /api/users/:userId/roles **/
 
     describe(GET + usersRoute + '/:userId/roles', function () {

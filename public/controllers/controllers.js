@@ -737,6 +737,45 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                 });
             };
 
+            $scope.changePassword = function () {
+                if ($scope.pass.new !== $scope.pass.repeat) {
+                    $scope.pass.success = undefined;
+                    $scope.pass.errorIncorrect = undefined;
+                    $scope.pass.notEqual = 'The password are different';
+                    return;
+                }
+                var passwordObj = {
+                    password: $scope.pass.old,
+                    newPassword: $scope.pass.new
+                };
+                $http.put('/api/users/' + $scope.uId + '/password', passwordObj, {
+                    headers: {
+                        Authorization: 'Bearer ' + $scope.$storage.user.token
+                    }
+                }).success(function () {
+                    $scope.pass.success = 'The password has changed successfully';
+                    $scope.pass.errorIncorrect = undefined;
+                    $scope.pass.notEqual = undefined;
+                    resetPasswordForm();
+                }).error(function (data, status) {
+                    if (status === 401) {
+                        $scope.pass.errorIncorrect = 'Incorrect password';
+                    } else {
+                        $scope.pass.errorIncorrect = 'The password didn\'t change';
+                    }
+                    $scope.pass.success = undefined;
+                    $scope.pass.notEqual = undefined;
+                    resetPasswordForm();
+                    console.error('Status:', status, ', Error on ProfileCtrl, PUT /api/users/' + $scope.uId + '\n', data);
+                });
+            };
+
+            var resetPasswordForm = function() {
+                $scope.pass.old = '';
+                $scope.pass.new = '';
+                $scope.pass.repeat = '';
+            };
+
             $scope.addRole = function (role) {
                 $http.post('/api/users/' + $scope.uId + '/roles', [role], {
                     headers: {
