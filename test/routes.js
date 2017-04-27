@@ -175,8 +175,29 @@ describe('REST API', function () {
                 });
             });
         });
-    });
 
+        it('should signUp correctly (username to lowercase)', function (done) {
+            var upperUsername = 'UPPER';
+            var lowerUsername = upperUsername.toLowerCase();
+            var email = 'test-email@mail.com';
+            post(signupRoute, {
+                username: upperUsername,
+                password: 'someRandPassword',
+                email: 'test-email@mail.com'
+            }, SUCCESS, function (err, res) {
+                should.not.exist(err);
+                res = JSON.parse(res.text);
+                should(res).be.an.Object();
+                should(res.user).be.an.Object();
+                should(res.user._id).be.an.String();
+                should(res.user.username).be.an.String();
+                should.equal(res.user.username, lowerUsername);
+                should(res.user.email).be.an.String();
+                should.equal(res.user.email, email);
+                done();
+            });
+        });
+    });
 
 
     /** /api/login **/
@@ -396,7 +417,31 @@ describe('REST API', function () {
 
                     app.acl.addUserRoles(user.username, 'gleanerUser', function (err) {
                         should.not.exist(err);
-                        done();
+
+                        var usernameFromPrefixUpperCase = 'TEST223';
+                        var mail = usernameFromPrefixUpperCase + '@email.com';
+                        post(signupRoute, {
+                            username: usernameFromPrefixUpperCase,
+                            password: 'somePwd',
+                            email:  mail,
+                            prefix: appData.prefix,
+                            role: role
+                        }, SUCCESS, function (err, res) {
+                            should.not.exist(err);
+                            res = JSON.parse(res.text);
+                            should(res).be.an.Object();
+                            should(res.user).be.an.Object();
+                            should(res.user._id).be.an.String();
+                            should(res.user.username).be.an.String();
+                            should.equal(res.user.username, usernameFromPrefixUpperCase.toLowerCase());
+                            should(res.user.email).be.an.String();
+                            should.equal(res.user.email, mail.toLowerCase());
+                            app.acl.hasRole(usernameFromPrefixUpperCase, role,  function (err) {
+                                should.not.exist(err);
+
+                                get(usersRoute + '/' + user._id + '/roles', user.token, SUCCESS, validateRolesInformation(done));
+                            });
+                        });
                     });
                 });
             });
@@ -878,6 +923,23 @@ describe('REST API', function () {
         });
     });
 
+
+    var validateRolesInformation = function (done) {
+        return function (err, res) {
+            should.not.exist(err);
+            should(res).be.an.Object();
+
+            var roles = JSON.parse(res.text);
+
+            should(roles).be.an.Array();
+
+            if (roles.length > 0) {
+                should(roles[0]).be.a.String();
+            }
+
+            done();
+        };
+    };
     /** /api/users/:userId/roles **/
 
     describe(GET + usersRoute + '/:userId/roles', function () {
@@ -890,25 +952,13 @@ describe('REST API', function () {
             get(usersRoute + '/' + admin._id + '/roles', user.token, FORBIDDEN, done);
         });
 
-        var validateRolesInformation = function (done) {
-            return function (err, res) {
-                should.not.exist(err);
-                should(res).be.an.Object();
-
-                var roles = JSON.parse(res.text);
-
-                should(roles).be.an.Array();
-
-                if (roles.length > 0) {
-                    should(roles[0]).be.a.String();
-                }
-
-                done();
-            };
-        };
-
         it('should GET his own roles being an admin', function (done) {
             get(usersRoute + '/' + admin._id + '/roles', admin.token, SUCCESS, validateRolesInformation(done));
+        });
+
+
+        it('should GET his own roles being a user', function (done) {
+            get(usersRoute + '/' + user._id + '/roles', user.token, SUCCESS, validateRolesInformation(done));
         });
 
         it('should GET a specific user\'s roles being authorized (admin)', function (done) {
