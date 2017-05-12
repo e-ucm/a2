@@ -28,31 +28,35 @@ var express = require('express'),
 var jsonParser;
 
 proxy.on('proxyReq', function (proxyReq, req, res, options) {
-    var forwardHeader = req.headers['x-forwarded-host'];
-    var forwardProtocol = req.headers['x-forwarded-proto'];
-    if (!forwardHeader) {
-        var hostHeader = req.get('host') + '/api/proxy/' + req.params.prefix + '/';
-        proxyReq.setHeader('x-forwarded-host', hostHeader);
-    } else {
-        proxyReq.setHeader('x-forwarded-host', forwardHeader);
-    }
-    if (!forwardProtocol) {
-        var hostProtocol = req.protocol;
-        proxyReq.setHeader('x-forwarded-proto', hostProtocol);
-    } else {
-        proxyReq.setHeader('x-forwarded-proto', forwardProtocol);
-    }
-    if (req.user) {
-        var username = req.user.username;
-        proxyReq.setHeader('X-Gleaner-User', username);
-    }
-    if (req.body) {
-        var bodyData = JSON.stringify(req.body);
-        // Incase if content-type is application/x-www-form-urlencoded -> we need to change to application/json
-        proxyReq.setHeader('Content-Type', 'application/json');
-        proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
-        // Stream the content
-        proxyReq.write(bodyData);
+    try {
+        var forwardHeader = req.headers['x-forwarded-host'];
+        var forwardProtocol = req.headers['x-forwarded-proto'];
+        if (!forwardHeader) {
+            var hostHeader = req.get('host') + '/api/proxy/' + req.params.prefix + '/';
+            proxyReq.setHeader('x-forwarded-host', hostHeader);
+        } else {
+            proxyReq.setHeader('x-forwarded-host', forwardHeader);
+        }
+        if (!forwardProtocol) {
+            var hostProtocol = req.protocol;
+            proxyReq.setHeader('x-forwarded-proto', hostProtocol);
+        } else {
+            proxyReq.setHeader('x-forwarded-proto', forwardProtocol);
+        }
+        if (req.user) {
+            var username = req.user.username;
+            proxyReq.setHeader('X-Gleaner-User', username);
+        }
+        if (req.body) {
+            var bodyData = JSON.stringify(req.body);
+            // Incase if content-type is application/x-www-form-urlencoded -> we need to change to application/json
+            proxyReq.setHeader('Content-Type', 'application/json');
+            proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+            // Stream the content
+            proxyReq.write(bodyData);
+        }
+    } catch (err) {
+        console.error(err);
     }
 });
 
