@@ -75,6 +75,8 @@ var validateUser = function (req, userObject, forcePass, done) {
         return done(err);
     }
 
+    userObject.username = userObject.username.toLowerCase();
+
     if (!userObject.password) {
         if (forcePass) {
             err = new Error('Password required!');
