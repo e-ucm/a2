@@ -249,28 +249,30 @@ describe('REST API', function () {
 
     /** /api/signup/massive **/
     var signupRouteMassive = signupRoute + '/massive';
-    var invalidUsers1 = { users: [] };
-    var invalidUsers2 = { users: true };
-    var badUser = { users: [{
-        username: 'userBad',
-        password: '12321'
-    },
-        {
-            username: 'userGood',
+    var invalidUsers1 = {users: []};
+    var invalidUsers2 = {users: true};
+    var badUser = {
+        users: [{
+            username: 'userBad',
+            password: '12321'
+        },
+            {
+                username: 'userGood',
+                password: '12321',
+                email: 'useremail1@comp.ink'
+            }]
+    };
+    var users = {
+        users: [{
+            username: 'user_1',
             password: '12321',
             email: 'useremail1@comp.ink'
-        }]
-    };
-    var users = { users: [{
-        username: 'user_1',
-        password: '12321',
-        email: 'useremail1@comp.ink'
-    },
-        {
-            username: 'user_2',
-            password: '12321',
-            email: 'useremail2@comp.ink'
-        }]
+        },
+            {
+                username: 'user_2',
+                password: '12321',
+                email: 'useremail2@comp.ink'
+            }]
     };
     describe(POST + signupRouteMassive, function () {
         it('should not signUp correctly if the users array is empty', function (done) {
@@ -338,9 +340,10 @@ describe('REST API', function () {
     var gleanerHost = 'localhost:' + gleanerPort;
     var anonymousRoute = '/anonymousRoute';
     var role = 'gleanerUser';
+    var secondRole = 'gleanerUser2';
     var gleanerRoles = [
         {
-            roles: role,
+            roles: [role, secondRole],
             allows: [
                 {
                     resources: [
@@ -382,7 +385,7 @@ describe('REST API', function () {
                 prefix: gleanerPrefix,
                 host: gleanerHost + '2',
                 roles: gleanerRoles,
-                autoroles: [role],
+                autoroles: [role, secondRole],
                 anonymous: [anonymousRoute]
             };
             authPost(applicationsRoute, admin.token, appData, SUCCESS, function (err, res) {
@@ -423,7 +426,7 @@ describe('REST API', function () {
                         post(signupRoute, {
                             username: usernameFromPrefixUpperCase,
                             password: 'somePwd',
-                            email:  mail,
+                            email: mail,
                             prefix: appData.prefix,
                             role: role
                         }, SUCCESS, function (err, res) {
@@ -436,7 +439,7 @@ describe('REST API', function () {
                             should.equal(res.user.username, usernameFromPrefixUpperCase.toLowerCase());
                             should(res.user.email).be.an.String();
                             should.equal(res.user.email, mail.toLowerCase());
-                            app.acl.hasRole(usernameFromPrefixUpperCase, role,  function (err) {
+                            app.acl.hasRole(usernameFromPrefixUpperCase, role, function (err) {
                                 should.not.exist(err);
 
                                 get(usersRoute + '/' + user._id + '/roles', user.token, SUCCESS, validateRolesInformation(done));
@@ -461,6 +464,16 @@ describe('REST API', function () {
             }, 404, done);
         });
 
+        it('should not signUp correctly if the role doesn\'t exist (array)', function (done) {
+            post(signupRoute, {
+                username: user,
+                password: 'pass',
+                email: 'email@email.com',
+                prefix: gleanerPrefix,
+                role: [role, 'invalidRole']
+            }, 404, done);
+        });
+
         it('should not signUp correctly if the role is admin', function (done) {
             post(signupRoute, {
                 username: user,
@@ -468,6 +481,26 @@ describe('REST API', function () {
                 email: 'email@email.com',
                 prefix: gleanerPrefix,
                 role: 'admin'
+            }, FORBIDDEN, done);
+        });
+
+        it('should not signUp correctly if the role is admin (array)', function (done) {
+            post(signupRoute, {
+                username: user,
+                password: 'pass',
+                email: 'email@email.com',
+                prefix: gleanerPrefix,
+                role: [role, 'admin']
+            }, FORBIDDEN, done);
+        });
+
+        it('should not signUp correctly if the role is admin and invalid (array)', function (done) {
+            post(signupRoute, {
+                username: user,
+                password: 'pass',
+                email: 'email@email.com',
+                prefix: gleanerPrefix,
+                role: ['invalidRoleAsd', 'admin']
             }, FORBIDDEN, done);
         });
 
@@ -481,6 +514,16 @@ describe('REST API', function () {
             }, 404, done);
         });
 
+        it('should not signUp correctly if the application with the prefix doesn\'t exist (array)', function (done) {
+            post(signupRoute, {
+                username: user,
+                password: 'pass',
+                email: 'email@email.com',
+                prefix: 'invalidPrefix',
+                role: [role]
+            }, 404, done);
+        });
+
         it('should not signUp correctly without a application prefix', function (done) {
             post(signupRoute, {
                 username: user,
@@ -489,6 +532,16 @@ describe('REST API', function () {
                 role: 'invalidRole'
             }, BAD_REQUEST, done);
         });
+
+        it('should not signUp correctly without a application prefix (array)', function (done) {
+            post(signupRoute, {
+                username: user,
+                password: 'pass',
+                email: 'email@email.com',
+                role: [role, 'invalidRole']
+            }, BAD_REQUEST, done);
+        });
+
 
         it('should signUp correctly', function (done) {
             post(signupRoute, {
@@ -503,6 +556,46 @@ describe('REST API', function () {
                     should.not.exist(err);
                     should.equal(hasRole, true);
                     done();
+                });
+            });
+        });
+
+        it('should signUp correctly (array roles)', function (done) {
+            post(signupRoute, {
+                username: user + '2',
+                password: 'pass',
+                email: '2email@email.com',
+                prefix: gleanerPrefix,
+                role: [role]
+            }, SUCCESS, function (err, res) {
+                should.not.exist(err);
+                app.acl.hasRole(user + '2', role, function (err, hasRole) {
+                    should.not.exist(err);
+                    should.equal(hasRole, true);
+                    done();
+                });
+            });
+        });
+
+
+        it('should signUp correctly (array roles)', function (done) {
+            post(signupRoute, {
+                username: user + '3',
+                password: 'pass',
+                email: '3email@email.com',
+                prefix: gleanerPrefix,
+                role: [role, secondRole]
+            }, SUCCESS, function (err, res) {
+                console.log(res.text);
+                should.not.exist(err);
+                app.acl.hasRole(user + '3', role, function (err, hasRole) {
+                    should.not.exist(err);
+                    should.equal(hasRole, true);
+                    app.acl.hasRole(user + '3', secondRole, function (err, hasRole) {
+                        should.not.exist(err);
+                        should.equal(hasRole, true);
+                        done();
+                    });
                 });
             });
         });
@@ -734,12 +827,12 @@ describe('REST API', function () {
             methods.forEach(function (method) {
                 request[method](gleanerProxyBaseUrl + anonymousRoute).send(someData)
                     .expect(SUCCESS).end(function (err, res) {
-                        should.not.exist(err);
-                        should(res.text).equal('OK');
-                        if (method === 'delete') {
-                            done();
-                        }
-                    });
+                    should.not.exist(err);
+                    should(res.text).equal('OK');
+                    if (method === 'delete') {
+                        done();
+                    }
+                });
             });
         });
     });
