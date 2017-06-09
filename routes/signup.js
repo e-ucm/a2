@@ -31,19 +31,19 @@ var storage = multer.diskStorage({
 
 var decode = multer({storage: storage}).single('csv');
 
-var addUsersArray = function(req, res, next, users) {
+var addUsersArray = function (req, res, next, users) {
     var usersError = [];
-    async.each(users.users, function(userObject, callback) {
+    async.each(users.users, function (userObject, callback) {
         async.auto({
-            validate: function(done) {
-                validateUser(req, userObject, false, function(err) {
+            validate: function (done) {
+                validateUser(req, userObject, false, function (err) {
                     if (err) {
                         usersError.push('>> ' + userObject.username + ' << ' + err);
                     }
                     done();
                 });
             }, user: ['validate', function (done) {
-                registerUser(req, res, userObject, function(err) {
+                registerUser(req, res, userObject, function (err) {
                     if (err) {
                         usersError.push('>> ' + userObject.username + '<< ' + err);
                     }
@@ -53,18 +53,42 @@ var addUsersArray = function(req, res, next, users) {
         }, function () {
             callback();
         });
-    }, function(err) {
+    }, function (err) {
         var msn = 'Users registered';
         var errors = [];
         if (usersError.length > 0) {
             msn += ' but there are some problems' + ' \n ';
-            usersError.forEach(function(e) {
+            usersError.forEach(function (e) {
                 errors.push(e);
             });
         }
         res.json({msn: msn, errors: errors, errorCount: errors.length});
 
     });
+};
+
+var checkRole = function(req, role, prefix, callback) {
+    req.app.acl.existsRole(role, function (err) {
+        if (err) {
+            err = new Error('The role ' + role + ' doesn\'t exist');
+            err.status = 404;
+            return callback(err);
+        }
+        callback();
+    });
+};
+
+var checkRoles = function (req, roles, prefix, callback) {
+    var i ;
+    for (i = 0; i < roles.length; ++i) {
+        var role = roles[i];
+        if (!role) {
+            var err = new Error('The role cannot be null or undefined!');
+            err.status = 404;
+            return callback(err);
+        }
+        checkRole(req, role, prefix, callback);
+    }
 };
 
 var validateUser = function (req, userObject, forcePass, done) {
@@ -99,18 +123,19 @@ var validateUser = function (req, userObject, forcePass, done) {
         return done(err);
     }
 
-    if (userObject.role === 'admin') {
-        err = new Error('The admin role can\'t be assigned');
-        err.status = 403;
-        return done(err);
-    }
-
     if (userObject.role && userObject.prefix) {
-        req.app.acl.existsRole(userObject.role, function (err) {
-            if (err) {
-                err = new Error('The role ' + userObject.role + ' doesn\'t exist');
-                err.status = 404;
-                return done(err);
+
+        userObject.role = [].concat(userObject.role);
+
+        if (userObject.role.indexOf('admin') > -1) {
+            err = new Error('The admin role can\'t be assigned');
+            err.status = 403;
+            return done(err);
+        }
+
+        checkRoles(req, userObject.role, userObject.prefix, function(error) {
+            if (error) {
+                return done(error);
             }
             var AppModel = req.app.db.model('application');
             AppModel.findByPrefix(userObject.prefix, function (err, application) {
@@ -122,22 +147,23 @@ var validateUser = function (req, userObject, forcePass, done) {
                     err.status = 404;
                     return done(err);
                 }
-                if (application.autoroles.indexOf(userObject.role) === -1) {
-                    err = new Error('The ' + userObject.role + ' role can\'t be assigned');
-                    err.status = 403;
-                    return done(err);
+
+                for (var i = 0; i < userObject.role.length; i++) {
+                    if (application.autoroles.indexOf(userObject.role[i]) === -1) {
+                        err = new Error('The ' + userObject.role + ' role can\'t be assigned');
+                        err.status = 403;
+                        return done(err);
+                    }
                 }
-                return done();
+                done();
             });
-
-
         });
     } else {
         done();
     }
 };
 
-var registerUser = function(req, res, userObject, done) {
+var registerUser = function (req, res, userObject, done) {
     var UserModel = req.app.db.model('user');
     UserModel.register(new UserModel({
         username: userObject.username,
@@ -148,15 +174,16 @@ var registerUser = function(req, res, userObject, done) {
         }
     }), userObject.password, function (err, resultUser) {
         if (err) {
+            var error = {};
             if (err.errors) {
                 if (err.errors.email && err.errors.email.message) {
-                    err.message = err.errors.email.message;
+                    error.message = err.errors.email.message;
                 }
                 if (err.errors.username && err.errors.username.message) {
-                    err.message = err.errors.username.message;
+                    error.message = err.errors.username.message;
                 }
             }
-            return done(err);
+            return done(error);
         }
 
         if (userObject.role && userObject.prefix) {
@@ -174,7 +201,7 @@ var registerUser = function(req, res, userObject, done) {
 };
 
 var parseUsersCSV = function (req, res, next, path, callback) {
-    fs.readFile(path, 'utf8', function (err,csv) {
+    fs.readFile(path, 'utf8', function (err, csv) {
         if (err) {
             return next(err);
         }
@@ -183,7 +210,7 @@ var parseUsersCSV = function (req, res, next, path, callback) {
         var heads = lines[0];
         var data = lines.slice(1, lines.length);
         var head = heads.split(',');
-        data.forEach(function(line) {
+        data.forEach(function (line) {
             if (line !== '') {
                 var words = line.split(',');
                 var obj = {};
@@ -207,7 +234,7 @@ var parseUsersCSV = function (req, res, next, path, callback) {
  * @apiParam {String} email User email.
  * @apiParam {String} username User username.
  * @apiParam {String} password User password
- * @apiParam {String} role Possible role considering roles have been established with A2 for 'prefix'
+ * @apiParam {String[]} role Possible roles considering roles have been established with A2 for 'prefix' (it can be a strings)
  * @apiParam {String} prefix Application prefix that has different roles that can be registered with
  *
  * @apiPermission none
@@ -243,7 +270,7 @@ var parseUsersCSV = function (req, res, next, path, callback) {
  */
 router.post('/', function (req, res, next) {
     async.auto({
-        validate: function(done) {
+        validate: function (done) {
             validateUser(req, req.body, true, done);
         }, user: ['validate', function (done) {
             registerUser(req, res, req.body, done);
@@ -338,7 +365,7 @@ router.post('/', function (req, res, next) {
  */
 router.post('/massive/', function (req, res, next) {
     var users = req.body;
-    decode(req, res, function(err) {
+    decode(req, res, function (err) {
         if (req.file) {
             users = parseUsersCSV(req, res, next, req.file.path, addUsersArray);
         } else {
