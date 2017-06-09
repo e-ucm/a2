@@ -174,15 +174,16 @@ var registerUser = function (req, res, userObject, done) {
         }
     }), userObject.password, function (err, resultUser) {
         if (err) {
+            var error = {};
             if (err.errors) {
                 if (err.errors.email && err.errors.email.message) {
-                    err.message = err.errors.email.message;
+                    error.message = err.errors.email.message;
                 }
                 if (err.errors.username && err.errors.username.message) {
-                    err.message = err.errors.username.message;
+                    error.message = err.errors.username.message;
                 }
             }
-            return done(err);
+            return done(error);
         }
 
         if (userObject.role && userObject.prefix) {
