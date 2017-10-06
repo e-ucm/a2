@@ -61,7 +61,7 @@
     "jscs": "2.3.5",
     "jshint": "*",
     "ims-lti": "*",
-    "mocha": "*",
+    "mocha": "3.5.3",
     "promptly": "*",
     "should": "*",
     "supertest": "*"
