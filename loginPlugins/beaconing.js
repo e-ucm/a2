@@ -235,7 +235,7 @@ function oauthSetup(app) {
                     return res.json(err);
                 }
                 generateAccessToken(req, user, function(e, accesstoken){
-                    res.json({_id: user._id, username: user.username, email: user.email, token: accesstoken, roles: user.roles});
+                    res.json({user: {_id: user._id, username: user.username, email: user.email, token: accesstoken}});
                 });
             });
         });
