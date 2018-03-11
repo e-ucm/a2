@@ -156,7 +156,7 @@ function oauthSetup(app) {
 
     var userExists = function (profile, db, callback) {
 
-        db.model('user').findOne({email: generateEmail(profile)}, function (err, user) {
+        db.model('user').findOne({username: profile.username}, function (err, user) {
             if (err) {
                 return callback(err);
             }
