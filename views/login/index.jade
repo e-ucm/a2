@@ -34,6 +34,10 @@ block content
                         button.btn.btn-primary.btn-login(type='submit' ng-click='login()') Sign In
                         a.btn.btn-link(href='/login/forgot') Forgot your password?
                     alert.alert-danger {{errorResponse}}
+                    br
+                    button.btn.btn-warning.btn-block(ng-if='hasBeaconing()' type='button' ng-click='loginBeaconing()') Login with
+                        br
+                        img(src='beaconingicon.png' width='33%')
         .row-fluid(ng-if='isUser()')
             .alert.alert-success(role='alert')
                 | You are already logged

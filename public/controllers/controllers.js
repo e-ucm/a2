@@ -84,9 +84,11 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
 
         }])
 
-    .controller('LoginCtrl', ['$scope', '$http', '$window', '$timeout', '$localStorage',
-        function ($scope, $http, $window, $timeout, $localStorage) {
+    .controller('LoginCtrl', ['$scope', '$http', '$window', '$location', '$timeout', '$localStorage',
+        function ($scope, $http, $window, $location, $timeout, $localStorage) {
             $scope.$storage = $localStorage;
+
+            console.log('asdsadsasdsadsadsadaddsa');
 
             $scope.login = function () {
 
@@ -114,6 +116,47 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                     console.error('Status:', status, ', Error on LoginCtrl, POST /api/login \n', data);
                     $scope.errorResponse = data.message;
                 });
+            };
+
+            $scope.loginBeaconing = function () {
+                var location = '/api/login/beaconing?callback=' + encodeURIComponent(
+                        $window.location.origin + $window.location.pathname + 'byplugin');
+
+                $window.location.href = location;
+            };
+
+            $scope.hasBeaconing = function() {
+                return $scope.beaconing !== null;
+            };
+        }])
+
+    .controller('LoginPluginCtrl', ['$scope', '$http', '$window', '$timeout', '$localStorage',
+        function ($scope, $http, $window, $timeout, $localStorage) {
+            $scope.$storage = $localStorage;
+            $scope.setupUser = function (user) {
+
+                console.log(user);
+                if (user && user.username && user.email && user.token) {
+                    $scope.$storage.user = user;
+
+                    if (!$scope.$storage.user._id) {
+                        $scope.$storage.user._id = $scope.$storage.user.id;
+                    }
+
+                    if (user.redirect) {
+                        $http.get('/api/lti/key/' + user.redirect).success(function(data) {
+                            $timeout(function () {
+                                $window.location.href = '/';
+                            }, 110);
+                        });
+                    } else {
+                        $timeout(function () {
+                            $window.location.href = '/';
+                        }, 110);
+                    }
+                } else {
+                    $window.location.href = 'login';
+                }
             };
         }])
 
