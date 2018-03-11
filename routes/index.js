@@ -81,4 +81,9 @@ router.get('/users/:userId', function (req, res) {
     });
 });
 
+/* GET login by plugin */
+router.get('/loginbyplugin/', function (req, res) {
+    res.render('loginplugin', {user: JSON.stringify(req.query)});
+});
+
 module.exports = router;
