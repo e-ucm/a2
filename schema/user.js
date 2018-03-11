@@ -73,6 +73,23 @@ module.exports = function (app, mongoose) {
         timeCreated: {
             type: Date,
             default: Date.now
+        },
+        externalId: {
+            type: 'array',
+            required: false,
+            items: {
+                type: 'object',
+                properties: {
+                    domain: {
+                        type: 'string',
+                        required: true
+                    },
+                    id: {
+                        type: 'string',
+                        required: true
+                    }
+                }
+            }
         }
     });
     userSchema.plugin(require('./plugins/pagedFind'));
