@@ -134,7 +134,8 @@ function oauthSetup(app) {
             }
         }, function (err, httpResponse, body) {
             if (err || (httpResponse && httpResponse.statusCode !== 200)) {
-                return done(err);
+                err = JSON.parse(body);
+                return done(err.error);
             }
             body = JSON.parse(body);
 
@@ -226,8 +227,8 @@ function oauthSetup(app) {
 
         userProfile(req.body.accessToken, function(error, profile){
             if(error){
-                res.status(500);
-                return res.json({message: 'Unable to obtain user profile'});
+                res.status(error.status);
+                return res.json({message: 'Unable to obtain user profile: ' + error.message});
             }
             checkUser(null, null, profile, function(err, user){
                 if(err){
