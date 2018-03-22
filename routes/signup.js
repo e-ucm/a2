@@ -168,6 +168,7 @@ var registerUser = function (req, res, userObject, done) {
     UserModel.register(new UserModel({
         username: userObject.username,
         email: userObject.email,
+        externalId: userObject.externalId,
         timeCreated: new Date(),
         verification: {
             complete: false
