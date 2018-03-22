@@ -147,7 +147,7 @@ router.get(userIdRoute, authentication.authenticated, function (req, res, next) 
 });
 
 /**
- * @api {get} /users/:domain/:externalId Gets the user information using externalId
+ * @api {get} /users/external/:domain/:externalId Gets the user information using externalId
  * @apiName GetUsersExternal
  * @apiGroup Users
  *
@@ -178,7 +178,7 @@ router.get(userIdRoute, authentication.authenticated, function (req, res, next) 
  * @apiError(400) UserNotFound No account with the given user id exists.
  *
  */
-router.get('/:domain/:externalId', authentication.authenticated, function (req, res, next) {
+router.get('/external/:domain/:externalId', authentication.authenticated, function (req, res, next) {
     var domain = req.params.domain;
     var externalId = req.params.externalId;
 
