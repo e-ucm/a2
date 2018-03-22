@@ -23,6 +23,7 @@ var express = require('express'),
     router = express.Router(),
     userIdRoute = '/:userId',
     userIdRolesRoute = '/:userId/roles',
+    userIdExternalIdRoute = '/:userId/externalId',
     unselectedFields = '-salt -hash -__v',
     removeFields = ['salt', 'hash', '__v'];
 
@@ -451,6 +452,132 @@ router.delete(userIdRolesRoute + '/:roleName', authentication.authorized, functi
         },
         deleteRoles: ['checkUser', function (done, results) {
             removeUserRoles(results.checkUser, req, res, done);
+        }]
+    }, function (err) {
+        if (err) {
+            return next(err);
+        }
+        res.sendDefaultSuccessMessage();
+    });
+});
+
+/**
+ * @api {post} /users/:userId/externalId Adds externalId to user.
+ * @apiName PostUserexternalId
+ * @apiGroup Users
+ *
+ * @apiParam {String} userId User id.
+ * @apiParam {Object[]} externalId The new externalId for the user.
+ *
+ * @apiPermission admin
+ *
+ * @apiParamExample {json} Request-Example:
+ *      [
+ *          { "domain" : "Domain1", "externalId" : "id1" },
+ *          { "domain" : "Domain2", "externalId" : "id2" }
+ *      ]
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message": "Success."
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ *
+ */
+router.post(userIdExternalIdRoute, function (req, res, next) {
+    var user;
+    var externalId = req.body.externalId;
+
+    async.auto({
+        checkUser: function (done) {
+            checkUserExistenceAndExec(req, res, done);
+        },
+        checkexternalId: ['checkUser', function (done, results) {
+            user = results.checkUser;
+
+            for (var i = 0; i < externalId.length; i++) {
+                for (var j = 0; j < user.externalId.length; j++) {
+                    if (externalId[i].domain === user.externalId[j].domain) {
+                        delete user.externalId[j];
+                        user.externalId.splice(j, 1);
+                        j--;
+                    }
+                }
+            }
+
+            user.save(function(error, result) {
+                for (var i = 0; i < externalId.length; i++) {
+                    user.externalId.push({
+                        domain: externalId[i].domain,
+                        id: externalId[i].id
+                    });
+                }
+
+                user.save(done);
+            });
+        }]
+    }, function (err) {
+        if (err) {
+            return next(err);
+        }
+        res.sendDefaultSuccessMessage();
+    });
+});
+
+/**
+ * @api {delete} /users/:userId/externalId/:domain Removes a externalId from the externalId of an user.
+ * @apiName DeleteUserExternalId
+ * @apiGroup Users
+ *
+ * @apiParam {String} userId User id.
+ * @apiParam {String} domain ExternalId domain.
+ *
+ * @apiPermission admin
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message": "Success."
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ * @apiError(403) UserNotFound No account with the given user id exists.
+ *
+ */
+router.delete(userIdExternalIdRoute + '/:domain', function (req, res, next) {
+    var domain = req.params.domain;
+    var user;
+
+    if (!domain) {
+        res.status(400);
+        return res.json({message: 'Not valid domain'});
+    }
+
+    async.auto({
+        checkUser: function (done) {
+            checkUserExistenceAndExec(req, res, done);
+        },
+        deleteExternalId: ['checkUser', function (done, results) {
+            user = results.checkUser;
+
+            for (var i = 0; i < user.externalId.length; i++) {
+                if (user.externalId[i].domain === domain) {
+                    delete user.externalId[i];
+                    user.externalId.splice(i, 1);
+                    console.log('deleted');
+                    break;
+                }
+            }
+
+            console.log(user);
+
+            user.save(done);
         }]
     }, function (err) {
         if (err) {
