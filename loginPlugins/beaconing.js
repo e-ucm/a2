@@ -69,19 +69,6 @@ function oauthSetup(app) {
     var getUrl = function(req){
         return req.protocol + '://' + req.get('host');
     };
-    
-    var hasKey = function(array, key){
-        var has = false;
-
-        for (var i = array.length - 1; i >= 0; i--) {
-            if(array[i].domain === key){
-                has = true;
-                break;
-            }
-        }
-
-        return has;
-    };
 
     var checkUser = function(accessToken, refreshToken, profile, done) {
         console.log(profile);
@@ -103,8 +90,16 @@ function oauthSetup(app) {
                 });
             };
 
-            if(!hasKey(user.externalId, "beaconing")){
-                user.externalId.push({beaconing: profile.id});
+            var found = false;
+            for(var i = 0; i < user.externalId.length; i++){
+                if(user.externalId[i].domain === "beaconing"){
+                    found = true;
+                    break;
+                }
+            }
+
+            if(!found){
+                user.externalId.push({domain: "beaconing", id: profile.id.toString()});
                 user.save(function(error, result){
                     userRoles();
                 });
@@ -156,19 +151,30 @@ function oauthSetup(app) {
     };
 
     var userExists = function (profile, db, callback) {
-
-        db.model('user').findOne({username: profile.username}, function (err, user) {
+        db.model('user').findOne({ externalId: { $elemMatch: { domain:'beaconing', id: profile.id.toString() } } }, function (err, user) {
             if (err) {
+                console.log(err);
                 return callback(err);
             }
 
             if (!user) {
-                err = new Error('No account with that email address exists.');
-                err.status = 400;
-                return callback(err);
-            }
+                db.model('user').findOne({ username: profile.username }, function (err, user) {
+                    if (err) {
+                        console.log(err);
+                        return callback(err);
+                    }
 
-            callback(null, user);
+                    if (!user) {
+                        err = new Error('No account with that username exists.');
+                        err.status = 400;
+                        return callback(err);
+                    }else{
+                        callback(null, user);
+                    }
+                });
+            }else{
+                callback(null, user);
+            }
         });
     };
 

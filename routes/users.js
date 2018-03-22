@@ -488,7 +488,7 @@ router.delete(userIdRolesRoute + '/:roleName', authentication.authorized, functi
  * @apiError(400) UserNotFound No account with the given user id exists.
  *
  */
-router.post(userIdExternalIdRoute, function (req, res, next) {
+router.post(userIdExternalIdRoute, authentication.authorized, function (req, res, next) {
     var user;
     var externalId = req.body.externalId;
 
@@ -550,7 +550,7 @@ router.post(userIdExternalIdRoute, function (req, res, next) {
  * @apiError(403) UserNotFound No account with the given user id exists.
  *
  */
-router.delete(userIdExternalIdRoute + '/:domain', function (req, res, next) {
+router.delete(userIdExternalIdRoute + '/:domain', authentication.authorized, function (req, res, next) {
     var domain = req.params.domain;
     var user;
 
