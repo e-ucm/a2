@@ -147,6 +147,67 @@ router.get(userIdRoute, authentication.authenticated, function (req, res, next) 
 });
 
 /**
+ * @api {get} /users/:domain/:externalId Gets the user information using externalId
+ * @apiName GetUsersExternal
+ * @apiGroup Users
+ *
+ * @apiParam {String} domain External domain
+ * @apiParam {String} externalId External ID
+ *
+ * @apiPermission none
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "_id": "559a447831b7acec185bf513",
+ *          "username": "admin",
+ *          "email": "admin@email.es",
+ *          "timeCreated": "2015-07-06T09:03:52.636Z",
+ *          "verification": {
+ *             "complete": false
+ *          },
+ *          "name": {
+ *              "last": "",
+ *              "middle": "",
+ *              "first": ""
+ *          }
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ *
+ */
+router.get('/:domain/:externalId', authentication.authenticated, function (req, res, next) {
+    var domain = req.params.domain;
+    var externalId = req.params.externalId;
+
+    if(!domain){
+        res.status(400);
+        return res.json({message: 'Invalid domain'});
+    }
+
+    if(!externalId){
+        res.status(400);
+        return res.json({message: 'Invalid externalId'});
+    }
+
+    req.app.db.model('user')
+        .findOne({ externalId: { $elemMatch: { domain: domain, id: externalId } } }, function (err, user) {
+            if (err) {
+                return next(err);
+            }
+
+            if(!user){
+                res.status(404);
+                return res.json({message: 'User ('+externalId+') not found for domain '+domain});
+            }
+
+            res.json(user);
+        });
+});
+
+/**
  * @api {put} /users/:userId Changes the user name and/or email.
  * @apiName PutUser
  * @apiGroup Users
