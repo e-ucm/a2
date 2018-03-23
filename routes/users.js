@@ -83,7 +83,7 @@ var express = require('express'),
  */
 router.get('/', authentication.authorized, function (req, res, next) {
 
-    var query = {};
+    var query = req.query.query || {};
     var fields = req.query.fields || '';
     var sort = req.query.sort || '_id';
     var limit = req.query.limit || 20;
