@@ -191,12 +191,7 @@ router.get('/external/:domain/:externalId', authentication.authenticated, functi
     var domain = req.params.domain;
     var externalId = req.params.externalId;
 
-    if(!domain){
-        res.status(400);
-        return res.json({message: 'Invalid domain'});
-    }
-
-    if(!externalId){
+    if (!externalId) {
         res.status(400);
         return res.json({message: 'Invalid externalId'});
     }
@@ -207,9 +202,9 @@ router.get('/external/:domain/:externalId', authentication.authenticated, functi
                 return next(err);
             }
 
-            if(!user){
+            if (!user) {
                 res.status(404);
-                return res.json({message: 'User ('+externalId+') not found for domain '+domain});
+                return res.json({message: 'User (' + externalId + ') not found for domain ' + domain});
             }
 
             res.json(user);
@@ -400,6 +395,56 @@ router.delete(userIdRoute, authentication.authenticated, function (req, res, nex
         }
         res.sendDefaultSuccessMessage();
     });
+});
+
+/**
+ * @api {delete} /users/external/:domain/:externalId Deletes the user using externalId
+ * @apiName DeleteUserExternal
+ * @apiGroup Users
+ *
+ * @apiParam {String} domain External domain
+ * @apiParam {String} externalId External ID
+ *
+ * @apiPermission none
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message": "Success."
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given external user id exists.
+ *
+ */
+router.delete('/external/:domain/:externalId', authentication.authenticated, function (req, res, next) {
+    var domain = req.params.domain;
+    var externalId = req.params.externalId;
+
+    if (!externalId) {
+        res.status(400);
+        return res.json({message: 'Invalid externalId'});
+    }
+
+    req.app.db.model('user')
+        .findOne({ externalId: { $elemMatch: { domain: domain, id: externalId } } }, function (err, user) {
+            if (err) {
+                return next(err);
+            }
+
+            if (!user) {
+                res.status(404);
+                return res.json({message: 'User (' + externalId + ') not found for domain ' + domain});
+            }
+
+            deleteUser(user._id, req, res, function (err) {
+                if (err) {
+                    return next(err);
+                }
+                res.sendDefaultSuccessMessage();
+            });
+        });
 });
 
 /**
