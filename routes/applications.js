@@ -471,22 +471,33 @@ router.put('/look/:prefix', authentication.authorized, function (req, res, next)
             return next(err);
         }
 
+        var users = [];
+        if (req.body.user) {
+            users.push(req.body.users);
+        }
+
+        if (req.body.users) {
+            users = users.concat(req.body.users);
+        }
+
         var applicationId = results._id;
         var query = {
             _id: applicationId
         };
 
         var existKey = false;
-        var addNewUser = false;
+        var addNewUser = [];
         var error;
         if (results.look) {
             results.look.forEach(function (lookObj) {
                 if (lookObj.url === req.body.url) {
                     if (lookObj.key === req.body.key) {
                         if (lookObj.permissions) {
-                            if (!lookObj.permissions[req.body.user]) {
-                                addNewUser = true;
-                            }
+                            users.forEach(function(user) {
+                                if (!lookObj.permissions[user]) {
+                                    addNewUser.push(user);
+                                }
+                            });
                         }
                         existKey = true;
                     } else {
@@ -509,7 +520,10 @@ router.put('/look/:prefix', authentication.authorized, function (req, res, next)
                 methods: req.body.methods,
                 url: req.body.url
             };
-            objToAdd.permissions[req.body.user] = req.body.resources;
+
+            users.forEach(function(user) {
+                objToAdd.permissions[user] = req.body.resources;
+            });
 
             update = {
                 $push: {
@@ -517,20 +531,28 @@ router.put('/look/:prefix', authentication.authorized, function (req, res, next)
             };
 
             update.$push.look = objToAdd;
-        } else if (!addNewUser) {
-            var resultField = 'look.$.permissions.' + req.body.user;
+        } else if (addNewUser.length === 0) {
             update = {
                 $addToSet: {}
             };
-            update.$addToSet[resultField] = { $each:  req.body.resources };
+
+            addNewUser.forEach(function(user) {
+                var resultField = 'look.$.permissions.' + user;
+                update.$addToSet[resultField] = { $each:  req.body.resources };
+            });
+
 
             query['look.url'] = req.body.url;
         } else {
-            var updateProp = 'look.$.permissions.' + req.body.user;
             update = {
                 $set: {}
             };
-            update.$set[updateProp] = req.body.resources;
+
+            addNewUser.forEach(function(user) {
+                var updateProp = 'look.$.permissions.' + user;
+                update.$set[updateProp] = req.body.resources;
+            });
+
             query['look.url'] = req.body.url;
         }
 
