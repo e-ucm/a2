@@ -473,7 +473,7 @@ router.put('/look/:prefix', authentication.authorized, function (req, res, next)
 
         var users = [];
         if (req.body.user) {
-            users.push(req.body.users);
+            users.push(req.body.user);
         }
 
         if (req.body.users) {
@@ -487,6 +487,7 @@ router.put('/look/:prefix', authentication.authorized, function (req, res, next)
 
         var existKey = false;
         var addNewUser = [];
+        var updateUser = [];
         var error;
         if (results.look) {
             results.look.forEach(function (lookObj) {
@@ -496,6 +497,8 @@ router.put('/look/:prefix', authentication.authorized, function (req, res, next)
                             users.forEach(function(user) {
                                 if (!lookObj.permissions[user]) {
                                     addNewUser.push(user);
+                                }else {
+                                    updateUser.push(user);
                                 }
                             });
                         }
@@ -512,7 +515,7 @@ router.put('/look/:prefix', authentication.authorized, function (req, res, next)
             return next(error);
         }
 
-        var update;
+        var update = {};
         if (!existKey) {
             var objToAdd = {
                 key: req.body.key,
@@ -531,29 +534,26 @@ router.put('/look/:prefix', authentication.authorized, function (req, res, next)
             };
 
             update.$push.look = objToAdd;
-        } else if (addNewUser.length === 0) {
-            update = {
-                $addToSet: {}
-            };
-
-            addNewUser.forEach(function(user) {
-                var resultField = 'look.$.permissions.' + user;
-                update.$addToSet[resultField] = { $each:  req.body.resources };
-            });
-
-
-            query['look.url'] = req.body.url;
         } else {
-            update = {
-                $set: {}
-            };
-
-            addNewUser.forEach(function(user) {
-                var updateProp = 'look.$.permissions.' + user;
-                update.$set[updateProp] = req.body.resources;
-            });
-
             query['look.url'] = req.body.url;
+
+            if (updateUser.length !== 0) {
+                update.$addToSet = {};
+
+                updateUser.forEach(function(user) {
+                    var resultField = 'look.$.permissions.' + user;
+                    update.$addToSet[resultField] = { $each:  req.body.resources };
+                });
+            }
+
+            if (addNewUser.length !== 0) {
+                update.$set = {};
+
+                addNewUser.forEach(function(user) {
+                    var updateProp = 'look.$.permissions.' + user;
+                    update.$set[updateProp] = req.body.resources;
+                });
+            }
         }
 
         var options = {
