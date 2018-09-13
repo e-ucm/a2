@@ -123,6 +123,20 @@ var registerRoot = function (options, callback) {
     });
 };
 
+
+
+registerRoot({
+    mongodbUrl: 'localhost:27017/a2',
+    rootEmail: 'a@b.com',
+    rootPassword: 'root',
+    failedLoginAttempts: '',
+    apiPath: '/api'
+}, function(a,b) {
+    console.log(a);
+    console.log(b);
+    console.log('created');
+});
+
 if (process.env.SETUP_MODE === 'fast') {
 
     var options = {

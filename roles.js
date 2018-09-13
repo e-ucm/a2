@@ -38,12 +38,18 @@ exports = module.exports = function (app, callback) {
             app.config.apiPath + '/applications/prefix/:prefix',
             app.config.apiPath + '/applications/:applicationId',
             app.config.apiPath + '/applications/look/:prefix',
+
             app.config.apiPath + '/users',
             app.config.apiPath + '/users/:userId',
             app.config.apiPath + '/users/:userId/verification',
             app.config.apiPath + '/users/:userId/roles',
             app.config.apiPath + '/users/:userId/roles/:roleName',
             app.config.apiPath + '/users/:userId/*/:permissionName',
+
+            app.config.apiPath + '/users/:userId/:userId/externalId',
+            app.config.apiPath + '/users/:userId/:userId/externalId/:domain',
+            app.config.apiPath + '/users/external/:domain/:externalId',
+
             app.config.apiPath + '/roles',
             app.config.apiPath + '/roles/:roleName',
             app.config.apiPath + '/roles/:roleName/resources',
@@ -51,6 +57,7 @@ exports = module.exports = function (app, callback) {
             app.config.apiPath + '/roles/:roleName/resources/*/permissions',
             app.config.apiPath + '/roles/:roleName/resources/*/permissions/:permissionName',
             app.config.apiPath + '/roles/:roleName/users',
+            
             app.config.apiPath + '/signup/massive'
         ],
         permissions: '*'

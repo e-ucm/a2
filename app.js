@@ -102,9 +102,7 @@ var jwtMiddleware = jwtCheck.unless({
         config.apiPath + '/login',
         config.apiPath + '/loginplugins',
         new RegExp(config.apiPath + '\/login\/.*'),
-        config.apiPath + '/signup',
-        config.apiPath + '/users/:userId/externalId',
-        config.apiPath + '/users/:userId/externalId/delete'
+        config.apiPath + '/signup'
     ]
 });
 
