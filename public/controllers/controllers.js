@@ -126,7 +126,7 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
             };
 
             $scope.hasBeaconing = function() {
-                return $scope.beaconing !== null;
+                return $scope.beaconing ? true : false;
             };
         }])
 
