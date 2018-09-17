@@ -54,14 +54,13 @@ var pluginName = 'beaconing';
  */
 
 var passport = {
-    // ?response_type=code&client_id=some_client_id_here&redirect_uri=some_callback_url_here
-    baseURL: 'https://core.beaconing.eu/',
-    authorizationURL: 'https://core.beaconing.eu/auth/auth',
-    tokenURL: 'https://core.beaconing.eu/auth/token',
-    clientID: 'analytics',
-    clientSecret: 'IVzeBVKpPriNYbM3O4Dr4El01R9zTBkNsgrAahvoiu7f51oUws3ISIAJOkBhlzuA',
-    callbackURL: '',
-    partialURL: '/api/login/beaconing/callback'
+    baseURL: process.env.BEACONING_PATH || 'https://core.beaconing.eu/',
+    authorizationURL: process.env.BEACONING_AUTH_URL || 'https://core.beaconing.eu/auth/auth',
+    tokenURL: process.env.BEACONING_TOKEN_URL || 'https://core.beaconing.eu/auth/token',
+    clientID: process.env.BEACONING_CLIENT_ID || 'client_id',
+    clientSecret: process.env.BEACONING_CLIENT_SECRET || 'client_secret',
+    callbackURL: process.env.BEACONING_CALLBACK_URL || '',
+    partialURL: process.env.BEACONING_PARTIAL_URL || '/api/login/beaconing/callback',
 };
 
 function oauthSetup(app) {
