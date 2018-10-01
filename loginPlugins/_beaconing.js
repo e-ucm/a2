@@ -63,6 +63,8 @@ var passport = {
     partialURL: process.env.BEACONING_PARTIAL_URL || '/api/login/beaconing/callback',
 };
 
+var addExternalToExistingUser = process.env.BEACONING_ADD_EXTERNAL || false;
+
 function oauthSetup(app) {
 
     var getUrl = function(req){
@@ -77,33 +79,38 @@ function oauthSetup(app) {
                 // No user found, create a new user and assign a new role
                 console.info(err);
                 return addNewUser(profile, app.db, app.acl, done);
-            }
+            }else {
+                //Add the roles and externalId to the existing user ONLY if the flag is active
+                var userRoles = function(){
+                    app.acl.userRoles(user.username.toString(), function (err, roles) {
+                        if (err) {
+                            return done(err);
+                        }
+                        user.roles = roles;
+                        done(null, user);
+                    });
+                };
 
-            var userRoles = function(){
-                app.acl.userRoles(user.username.toString(), function (err, roles) {
-                    if (err) {
-                        return done(err);
+                var found = false;
+                for(var i = 0; i < user.externalId.length; i++){
+                    if(user.externalId[i].domain === "beaconing"){
+                        found = true;
+                        break;
                     }
-                    user.roles = roles;
-                    done(null, user);
-                });
-            };
-
-            var found = false;
-            for(var i = 0; i < user.externalId.length; i++){
-                if(user.externalId[i].domain === "beaconing"){
-                    found = true;
-                    break;
                 }
-            }
 
-            if(!found){
-                user.externalId.push({domain: "beaconing", id: profile.id.toString()});
-                user.save(function(error, result){
+                if(!found){
+                    if(addExternalToExistingUser) {
+                        user.externalId.push({domain: "beaconing", id: profile.id.toString()});
+                        user.save(function(error, result){
+                            userRoles();
+                        });
+                    }else{
+                        return done(new Error('User with same username already exist and can\'t be reused'));
+                    }
+                }else{
                     userRoles();
-                });
-            }else{
-                userRoles();
+                }
             }
         });
     };
@@ -145,8 +152,31 @@ function oauthSetup(app) {
         done(null, user);
     });
 
-    var generateEmail = function(profile){
-        return profile.id + profile.username  + '@beaconing.eu';
+    var randomId = function() {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for (var i = 0; i < 5; i++)
+            text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        return text;
+    };
+
+    var generateEmail = function(profile, db, callback){
+        var tmpemail = profile.id + profile.username  + '_' + randomId() + '@beaconing.eu';
+
+        db.model('user').findOne({ email: tmpemail }, function (err, user) {
+            if (err) {
+                console.log(err);
+                return callback(err);
+            }
+
+            if (!user) {
+                callback(null, tmpemail);
+            }else{
+                generateEmail(profile, db, callback);
+            }
+        });
     };
 
     var userExists = function (profile, db, callback) {
@@ -178,33 +208,39 @@ function oauthSetup(app) {
     };
 
     var addNewUser = function (profile, db, acl, callback) {
-        var UserModel = db.model('user');
-        var user = new UserModel({
-            username: profile.username,
-            email: generateEmail(profile),
-            timeCreated: new Date(),
-            verification: {
-                complete: true
-            }
-        });
-
-        user.save(function (saveErr) {
-            if (saveErr) {
-                return callback(saveErr);
+        generateEmail(profile, db, function(err, email){
+            if (err) {
+                return callback(err);
             }
 
-            // Default role assigned to the user
-            var roles = profile.roles;
-            acl.addUserRoles(user.username.toString(), roles, function (err) {
-                if (err) {
-                    return callback(err);
+            var UserModel = db.model('user');
+            var user = new UserModel({
+                username: profile.username,
+                email: email,
+                timeCreated: new Date(),
+                verification: {
+                    complete: true
                 }
-                if (typeof roles === 'string' || roles instanceof String) {
-                    user.roles = [roles];
-                } else {
-                    user.roles = roles;
+            });
+
+            user.save(function (saveErr) {
+                if (saveErr) {
+                    return callback(saveErr);
                 }
-                callback(null, user);
+
+                // Default role assigned to the user
+                var roles = profile.roles;
+                acl.addUserRoles(user.username.toString(), roles, function (err) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    if (typeof roles === 'string' || roles instanceof String) {
+                        user.roles = [roles];
+                    } else {
+                        user.roles = roles;
+                    }
+                    callback(null, user);
+                });
             });
         });
     };

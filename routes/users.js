@@ -669,11 +669,6 @@ router.delete(userIdExternalIdRoute + '/:domain', authentication.authorized, fun
     var domain = req.params.domain;
     var user;
 
-    if (!domain) {
-        res.status(400);
-        return res.json({message: 'Not valid domain'});
-    }
-
     async.auto({
         checkUser: function (done) {
             checkUserExistenceAndExec(req, res, done);

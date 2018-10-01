@@ -88,8 +88,6 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
         function ($scope, $http, $window, $location, $timeout, $localStorage) {
             $scope.$storage = $localStorage;
 
-            console.log('asdsadsasdsadsadsadaddsa');
-
             $scope.login = function () {
 
                 $http.post('/api/login', $scope.user).success(function (data) {
@@ -117,6 +115,15 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                     $scope.errorResponse = data.message;
                 });
             };
+
+            $scope.beaconing = null;
+            $http.get('/api/loginplugins').success(function (results) {
+                for (var i = 0; i < results.data.length; ++i) {
+                    if (results.data[i].pluginId === 'beaconing') {
+                        $scope.beaconing = results.data[i];
+                    }
+                }
+            });
 
             $scope.loginBeaconing = function () {
                 var location = '/api/login/beaconing?callback=' + encodeURIComponent(

@@ -430,13 +430,21 @@ router.delete(applicationIdRoute, authentication.authorized, function (req, res,
  *
  * @apiPermission admin
  *
- * @apiParamExample {json} Request-Example:
+ * @apiParamExample {json} Request-Example (Single-User):
  *      {
- *          "key":"_id",
- *          "user": "dev"
- *          "resources":["id1"],
- *          "methods":["post","put"],
- *          "url":"/url/*"
+ *          "key": "_id",
+ *          "user": "dev",
+ *          "resources": ["id1"],
+ *          "methods": ["post", "put"],
+ *          "url": "/url/*"
+ *      }
+ * @apiParamExample {json} Request-Example (Multiple-User):
+ *      {
+ *          "key": "_id",
+ *          "users": ["u1", "u2", "u3"],
+ *          "resources": ["id1"],
+ *          "methods": ["post", "put"],
+ *          "url": "/url/*"
  *      }
  *
  * @apiSuccess(200) Success.
