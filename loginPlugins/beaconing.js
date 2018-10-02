@@ -79,7 +79,7 @@ function oauthSetup(app) {
                 // No user found, create a new user and assign a new role
                 console.info(err);
                 return addNewUser(profile, app.db, app.acl, done);
-            }else if(addExternalToExistingUser) {
+            }else {
                 //Add the roles and externalId to the existing user ONLY if the flag is active
                 var userRoles = function(){
                     app.acl.userRoles(user.username.toString(), function (err, roles) {
@@ -100,15 +100,17 @@ function oauthSetup(app) {
                 }
 
                 if(!found){
-                    user.externalId.push({domain: "beaconing", id: profile.id.toString()});
-                    user.save(function(error, result){
-                        userRoles();
-                    });
+                    if(addExternalToExistingUser) {
+                        user.externalId.push({domain: "beaconing", id: profile.id.toString()});
+                        user.save(function(error, result){
+                            userRoles();
+                        });
+                    }else{
+                        return done(new Error('User with same username already exist and can\'t be reused'));
+                    }
                 }else{
                     userRoles();
                 }
-            }else{
-                return done(new Error('User with same username already exist and can\'t be reused'));
             }
         });
     };
