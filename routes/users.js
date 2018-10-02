@@ -27,6 +27,15 @@ var express = require('express'),
     unselectedFields = '-salt -hash -__v',
     removeFields = ['salt', 'hash', '__v'];
 
+function isJson(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
 /**
  * @api {get} /users Returns all users.
  * @apiName GetUsers
@@ -83,7 +92,7 @@ var express = require('express'),
  */
 router.get('/', authentication.authorized, function (req, res, next) {
 
-    var query = JSON.parse(req.query.query) || {};
+    var query = (isJson(req.query.query) && JSON.parse(req.query.query)) || {};
     var fields = req.query.fields || '';
     var sort = req.query.sort || '_id';
     var limit = req.query.limit || 20;
@@ -181,11 +190,6 @@ router.get(userIdRoute, authentication.authenticated, function (req, res, next) 
 router.get('/external/:domain/:externalId', authentication.authenticated, function (req, res, next) {
     var domain = req.params.domain;
     var externalId = req.params.externalId;
-
-    if (!domain) {
-        res.status(400);
-        return res.json({message: 'Invalid domain'});
-    }
 
     if (!externalId) {
         res.status(400);
@@ -417,11 +421,6 @@ router.delete(userIdRoute, authentication.authenticated, function (req, res, nex
 router.delete('/external/:domain/:externalId', authentication.authenticated, function (req, res, next) {
     var domain = req.params.domain;
     var externalId = req.params.externalId;
-
-    if (!domain) {
-        res.status(400);
-        return res.json({message: 'Invalid domain'});
-    }
 
     if (!externalId) {
         res.status(400);

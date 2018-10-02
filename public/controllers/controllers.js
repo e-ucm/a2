@@ -118,6 +118,15 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                 });
             };
 
+            $scope.beaconing = null;
+            $http.get('/api/loginplugins').success(function (results) {
+                for (var i = 0; i < results.data.length; ++i) {
+                    if (results.data[i].pluginId === 'beaconing') {
+                        $scope.beaconing = results.data[i];
+                    }
+                }
+            });
+
             $scope.loginBeaconing = function () {
                 var location = '/api/login/beaconing?callback=' + encodeURIComponent(
                         $window.location.origin + $window.location.pathname + 'byplugin');
