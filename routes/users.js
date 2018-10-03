@@ -23,8 +23,18 @@ var express = require('express'),
     router = express.Router(),
     userIdRoute = '/:userId',
     userIdRolesRoute = '/:userId/roles',
+    userIdExternalIdRoute = '/:userId/externalId',
     unselectedFields = '-salt -hash -__v',
     removeFields = ['salt', 'hash', '__v'];
+
+function isJson(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
 
 /**
  * @api {get} /users Returns all users.
@@ -82,7 +92,7 @@ var express = require('express'),
  */
 router.get('/', authentication.authorized, function (req, res, next) {
 
-    var query = {};
+    var query = (isJson(req.query.query) && JSON.parse(req.query.query)) || {};
     var fields = req.query.fields || '';
     var sort = req.query.sort || '_id';
     var limit = req.query.limit || 20;
@@ -143,6 +153,62 @@ router.get(userIdRoute, authentication.authenticated, function (req, res, next) 
         }
         res.json(results.getInfo);
     });
+});
+
+/**
+ * @api {get} /users/external/:domain/:externalId Gets the user information using externalId
+ * @apiName GetUsersExternal
+ * @apiGroup Users
+ *
+ * @apiParam {String} domain External domain
+ * @apiParam {String} externalId External ID
+ *
+ * @apiPermission none
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "_id": "559a447831b7acec185bf513",
+ *          "username": "admin",
+ *          "email": "admin@email.es",
+ *          "timeCreated": "2015-07-06T09:03:52.636Z",
+ *          "verification": {
+ *             "complete": false
+ *          },
+ *          "name": {
+ *              "last": "",
+ *              "middle": "",
+ *              "first": ""
+ *          }
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ *
+ */
+router.get('/external/:domain/:externalId', authentication.authenticated, function (req, res, next) {
+    var domain = req.params.domain;
+    var externalId = req.params.externalId;
+
+    if (!externalId) {
+        res.status(400);
+        return res.json({message: 'Invalid externalId'});
+    }
+
+    req.app.db.model('user')
+        .findOne({ externalId: { $elemMatch: { domain: domain, id: externalId } } }, function (err, user) {
+            if (err) {
+                return next(err);
+            }
+
+            if (!user) {
+                res.status(404);
+                return res.json({message: 'User (' + externalId + ') not found for domain ' + domain});
+            }
+
+            res.json(user);
+        });
 });
 
 /**
@@ -332,6 +398,56 @@ router.delete(userIdRoute, authentication.authenticated, function (req, res, nex
 });
 
 /**
+ * @api {delete} /users/external/:domain/:externalId Deletes the user using externalId
+ * @apiName DeleteUserExternal
+ * @apiGroup Users
+ *
+ * @apiParam {String} domain External domain
+ * @apiParam {String} externalId External ID
+ *
+ * @apiPermission none
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message": "Success."
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given external user id exists.
+ *
+ */
+router.delete('/external/:domain/:externalId', authentication.authenticated, function (req, res, next) {
+    var domain = req.params.domain;
+    var externalId = req.params.externalId;
+
+    if (!externalId) {
+        res.status(400);
+        return res.json({message: 'Invalid externalId'});
+    }
+
+    req.app.db.model('user')
+        .findOne({ externalId: { $elemMatch: { domain: domain, id: externalId } } }, function (err, user) {
+            if (err) {
+                return next(err);
+            }
+
+            if (!user) {
+                res.status(404);
+                return res.json({message: 'User (' + externalId + ') not found for domain ' + domain});
+            }
+
+            deleteUser(user._id, req, res, function (err) {
+                if (err) {
+                    return next(err);
+                }
+                res.sendDefaultSuccessMessage();
+            });
+        });
+});
+
+/**
  * @api {get} /users/:userId/roles Gets the user roles.
  * @apiName GetUsersRoles
  * @apiGroup Users
@@ -451,6 +567,127 @@ router.delete(userIdRolesRoute + '/:roleName', authentication.authorized, functi
         },
         deleteRoles: ['checkUser', function (done, results) {
             removeUserRoles(results.checkUser, req, res, done);
+        }]
+    }, function (err) {
+        if (err) {
+            return next(err);
+        }
+        res.sendDefaultSuccessMessage();
+    });
+});
+
+/**
+ * @api {post} /users/:userId/externalId Adds externalId to user.
+ * @apiName PostUserexternalId
+ * @apiGroup Users
+ *
+ * @apiParam {String} userId User id.
+ * @apiParam {Object[]} externalId The new externalId for the user.
+ *
+ * @apiPermission admin
+ *
+ * @apiParamExample {json} Request-Example:
+ *      [
+ *          { "domain" : "Domain1", "externalId" : "id1" },
+ *          { "domain" : "Domain2", "externalId" : "id2" }
+ *      ]
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message": "Success."
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ *
+ */
+router.post(userIdExternalIdRoute, authentication.authorized, function (req, res, next) {
+    var user;
+    var externalId = req.body.externalId;
+
+    async.auto({
+        checkUser: function (done) {
+            checkUserExistenceAndExec(req, res, done);
+        },
+        checkexternalId: ['checkUser', function (done, results) {
+            user = results.checkUser;
+
+            for (var i = 0; i < externalId.length; i++) {
+                for (var j = 0; j < user.externalId.length; j++) {
+                    if (externalId[i].domain === user.externalId[j].domain) {
+                        delete user.externalId[j];
+                        user.externalId.splice(j, 1);
+                        j--;
+                    }
+                }
+            }
+
+            user.save(function(error, result) {
+                for (var i = 0; i < externalId.length; i++) {
+                    user.externalId.push({
+                        domain: externalId[i].domain,
+                        id: externalId[i].id
+                    });
+                }
+
+                user.save(done);
+            });
+        }]
+    }, function (err) {
+        if (err) {
+            return next(err);
+        }
+        res.sendDefaultSuccessMessage();
+    });
+});
+
+/**
+ * @api {delete} /users/:userId/externalId/:domain Removes a externalId from the externalId of an user.
+ * @apiName DeleteUserExternalId
+ * @apiGroup Users
+ *
+ * @apiParam {String} userId User id.
+ * @apiParam {String} domain ExternalId domain.
+ *
+ * @apiPermission admin
+ *
+ * @apiSuccess(200) Success.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "message": "Success."
+ *      }
+ *
+ * @apiError(400) UserNotFound No account with the given user id exists.
+ * @apiError(403) UserNotFound No account with the given user id exists.
+ *
+ */
+router.delete(userIdExternalIdRoute + '/:domain', authentication.authorized, function (req, res, next) {
+    var domain = req.params.domain;
+    var user;
+
+    async.auto({
+        checkUser: function (done) {
+            checkUserExistenceAndExec(req, res, done);
+        },
+        deleteExternalId: ['checkUser', function (done, results) {
+            user = results.checkUser;
+
+            for (var i = 0; i < user.externalId.length; i++) {
+                if (user.externalId[i].domain === domain) {
+                    delete user.externalId[i];
+                    user.externalId.splice(i, 1);
+                    console.log('deleted');
+                    break;
+                }
+            }
+
+            console.log(user);
+
+            user.save(done);
         }]
     }, function (err) {
         if (err) {

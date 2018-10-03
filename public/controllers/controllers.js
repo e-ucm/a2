@@ -84,8 +84,8 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
 
         }])
 
-    .controller('LoginCtrl', ['$scope', '$http', '$window', '$timeout', '$localStorage',
-        function ($scope, $http, $window, $timeout, $localStorage) {
+    .controller('LoginCtrl', ['$scope', '$http', '$window', '$location', '$timeout', '$localStorage',
+        function ($scope, $http, $window, $location, $timeout, $localStorage) {
             $scope.$storage = $localStorage;
 
             $scope.login = function () {
@@ -114,6 +114,56 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                     console.error('Status:', status, ', Error on LoginCtrl, POST /api/login \n', data);
                     $scope.errorResponse = data.message;
                 });
+            };
+
+            $scope.beaconing = null;
+            $http.get('/api/loginplugins').success(function (results) {
+                for (var i = 0; i < results.data.length; ++i) {
+                    if (results.data[i].pluginId === 'beaconing') {
+                        $scope.beaconing = results.data[i];
+                    }
+                }
+            });
+
+            $scope.loginBeaconing = function () {
+                var location = '/api/login/beaconing?callback=' + encodeURIComponent(
+                        $window.location.origin + $window.location.pathname + 'byplugin');
+
+                $window.location.href = location;
+            };
+
+            $scope.hasBeaconing = function() {
+                return $scope.beaconing ? true : false;
+            };
+        }])
+
+    .controller('LoginPluginCtrl', ['$scope', '$http', '$window', '$timeout', '$localStorage',
+        function ($scope, $http, $window, $timeout, $localStorage) {
+            $scope.$storage = $localStorage;
+            $scope.setupUser = function (user) {
+
+                console.log(user);
+                if (user && user.username && user.email && user.token) {
+                    $scope.$storage.user = user;
+
+                    if (!$scope.$storage.user._id) {
+                        $scope.$storage.user._id = $scope.$storage.user.id;
+                    }
+
+                    if (user.redirect) {
+                        $http.get('/api/lti/key/' + user.redirect).success(function(data) {
+                            $timeout(function () {
+                                $window.location.href = '/';
+                            }, 110);
+                        });
+                    } else {
+                        $timeout(function () {
+                            $window.location.href = '/';
+                        }, 110);
+                    }
+                } else {
+                    $window.location.href = 'login';
+                }
             };
         }])
 
