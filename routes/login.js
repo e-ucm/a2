@@ -206,7 +206,7 @@ router.post('/forgot', function (req, res, next) {
         }
     ], function (err) {
         if (err) {
-            next(err);
+            return next(err);
         }
     });
 });

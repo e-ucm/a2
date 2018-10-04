@@ -30,7 +30,17 @@ var validateEmail = function(email) {
     return false;
 };
 
+/**
+    Schema for the user. This schema contains the next fields:
+        email, unique and used to recover the user password and to contact with the developers by use of form
+        name, the real name of the user
+        resetPassword,this field is used to change the password if the user forgets it.
+        verification, this field is used to verify the user mail.
+        timeCreated, when the user has been registered
+        externalId, this field is used to link a user with an external login platform
+ */
 module.exports = function (app, mongoose) {
+    mongoose.Promise = global.Promise;
     var userSchema = new mongoose.Schema({
         email: {
             type: String,

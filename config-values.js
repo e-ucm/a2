@@ -46,6 +46,8 @@
  * @param smtpPassword -
  * @param failedLoginAttempts - The amount of failed login attempts before blocking the account.
  * @param apiPath - prefix for the REST API requests.
+ * @param maxSizeRequest - The max size for the routes request.
+ * @param maxSizeVisualizations - The max size for the visualizations uploaded.
  */
 
 
