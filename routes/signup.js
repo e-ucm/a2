@@ -176,6 +176,8 @@ var registerUser = function (req, res, userObject, done) {
     }), userObject.password, function (err, resultUser) {
         if (err) {
             var error = {};
+            error.status = 400;
+            error.message = err.message;
             if (err.errors) {
                 if (err.errors.email && err.errors.email.message) {
                     error.message = err.errors.email.message;

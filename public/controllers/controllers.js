@@ -29,8 +29,8 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                 $(element).on('change', function (changeEvent) {
                     var files = changeEvent.target.files;
                     if (files.length) {
-                        var r = new FileReader();
-                        r.onload = function (e) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
                             var contents = e.target.result;
                             scope.$apply(function () {
                                 scope.fileReader = {
@@ -40,11 +40,14 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                             });
                         };
 
-                        r.readAsText(files[0]);
+                        reader.readAsText(files[0]);
                     }
                 });
             }
         };
+    /*
+     * TOOLBAR CONTROLLER
+     */
     }).controller('ToolbarCtrl', ['$scope', '$http', '$window', '$timeout', '$localStorage',
         function ($scope, $http, $window, $timeout, $localStorage) {
             $scope.$storage = $localStorage;
@@ -83,13 +86,14 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
             };
 
         }])
-
+    /*
+     * LOGIN CONTROLLER
+     */
     .controller('LoginCtrl', ['$scope', '$http', '$window', '$location', '$timeout', '$localStorage',
         function ($scope, $http, $window, $location, $timeout, $localStorage) {
             $scope.$storage = $localStorage;
 
             $scope.login = function () {
-
                 $http.post('/api/login', $scope.user).success(function (data) {
                     $localStorage.$reset();
                     $scope.$storage.user = data.user;
@@ -136,13 +140,13 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                 return $scope.beaconing ? true : false;
             };
         }])
-
+    /*
+     * LOGIN PLUGINS CONTROLLER
+     */
     .controller('LoginPluginCtrl', ['$scope', '$http', '$window', '$timeout', '$localStorage',
         function ($scope, $http, $window, $timeout, $localStorage) {
             $scope.$storage = $localStorage;
             $scope.setupUser = function (user) {
-
-                console.log(user);
                 if (user && user.username && user.email && user.token) {
                     $scope.$storage.user = user;
 
@@ -150,29 +154,33 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                         $scope.$storage.user._id = $scope.$storage.user.id;
                     }
 
-                    if (user.redirect) {
-                        $http.get('/api/lti/key/' + user.redirect).success(function(data) {
-                            $timeout(function () {
-                                $window.location.href = '/';
-                            }, 110);
-                        });
-                    } else {
+                    var wait = function(time){
                         $timeout(function () {
                             $window.location.href = '/';
-                        }, 110);
+                        }, time);
+                    };
+
+                    if (user.redirect) {
+                        $http.get('/api/lti/key/' + user.redirect).success(function(data) {
+                            wait(110);
+                        });
+                    } else {
+                        wait(110);
                     }
                 } else {
                     $window.location.href = 'login';
                 }
             };
         }])
-
+    /*
+     * SIGN UP CONTROLLER
+     */
     .controller('SignupCtrl', ['$scope', '$http', '$window',
         function ($scope, $http, $window) {
-
             $scope.repeatedPassword = '';
             $scope.errorResponse = '';
             var showAlert = false;
+
             $scope.signup = function () {
                 showAlert = true;
                 if ($scope.isValidPassword() && !$scope.isEmpty($scope.user.username) && !$scope.isEmpty($scope.user.email)) {
@@ -194,10 +202,31 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                 return showAlert && (!data || data === '');
             };
         }])
-
+    /*
+     * FORGOT PASSWORD CONTROLLER
+     */
+    .controller('ForgotCtrl', ['$scope', '$http', '$window',
+        function ($scope, $http, $window) {
+            $scope.successMsg = "";
+            $scope.errorMsg = "";
+            $scope.sendMail = function () {
+                $http.post('/api/login/forgot/', {email: $scope.email})
+                    .success(function () {
+                        $scope.errorMsg = "";
+                        $scope.successMsg = "Please, check your mail. " +
+                            "We have sent you a email with which you can change your password";
+                    }).error(function (data, status) {
+                        $scope.errorMsg = data.message;
+                        $scope.successMsg = "";
+                        console.error('Status:', status, ', Error on ForgotCtrl, POST /api/login/forgot/'+ '\n', data);
+                });
+            };
+        }])
+    /*
+     * RESET PASSWORD CONTROLLER
+     */
     .controller('ResetCtrl', ['$scope', '$http', '$window',
         function ($scope, $http, $window) {
-
             $scope.resetPassword = function () {
                 $http.post('/api/login/reset/' + $scope.tkn, $scope.password, {})
                     .success(function () {
@@ -207,7 +236,30 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                     });
             };
         }])
-
+    /*
+     * CONTACT CONTROLLER
+     */
+    .controller('ContactCtrl', ['$scope', '$http', '$window',
+        function ($scope, $http, $window) {
+            $scope.successMsg = "";
+            $scope.errorMsg = "";
+            $scope.contactObj = {
+                name: "",
+                email: "",
+                text: ""
+            };
+            $scope.contact = function () {
+                $http.post('/api/contact', $scope.contactObj)
+                    .success(function () {
+                        $scope.errorMsg = "";
+                        $scope.successMsg = "Email sent. We'll read it as soon as possible.";
+                    }).error(function (data, status) {
+                        $scope.errorMsg = data.message;
+                        $scope.successMsg = "";
+                        console.error('Status:', status, ', Error on ContactCtrl, POST /api/contact/'+ '\n', data);
+                });
+            };
+        }])
     .controller('UsersCtrl', ['$scope', '$http', '$window', '$localStorage',
         function ($scope, $http, $window, $localStorage) {
             $scope.$storage = $localStorage;
