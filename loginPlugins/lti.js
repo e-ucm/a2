@@ -62,8 +62,20 @@ function ltiSetup(app) {
         createProvider: function (req, done) {
             // Lookup your LTI customer in your DB with req's params, and get its secret
             // Dummy DB lookup
-            request.get(req.protocol + '://' + req.host + ':' + app.config.port + '/api/proxy/' + req.params.prefixbd +
-                '/lti/key/' + req.body.oauth_consumer_key, function(err, response, body) {
+            var host = req.hostname;
+            if(host.indexOf('localhost') !== -1) {
+                host += ':' + app.config.port;
+            }
+            var launchURL = '';
+            if(process.env.LTI_BACK_HOST && process.env.LTI_BACK_PORT){
+                var launchProtocol =  process.env.LTI_BACK_PROTOCOL ? process.env.LTI_BACK_PROTOCOL : 'http';
+                launchURL = launchProtocol + '://'+ process.env.LTI_BACK_HOST + ':' + process.env.LTI_BACK_PORT +
+                    '/api/lti/key/' + req.body.oauth_consumer_key;
+            } else {
+                launchURL = req.protocol + '://' + host + '/api/proxy/' + req.params.prefixbd +
+                    '/lti/key/' + req.body.oauth_consumer_key;
+            }
+            request.get(launchURL, function(err, response, body) {
                 if (err) {
                     return done(err);
                 }
@@ -73,7 +85,7 @@ function ltiSetup(app) {
                     return done(null, consumer);
                 } else {
                     // String error, will fail the strategy (and not crash it)
-                    return done('not_authorized');
+                    return done('Not Authorized');
                 }
             });
         }
@@ -145,7 +157,10 @@ function ltiSetup(app) {
 
     /**
      * Ensure that the user exists, given a parsed LTI profile.
+     *
      * @param profile
+     * @param db
+     * @param callback
      */
     var userExists = function (profile, db, callback) {
         db.model('user').findOne({email: profile.lis_person_contact_email_primary}, function (err, user) {
@@ -171,7 +186,10 @@ function ltiSetup(app) {
      * a LTI-Authenticated user exists and here to create that user. This avoids finding
      * that a "new" user has an existing username.
      *
+     * @param profile
      * @param db
+     * @param acl
+     * @param callback
      */
     var addNewUser = function (profile, db, acl, callback) {
         var UserModel = db.model('user');
@@ -234,11 +252,9 @@ function ltiSetup(app) {
                 app.passport.authenticate('lti',
                     {session: false}, function (err, user, info) {
                         if (err) {
-                            console.log('ERROR ', err);
                             return done(err);
                         }
                         if (!user) {
-                            console.log('ERROR ', info.message);
                             err = new Error(info.message);
                             err.status = 401;
                             return done(err);
@@ -293,11 +309,10 @@ function ltiSetup(app) {
         }, function (err, results) {
             if (err) {
                 err.status = 400;
-                next(err);
+                return next(err);
             }
 
-            var url = req.protocol + '://' + req.host + ':' + app.config.port + '/api/proxy/' + req.params.prefix + '/loginbyplugin' + results.sendData;
-
+            var url = req.protocol + '://' + req.hostname + '/api/proxy/' + req.params.prefix + '/loginbyplugin' + results.sendData;
             res.redirect(url);
         });
     });

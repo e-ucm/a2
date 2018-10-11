@@ -74,6 +74,8 @@ if (app.get('env') === 'development') {
     app.use(logger('dev'));
 }
 
+app.enable('trust proxy');
+
 // Enable cross-origin resource sharing - CORS http://enable-cors.org/index.html
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
