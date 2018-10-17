@@ -16,7 +16,18 @@
     limitations under the License.
  
 .page-header
-   h1= message
+   h1= error.descriptiveTitle
+   h2= error.message
 #error
-   h2= error.status
-   pre #{error.stack}
+   .panel-group
+      .panel.panel-default
+         .panel-heading
+            h4.panel-title
+               a(data-toggle='collapse', href='#collapse1') More info for the developer
+         #collapse1.panel-collapse.collapse
+            .panel-body
+               h3= error.status
+               h4= error.descriptiveSubtitle
+               h4= 'The URL of the issue is: ' + url
+            .panel-footer
+               pre #{error.stack}

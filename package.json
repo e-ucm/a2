@@ -33,6 +33,7 @@
     "express": "~4.13.x",
     "express-jwt": "*",
     "http-proxy": "*",
+    "http-status": "^1.2.0",
     "jade": "^1.11.x",
     "jsonwebtoken": "^5.4.x",
     "lodash": "*",
