@@ -25,7 +25,8 @@ var express = require('express'),
     mongoose = require('mongoose'),
     passport = require('passport'),
     jwt = require('express-jwt'),
-    TokenStorage = require('./tokenStorage/token-storage');
+    TokenStorage = require('./tokenStorage/token-storage'),
+    status = require('http-status');
 
 var config = require((process.env.NODE_ENV === 'test') ? './config-test' : './config'),
     health = require('./routes/health'),
@@ -159,7 +160,7 @@ app.use(config.apiPath + '/health', health);
 // Catch 404 and forward to error handler
 app.use(function (req, res, next) {
     var err = new Error('Not Found');
-    err.status = 404;
+    err.status = err.status || 404;
     next(err);
 });
 
@@ -167,9 +168,28 @@ app.use(function (req, res, next) {
 // production error handler
 // no stacktraces leaked to user
 app.use(function (err, req, res, next) {
-    res.status(err.status || 500).send({
-        message: err.message
-    });
+
+    err.status = err.status || 500;
+
+    err.descriptiveTitle = status[err.status];
+    err.descriptiveTitle = err.descriptiveTitle || 'An unknown error has occurred';
+    err.descriptiveSubtitle = status[err.status + '_MESSAGE'];
+    err.descriptiveSubtitle = err.descriptiveSubtitle || 'An unexpected condition was encountered and we are now sure what has happened';
+
+    // Respond with html page
+    if (req.accepts('html')) {
+        res.status(err.status).render('error', { error: err, url: req.url });
+        return;
+    }
+
+    // Respond with json
+    if (req.accepts('json')) {
+        res.json({ error: 'Not found' });
+        return;
+    }
+
+    // Default to plain-text. send()
+    res.type('txt').send('Not found');
 });
 
 module.exports = app;
