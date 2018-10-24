@@ -57,7 +57,7 @@ exports = module.exports = function (app, callback) {
             app.config.apiPath + '/roles/:roleName/resources/*/permissions',
             app.config.apiPath + '/roles/:roleName/resources/*/permissions/:permissionName',
             app.config.apiPath + '/roles/:roleName/users',
-            
+
             app.config.apiPath + '/signup/massive'
         ],
         permissions: '*'

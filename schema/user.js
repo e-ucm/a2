@@ -114,7 +114,6 @@ module.exports = function (app, mongoose) {
          *  More info about the options that can be passed here:
          *      https://github.com/saintedlama/passport-local-mongoose#options
          */
-
         usernameLowerCase: true,
         limitAttempts: false,
         maxAttempts: app.config.loginAttempts.failedLoginAttempts

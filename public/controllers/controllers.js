@@ -18,8 +18,7 @@
 'use strict';
 
 /* Controllers */
-
-angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
+angular.module('myAppControllers', ['ngStorage', 'ngFileUpload', 'applicationsExample'])
     .directive('fileReader', function () {
         return {
             scope: {
@@ -45,9 +44,9 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                 });
             }
         };
-    /*
-     * TOOLBAR CONTROLLER
-     */
+        /*
+         * TOOLBAR CONTROLLER
+         */
     }).controller('ToolbarCtrl', ['$scope', '$http', '$window', '$timeout', '$localStorage',
         function ($scope, $http, $window, $timeout, $localStorage) {
             $scope.$storage = $localStorage;
@@ -154,7 +153,7 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                         $scope.$storage.user._id = $scope.$storage.user.id;
                     }
 
-                    var wait = function(time){
+                    var wait = function(time) {
                         $timeout(function () {
                             $window.location.href = '/';
                         }, time);
@@ -207,19 +206,19 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
      */
     .controller('ForgotCtrl', ['$scope', '$http', '$window',
         function ($scope, $http, $window) {
-            $scope.successMsg = "";
-            $scope.errorMsg = "";
+            $scope.successMsg = '';
+            $scope.errorMsg = '';
             $scope.sendMail = function () {
                 $http.post('/api/login/forgot/', {email: $scope.email})
                     .success(function () {
-                        $scope.errorMsg = "";
-                        $scope.successMsg = "Please, check your mail. " +
-                            "We have sent you a email with which you can change your password";
+                        $scope.errorMsg = '';
+                        $scope.successMsg = 'Please, check your mail. ' +
+                            'We have sent you a email with which you can change your password';
                     }).error(function (data, status) {
                         $scope.errorMsg = data.message;
-                        $scope.successMsg = "";
-                        console.error('Status:', status, ', Error on ForgotCtrl, POST /api/login/forgot/'+ '\n', data);
-                });
+                        $scope.successMsg = '';
+                        console.error('Status:', status, ', Error on ForgotCtrl, POST /api/login/forgot/' + '\n', data);
+                    });
             };
         }])
     /*
@@ -241,28 +240,40 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
      */
     .controller('ContactCtrl', ['$scope', '$http', '$window',
         function ($scope, $http, $window) {
-            $scope.successMsg = "";
-            $scope.errorMsg = "";
+            $scope.successMsg = '';
+            $scope.errorMsg = '';
             $scope.contactObj = {
-                name: "",
-                email: "",
-                text: ""
+                name: '',
+                email: '',
+                text: ''
             };
             $scope.contact = function () {
                 $http.post('/api/contact', $scope.contactObj)
                     .success(function () {
-                        $scope.errorMsg = "";
-                        $scope.successMsg = "Email sent. We'll read it as soon as possible.";
+                        $scope.errorMsg = '';
+                        $scope.successMsg = 'Email sent. We\'ll read it as soon as possible.';
+                        $scope.contactObj = {
+                            name: '',
+                            email: '',
+                            text: ''
+                        };
                     }).error(function (data, status) {
                         $scope.errorMsg = data.message;
-                        $scope.successMsg = "";
-                        console.error('Status:', status, ', Error on ContactCtrl, POST /api/contact/'+ '\n', data);
-                });
+                        $scope.successMsg = '';
+                        console.error('Status:', status, ', Error on ContactCtrl, POST /api/contact/' + '\n', data);
+                    });
             };
         }])
+    /*
+     * USERS CONTROLLER
+     */
     .controller('UsersCtrl', ['$scope', '$http', '$window', '$localStorage',
         function ($scope, $http, $window, $localStorage) {
             $scope.$storage = $localStorage;
+
+            /*
+                Return the users by pages
+             */
             var pages;
             var lastPage;
             var getUsers = function (page) {
@@ -293,6 +304,9 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
 
             getUsers(1);
 
+            /*
+                Function to upload a group of users by upload CSV file
+            */
             $scope.addedFileError = [];
             $scope.addedFileMsn = '';
             $scope.uploadCSV = function () {
@@ -318,13 +332,18 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                 }
             };
         }])
-    .controller('ApplicationsCtrl', ['$scope', '$http', '$window', '$localStorage',
-        function ($scope, $http, $window, $localStorage) {
+    /*
+     * APPLICATIONS CONTROLLER
+     */
+    .controller('ApplicationsCtrl', ['$scope', '$http', '$window', '$localStorage', 'applicationsExample',
+        function ($scope, $http, $window, $localStorage, applicationsExample) {
             $scope.$storage = $localStorage;
-
             $scope.proxyRoute = $window.location.host + '/api/proxy/';
-            var refresh = function () {
 
+            /*
+                Load de application list in the $scope.response var
+             */
+            var refresh = function () {
                 $http.get('/api/applications', {
                     headers: {
                         Authorization: 'Bearer ' + $scope.$storage.user.token
@@ -349,18 +368,28 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                 route: ''
             }];
 
+            /*
+                If the last resource and permission in the received object are not empty, add a empty new one.
+             */
             $scope.addResourceInput = function (applicationRole) {
                 if (applicationRole.allows[applicationRole.allows.length - 1].resourceName !== '') {
                     applicationRole.allows.push({resourceName: '', permissionName: ''});
                 }
             };
 
+            /*
+                If the last object in anonymousRoutes array is not empty, add new object to the array with
+                an empty route to fill it
+             */
             $scope.addAnonymousRouteInput = function () {
                 if ($scope.anonymousRoutes[$scope.anonymousRoutes.length - 1].route !== '') {
                     $scope.anonymousRoutes.push({route: ''});
                 }
             };
 
+            /*
+                If the last object resource in applicationRoles array is not empty, add new object to the array
+             */
             $scope.addRoleInput = function () {
                 if ($scope.applicationRoles[$scope.applicationRoles.length - 1].roles !== '') {
                     $scope.applicationRoles.push({
@@ -372,8 +401,10 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                 }
             };
 
+            /*
+                Modify application config (name, host, routes...)
+             */
             $scope.applyChanges = function (application) {
-
                 $http.put('/api/applications/' + application._id, {
                     prefix: application.prefix,
                     host: application.host,
@@ -390,13 +421,17 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                 });
             };
 
+            /*
+                Add new application with not empty routes, resources and permissions.
+             */
             $scope.addApplication = function () {
-
                 var applicationData = {
                     name: $scope.name,
                     prefix: $scope.prefix,
                     host: $scope.host
                 };
+
+                // Check and discard empty data
                 if ($scope.applicationRoles[0].roles !== '') {
                     applicationData.roles = [];
                     var i = 0;
@@ -422,11 +457,14 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                         applicationData.anonymous.push(field.route);
                     });
                 }
+
+                // Add the application
                 $http.post('/api/applications/', applicationData, {
                     headers: {
                         Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
+                    // Clean form
                     $scope.applicationRoles = [{roles: '', allows: [{resourceName: '', permissionName: ['']}]}];
                     $scope.anonymousRoutes = [{route: ''}];
                     $scope.name = '';
@@ -438,142 +476,29 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                 });
             };
 
+            /*
+                Remove the application with the id "appId"
+             */
             $scope.deleteApplication = function (appId) {
                 $http.delete('/api/applications/' + appId, {
                     headers: {
                         Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
                 }).success(function () {
+                    // Updated the application list to show it
                     refresh();
                 }).error(function (data, status) {
                     console.error('Status:', status, ', Error on ApplicationsCtrl, DEL /api/applications/' + appId + '\n', data);
                 });
             };
-
-            $scope.emotionsApplication = {
-                name: 'emotions',
-                prefix: 'emotions',
-                host: 'http://localhost:3232/api',
-                anonymous: [
-                    '/emotions'
-                ]
-            };
-
-            $scope.gleanerApplication = {
-                name: 'gleaner',
-                prefix: 'gleaner',
-                host: 'http://localhost:3300/api',
-                roles: [
-                    {
-                        roles: 'student',
-                        allows: [
-                            {
-                                resources: [
-                                    '/games/public',
-                                    '/games/:gameId/versions',
-                                    '/games/:gameId/versions/:versionId',
-                                    '/games/:gameId/versions/:versionId/sessions/my',
-                                    '/sessions/:sessionId/results'
-                                ],
-                                permissions: [
-                                    'get'
-                                ]
-                            },
-                            {
-                                resources: [
-                                    '/sessions/:sessionId'
-                                ],
-                                permissions: [
-                                    'put',
-                                    'get'
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        roles: 'teacher',
-                        allows: [
-                            {
-                                resources: [
-                                    '/games/public',
-                                    '/games/:gameId/versions',
-                                    '/games/:gameId/versions/:versionId',
-                                    '/games/:gameId/versions/:versionId/sessions/my',
-                                    '/sessions/:sessionId/results'
-
-                                ],
-                                permissions: [
-                                    'get'
-                                ]
-                            },
-                            {
-                                resources: [
-                                    '/sessions/:sessionId',
-                                    '/sessions/:sessionId/remove',
-                                    '/sessions/:sessionId/results/:resultsId'
-                                ],
-                                permissions: [
-                                    '*'
-                                ]
-                            },
-                            {
-                                resources: [
-                                    '/games/:gameId/versions/:versionId/sessions',
-                                    '/sessions/:sessionId/event/:event'
-                                ],
-                                permissions: [
-                                    'post'
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        roles: 'developer',
-                        allows: [
-                            {
-                                resources: [
-                                    '/games/my',
-                                    '/games/:gameId',
-                                    '/games/:gameId/versions',
-                                    '/games/:gameId/versions/:versionId'
-                                ],
-                                permissions: [
-                                    '*'
-                                ]
-                            },
-                            {
-                                resources: [
-                                    '/games/:gameId/versions/:versionId/sessions',
-                                    '/sessions/:sessionId'
-                                ],
-                                permissions: [
-                                    'get'
-                                ]
-                            },
-                            {
-                                resources: [
-                                    '/games'
-                                ],
-                                permissions: [
-                                    'post'
-                                ]
-                            }
-                        ]
-                    }
-                ],
-                anonymous: [
-                    '/collector/start/:trackingCode',
-                    '/collector/track'
-                ],
-                autoroles: [
-                    'student',
-                    'teacher',
-                    'developer'
-                ]
-            };
-
+            
+            $scope.emotionsApplication = applicationsExample.emotionsApplication;
+            $scope.gleanerApplication = applicationsExample.gleanerApplication;
             $scope.applicationString = JSON.stringify($scope.gleanerApplication, null, 4);
-
+            /*
+                Add the application that are inside the var "applicationString".
+                "applicationString" can be modified in the view (text-area.jade)
+             */
             $scope.addScriptApplication = function () {
                 var data = JSON.parse($scope.applicationString);
                 $http.post('/api/applications', data, {
@@ -592,15 +517,19 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
             };
 
         }])
-
+    /*
+     * ROLES CONTROLLER
+     */
     .controller('RolesCtrl', ['$scope', '$http', '$location', '$localStorage',
         function ($scope, $http, $location, $localStorage) {
             $scope.$storage = $localStorage;
-
             $scope.newPer = {};
             $scope.newRec = {};
             $scope.newRecPer = {};
 
+            /*
+                Get the roles list to show it into a view
+             */
             var getRoles = function () {
                 $http.get('/api/roles', {
                     headers: {
@@ -628,10 +557,13 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                 });
             };
 
-            $scope.newRoleModel = [{resourceName: '', permissionName: ['']}];
-
             getRoles();
 
+            $scope.newRoleModel = [{resourceName: '', permissionName: ['']}];
+
+            /*
+                Create new input to add new resources into a role
+             */
             $scope.addResourceInput = function () {
                 if ($scope.newRoleModel[$scope.newRoleModel.length - 1].resourceName !== '') {
                     $scope.newRoleModel.push({resourceName: '', permissionName: ['']});
@@ -754,11 +686,14 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                 return rolName.toLowerCase() === 'admin';
             };
         }])
-
+    /*
+     * PROFILE CONTROLLER
+     */
     .controller('ProfileCtrl', ['$scope', '$http', '$localStorage',
         function ($scope, $http, $localStorage) {
             $scope.$storage = $localStorage;
 
+            // Load user account info and roles
             var refresh = function () {
                 $http.get('/api/users/' + $scope.uId, {
                     headers: {
@@ -872,6 +807,7 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload'])
                 });
             };
 
+            // Clear view passwords fields
             var resetPasswordForm = function() {
                 $scope.pass.old = '';
                 $scope.pass.new = '';

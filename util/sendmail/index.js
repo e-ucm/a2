@@ -95,8 +95,8 @@ exports = module.exports = function (req, res, options) {
                 attachment: attachments
             }, function (err, message) {
                 if (err) {
-                    err.message = 'There are some problems with the server, we can\'t send the email.'+
-                        '\n'+'Error code: '+err.code;
+                    err.message = 'There are some problems with the server, we can\'t send the email.' +
+                        '\n' + 'Error code: ' + err.code;
                     options.error(err);
                 } else {
                     options.success(message);

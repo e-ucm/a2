@@ -54,7 +54,7 @@ describe('User  model validations', function () {
     // to specify when our test is completed, and that's what makes easy
     // to perform async test!
 
-    it('should return a new instance when create succeeds', function (done) {
+    it('should return a new instance when create success', function (done) {
         User.register(new User({
             username: 'username',
             email: 'usermail@mail.com'

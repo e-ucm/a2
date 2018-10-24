@@ -31,6 +31,15 @@ var storage = multer.diskStorage({
 
 var decode = multer({storage: storage}).single('csv');
 
+/**
+ * Add a list of users. The function receives an users object array to register all of them.
+ * Return an error with the list of users that could not be registered.
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @param users
+ */
 var addUsersArray = function (req, res, next, users) {
     var usersError = [];
     async.each(users.users, function (userObject, callback) {
@@ -67,6 +76,14 @@ var addUsersArray = function (req, res, next, users) {
     });
 };
 
+/**
+ * Check if a specific role exist.
+ *
+ * @param req
+ * @param role
+ * @param prefix
+ * @param callback
+ */
 var checkRole = function(req, role, prefix, callback) {
     req.app.acl.existsRole(role, function (err) {
         if (err) {
@@ -78,6 +95,14 @@ var checkRole = function(req, role, prefix, callback) {
     });
 };
 
+/**
+ * Check if a list of roles exist
+ *
+ * @param req
+ * @param role
+ * @param prefix
+ * @param callback
+ */
 var checkRoles = function (req, roles, prefix, callback) {
     var i ;
     for (i = 0; i < roles.length; ++i) {
@@ -91,6 +116,14 @@ var checkRoles = function (req, roles, prefix, callback) {
     }
 };
 
+/**
+ * Check if a user is valid for registered it.
+ *
+ * @param req
+ * @param userObject
+ * @param forcePass if false and the user doesn't has a password, it is generated as random string
+ * @param done
+ */
 var validateUser = function (req, userObject, forcePass, done) {
     var err;
     if (!userObject.username) {
@@ -163,6 +196,14 @@ var validateUser = function (req, userObject, forcePass, done) {
     }
 };
 
+/**
+ * Check the user by a schema and register it.
+ *
+ * @param req
+ * @param res
+ * @param userObject
+ * @param done
+ */
 var registerUser = function (req, res, userObject, done) {
     var UserModel = req.app.db.model('user');
     UserModel.register(new UserModel({
@@ -203,6 +244,15 @@ var registerUser = function (req, res, userObject, done) {
     });
 };
 
+/**
+ * Transform a list of users in csv format to a JSON format to register them.
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @param path The directory of the CSV to transform itc in JSON.
+ * @param callback
+ */
 var parseUsersCSV = function (req, res, next, path, callback) {
     fs.readFile(path, 'utf8', function (err, csv) {
         if (err) {
