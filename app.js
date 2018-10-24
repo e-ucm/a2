@@ -184,12 +184,12 @@ app.use(function (err, req, res, next) {
 
     // Respond with json
     if (req.accepts('json')) {
-        res.json({ error: 'Not found' });
+        res.status(err.status).json(err);
         return;
     }
 
     // Default to plain-text. send()
-    res.type('txt').send('Not found');
+    res.type('txt').status(err.status).send(err.toString());
 });
 
 module.exports = app;

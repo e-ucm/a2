@@ -103,7 +103,6 @@ module.exports = function (jwtMiddleware) {
                     }
                 }
             }
-
             req.app.acl.isAllowed(userId, resource, action, function (err, allowed) {
                 if (err) {
                     return next(err);
