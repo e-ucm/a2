@@ -3,7 +3,7 @@
 var apps = angular.module('applicationsExample', []);
 
 apps.constant('applicationsExample', {
-    emotionsApplication : {
+    emotionsApplication: {
         name: 'emotions',
         prefix: 'emotions',
         host: 'http://localhost:3232/api',

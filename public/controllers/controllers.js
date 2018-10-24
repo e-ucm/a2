@@ -491,7 +491,7 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload', 'applicationsEx
                     console.error('Status:', status, ', Error on ApplicationsCtrl, DEL /api/applications/' + appId + '\n', data);
                 });
             };
-            
+
             $scope.emotionsApplication = applicationsExample.emotionsApplication;
             $scope.gleanerApplication = applicationsExample.gleanerApplication;
             $scope.applicationString = JSON.stringify($scope.gleanerApplication, null, 4);
