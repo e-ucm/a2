@@ -19,75 +19,88 @@
 
 /* Controllers */
 angular.module('myAppControllers', ['ngStorage', 'ngFileUpload', 'applicationsExample'])
-    .directive('fileReader', function () {
-        return {
-            scope: {
-                fileReader: '='
-            },
-            link: function (scope, element) {
-                $(element).on('change', function (changeEvent) {
-                    var files = changeEvent.target.files;
-                    if (files.length) {
-                        var reader = new FileReader();
-                        reader.onload = function (e) {
-                            var contents = e.target.result;
-                            scope.$apply(function () {
-                                scope.fileReader = {
-                                    contents: contents,
-                                    name: files[0].name
-                                };
-                            });
-                        };
-
-                        reader.readAsText(files[0]);
-                    }
-                });
-            }
-        };
-        /*
-         * TOOLBAR CONTROLLER
-         */
-    }).controller('ToolbarCtrl', ['$scope', '$http', '$window', '$timeout', '$localStorage',
-        function ($scope, $http, $window, $timeout, $localStorage) {
-            $scope.$storage = $localStorage;
-
-            $scope.isAdmin = function () {
-                return $scope.isUser() &&
-                    $scope.$storage.user.roles && $scope.$storage.user.roles.indexOf('admin') !== -1;
+    .factory('httpRequestInterceptor', [
+        function () {
+            return {
+                request: function (config) {
+                    config.headers.Accept = 'application/json';
+                    return config;
+                }
             };
+        }
+    ]).config(['$httpProvider',
+        function ($httpProvider) {
+            $httpProvider.interceptors.push('httpRequestInterceptor');
+        }
+    ]).directive('fileReader', function () {
+    return {
+        scope: {
+            fileReader: '='
+        },
+        link: function (scope, element) {
+            $(element).on('change', function (changeEvent) {
+                var files = changeEvent.target.files;
+                if (files.length) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var contents = e.target.result;
+                        scope.$apply(function () {
+                            scope.fileReader = {
+                                contents: contents,
+                                name: files[0].name
+                            };
+                        });
+                    };
 
-            $scope.isUser = function () {
-                return $scope.$storage && $scope.$storage.user;
-            };
-
-            $scope.seeProfile = function () {
-                $scope.href('/users/' + $scope.$storage.user._id);
-            };
-
-            $scope.href = function (href) {
-                $window.location.href = href;
-            };
-
-            $scope.logout = function () {
-                $http.delete('/api/logout', {
-                    headers: {
-                        Authorization: 'Bearer ' + $scope.$storage.user.token
-                    }
-                }).success(function () {
-                    delete $scope.$storage.user;
-                    $timeout(function () {
-                        $scope.href('/login');
-                    }, 110);
-                }).error(function (data, status) {
-                    delete $scope.$storage.user;
-                    console.error('Status:', status, ', Error on ToolbarCtrl, GET /api/logout \n', data);
-                });
-            };
-
-        }])
+                    reader.readAsText(files[0]);
+                }
+            });
+        }
+    };
     /*
-     * LOGIN CONTROLLER
+     * TOOLBAR CONTROLLER
      */
+}).controller('ToolbarCtrl', ['$scope', '$http', '$window', '$timeout', '$localStorage',
+    function ($scope, $http, $window, $timeout, $localStorage) {
+        $scope.$storage = $localStorage;
+
+        $scope.isAdmin = function () {
+            return $scope.isUser() &&
+                $scope.$storage.user.roles && $scope.$storage.user.roles.indexOf('admin') !== -1;
+        };
+
+        $scope.isUser = function () {
+            return $scope.$storage && $scope.$storage.user;
+        };
+
+        $scope.seeProfile = function () {
+            $scope.href('/users/' + $scope.$storage.user._id);
+        };
+
+        $scope.href = function (href) {
+            $window.location.href = href;
+        };
+
+        $scope.logout = function () {
+            $http.delete('/api/logout', {
+                headers: {
+                    Authorization: 'Bearer ' + $scope.$storage.user.token
+                }
+            }).success(function () {
+                delete $scope.$storage.user;
+                $timeout(function () {
+                    $scope.href('/login');
+                }, 110);
+            }).error(function (data, status) {
+                delete $scope.$storage.user;
+                console.error('Status:', status, ', Error on ToolbarCtrl, GET /api/logout \n', data);
+            });
+        };
+
+    }])
+/*
+ * LOGIN CONTROLLER
+ */
     .controller('LoginCtrl', ['$scope', '$http', '$window', '$location', '$timeout', '$localStorage',
         function ($scope, $http, $window, $location, $timeout, $localStorage) {
             $scope.$storage = $localStorage;
@@ -130,12 +143,12 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload', 'applicationsEx
 
             $scope.loginBeaconing = function () {
                 var location = '/api/login/beaconing?callback=' + encodeURIComponent(
-                        $window.location.origin + $window.location.pathname + 'byplugin');
+                    $window.location.origin + $window.location.pathname + 'byplugin');
 
                 $window.location.href = location;
             };
 
-            $scope.hasBeaconing = function() {
+            $scope.hasBeaconing = function () {
                 return $scope.beaconing ? true : false;
             };
         }])
@@ -153,14 +166,14 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload', 'applicationsEx
                         $scope.$storage.user._id = $scope.$storage.user.id;
                     }
 
-                    var wait = function(time) {
+                    var wait = function (time) {
                         $timeout(function () {
                             $window.location.href = '/';
                         }, time);
                     };
 
                     if (user.redirect) {
-                        $http.get('/api/lti/key/' + user.redirect).success(function(data) {
+                        $http.get('/api/lti/key/' + user.redirect).success(function (data) {
                             wait(110);
                         });
                     } else {
@@ -215,10 +228,10 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload', 'applicationsEx
                         $scope.successMsg = 'Please, check your mail. ' +
                             'We have sent you a email with which you can change your password';
                     }).error(function (data, status) {
-                        $scope.errorMsg = data.message;
-                        $scope.successMsg = '';
-                        console.error('Status:', status, ', Error on ForgotCtrl, POST /api/login/forgot/' + '\n', data);
-                    });
+                    $scope.errorMsg = data.message;
+                    $scope.successMsg = '';
+                    console.error('Status:', status, ', Error on ForgotCtrl, POST /api/login/forgot/' + '\n', data);
+                });
             };
         }])
     /*
@@ -231,8 +244,8 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload', 'applicationsEx
                     .success(function () {
                         $window.location.href = '/login';
                     }).error(function (data, status) {
-                        console.error('Status:', status, ', Error on ResetCtrl, POST /api/reset/' + $scope.tkn + '\n', data);
-                    });
+                    console.error('Status:', status, ', Error on ResetCtrl, POST /api/reset/' + $scope.tkn + '\n', data);
+                });
             };
         }])
     /*
@@ -258,10 +271,10 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload', 'applicationsEx
                             text: ''
                         };
                     }).error(function (data, status) {
-                        $scope.errorMsg = data.message;
-                        $scope.successMsg = '';
-                        console.error('Status:', status, ', Error on ContactCtrl, POST /api/contact/' + '\n', data);
-                    });
+                    $scope.errorMsg = data.message;
+                    $scope.successMsg = '';
+                    console.error('Status:', status, ', Error on ContactCtrl, POST /api/contact/' + '\n', data);
+                });
             };
         }])
     /*
@@ -318,16 +331,17 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload', 'applicationsEx
                             'Content-Type': undefined,
                             enctype: 'multipart/form-data',
                             Authorization: 'Bearer ' + $scope.$storage.user.token
-                        }}).success(function (data) {
-                            $scope.addedFileMsn = data.msn;
-                            if (data.errorCount > 0) {
-                                $scope.addedFileError = data.errors;
-                            } else {
-                                $scope.addedFileError = [];
-                            }
-                            getUsers(lastPage);
-                        }).error(function (data, status) {
-                        console.error('Error on post /api/signup/massive' +  JSON.stringify(data) + ', status: ' + status);
+                        }
+                    }).success(function (data) {
+                        $scope.addedFileMsn = data.msn;
+                        if (data.errorCount > 0) {
+                            $scope.addedFileError = data.errors;
+                        } else {
+                            $scope.addedFileError = [];
+                        }
+                        getUsers(lastPage);
+                    }).error(function (data, status) {
+                        console.error('Error on post /api/signup/massive' + JSON.stringify(data) + ', status: ' + status);
                     });
                 }
             };
@@ -405,12 +419,16 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload', 'applicationsEx
                 Modify application config (name, host, routes...)
              */
             $scope.applyChanges = function (application) {
-                $http.put('/api/applications/' + application._id, {
+                var returnApp =  {
                     prefix: application.prefix,
-                    host: application.host,
-                    name: application.name,
-                    anonymous: [application.anonymousRoute]
-                }, {
+                        host: application.host,
+                    name: application.name
+                };
+
+                if(application.anonymousRoute) {
+                    returnApp.anonymous = [application.anonymousRoute];
+                }
+                $http.put('/api/applications/' + application._id, returnApp, {
                     headers: {
                         Authorization: 'Bearer ' + $scope.$storage.user.token
                     }
@@ -808,7 +826,7 @@ angular.module('myAppControllers', ['ngStorage', 'ngFileUpload', 'applicationsEx
             };
 
             // Clear view passwords fields
-            var resetPasswordForm = function() {
+            var resetPasswordForm = function () {
                 $scope.pass.old = '';
                 $scope.pass.new = '';
                 $scope.pass.repeat = '';
