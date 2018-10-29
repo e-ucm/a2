@@ -60,7 +60,7 @@ router.post('/', function (req, res, next) {
             return next(err);
         }
         if (!user) {
-            err = new Error(info.message);
+            err = info;
             err.status = 401;
             return next(err);
         }
