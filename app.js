@@ -169,27 +169,29 @@ app.use(function (req, res, next) {
 // no stacktraces leaked to user
 app.use(function (err, req, res, next) {
 
-    err.status = err.status || 500;
+    var retErr = {};
+    retErr.message = err.message || err.toString();
+    retErr.status = err.status || 500;
 
-    err.descriptiveTitle = status[err.status];
-    err.descriptiveTitle = err.descriptiveTitle || 'An unknown error has occurred';
-    err.descriptiveSubtitle = status[err.status + '_MESSAGE'];
-    err.descriptiveSubtitle = err.descriptiveSubtitle || 'An unexpected condition was encountered and we are now sure what has happened';
+    retErr.descriptiveTitle = status[err.status];
+    retErr.descriptiveTitle = err.descriptiveTitle || 'An unknown error has occurred';
+    retErr.descriptiveSubtitle = status[err.status + '_MESSAGE'];
+    retErr.descriptiveSubtitle = err.descriptiveSubtitle || 'An unexpected condition was encountered and we are now sure what has happened';
 
     // Respond with html page
     if (req.accepts('html')) {
-        res.status(err.status).render('error', { error: err, url: req.url });
+        res.status(err.status).render('error', { error: retErr, url: req.url });
         return;
     }
 
     // Respond with json
     if (req.accepts('json')) {
-        res.status(err.status).json(err);
+        res.status(err.status).json(retErr);
         return;
     }
 
     // Default to plain-text. send()
-    res.type('txt').status(err.status).send(err.toString());
+    res.type('txt').status(err.status).send(retErr.toString());
 });
 
 module.exports = app;
