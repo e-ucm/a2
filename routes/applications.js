@@ -66,8 +66,12 @@ var appSchema = {
             items: {type: 'string'}
         },
         anonymous: {
-            type: 'array',
-            items: {type: 'string'}
+            anyOf: [{
+                type: 'array',
+                items: {type: 'string'}
+            }, {
+                type: 'string'
+            }]
         },
         look: {
             type: 'array',
