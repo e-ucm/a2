@@ -81,24 +81,24 @@ describe('REST API', function () {
         done();
     });
 
-    var get = function (url, token, exprectedCode, callback) {
-        request.get(url).set('Authorization', 'Bearer ' + token).expect(exprectedCode).end(callback);
+    var get = function (url, token, expectedCode, callback) {
+        request.get(url).set('Authorization', 'Bearer ' + token).expect(expectedCode).end(callback);
     };
 
-    var post = function (url, data, exprectedCode, callback) {
-        request.post(url).send(data).expect(exprectedCode).end(callback);
+    var post = function (url, data, expectedCode, callback) {
+        request.post(url).send(data).expect(expectedCode).end(callback);
     };
 
-    var authPost = function (url, token, data, exprectedCode, callback) {
-        request.post(url).set('Authorization', 'Bearer ' + token).send(data).expect(exprectedCode).end(callback);
+    var authPost = function (url, token, data, expectedCode, callback) {
+        request.post(url).set('Authorization', 'Bearer ' + token).send(data).expect(expectedCode).end(callback);
     };
 
-    var authPut = function (url, token, data, exprectedCode, callback) {
-        request.put(url).set('Authorization', 'Bearer ' + token).send(data).expect(exprectedCode).end(callback);
+    var authPut = function (url, token, data, expectedCode, callback) {
+        request.put(url).set('Authorization', 'Bearer ' + token).send(data).expect(expectedCode).end(callback);
     };
 
-    var del = function (url, token, exprectedCode, callback) {
-        request.delete(url).set('Authorization', 'Bearer ' + token).expect(exprectedCode).end(callback);
+    var del = function (url, token, expectedCode, callback) {
+        request.delete(url).set('Authorization', 'Bearer ' + token).expect(expectedCode).end(callback);
     };
 
     var validateUser = function (user) {
@@ -420,7 +420,6 @@ describe('REST API', function () {
 
                     app.acl.addUserRoles(user.username, 'gleanerUser', function (err) {
                         should.not.exist(err);
-
                         var usernameFromPrefixUpperCase = 'TEST223';
                         var mail = usernameFromPrefixUpperCase + '@email.com';
                         post(signupRoute, {
@@ -586,7 +585,6 @@ describe('REST API', function () {
                 prefix: gleanerPrefix,
                 role: [role, secondRole]
             }, SUCCESS, function (err, res) {
-                console.log(res.text);
                 should.not.exist(err);
                 app.acl.hasRole(user + '3', role, function (err, hasRole) {
                     should.not.exist(err);
@@ -1458,17 +1456,19 @@ describe('REST API', function () {
                 email: 'testUser1Pw@comp.ink'
             }, SUCCESS, function (err, res) {
                 should.not.exist(err);
-                var result = JSON.parse(res.text);
+                setTimeout(function() {
+                    var result = JSON.parse(res.text);
 
-                post(loginRoute, {
-                    username: 'testUser1',
-                    password: 'testUser1Pw'
-                }, SUCCESS, function (err, res) {
-                    res = JSON.parse(res.text);
-                    var testUserToken = res.user.token;
-                    del(usersRoute + '/' + result.user._id, testUserToken, SUCCESS,
-                        validateDeletedUser(result.user.username, done));
-                });
+                    post(loginRoute, {
+                        username: 'testUser1',
+                        password: 'testUser1Pw'
+                    }, SUCCESS, function (err, res) {
+                        res = JSON.parse(res.text);
+                        var testUserToken = res.user.token;
+                        del(usersRoute + '/' + result.user._id, testUserToken, SUCCESS,
+                            validateDeletedUser(result.user.username, done));
+                    });
+                }, 500);
             });
         });
     });

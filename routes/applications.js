@@ -25,6 +25,119 @@ var express = require('express'),
     unselectedFields = '-__v',
     removeFields = ['__v'];
 
+var Validator = require('jsonschema').Validator,
+    v = new Validator();
+
+var appSchema = {
+    id: '/AppSchema',
+    type: 'object',
+    properties: {
+        _id: {type: 'string'},
+        name: { type: 'string'},
+        prefix: { type: 'string'},
+        host: { type: 'string'},
+        owner: { type: 'string'},
+        roles:  {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    roles: {
+                        anyOf: [{
+                            type: 'array',
+                            items: {type: 'string'}
+                        },{
+                            type: 'string'
+                        }]
+                    },
+                    allows: {
+                        type: 'array',
+                        items: {$ref: '/AllowsSchema'}
+                    }
+                }
+            }
+        },
+        autoroles: {
+            type: 'array',
+            items: {type: 'string'}
+        },
+        routes: {
+            type: 'array',
+            items: {type: 'string'}
+        },
+        anonymous: {
+            anyOf: [{
+                type: 'array',
+                items: {type: 'string'}
+            }, {
+                type: 'string'
+            }]
+        },
+        look: {
+            type: 'array',
+            items: {$ref: '/LookSchema'}
+        }
+    },
+    additionalProperties: false
+};
+
+var allowsSchema = {
+    id: '/AllowsSchema',
+    type: 'object',
+    properties: {
+        resources: {
+            type: 'array',
+            items: {type: 'string'}
+        },
+        permissions: {
+            type: 'array',
+            items: {type: 'string'}
+        }
+    }
+};
+
+var lookSchema = {
+    id: '/LookSchema',
+    type: 'object',
+    properties: {
+        url: { type: 'string'},
+        key: { type: 'string'},
+        methods: {
+            type: 'array',
+            items: {type: 'string'}
+        },
+        permissions: {type: 'object'}
+    },
+    additionalProperties: false
+};
+
+var putLookSchema = {
+    id: '/PutLookSchema',
+    type: 'object',
+    properties: {
+        key: {type: 'string'},
+        users: {
+            type: 'array',
+            items: {type: 'string'}
+        },
+        resources: {
+            type: 'array',
+            items: {type: 'string'}
+        },
+        methods: {
+            type: 'array',
+            items: {type: 'string'}
+        },
+        url: {type: 'string'}
+    },
+    additionalProperties: false
+};
+
+v.addSchema(allowsSchema, '/AllowsSchema');
+v.addSchema(lookSchema, '/LookSchema');
+v.addSchema(appSchema, '/AppSchema');
+v.addSchema(putLookSchema, '/PutLookSchema');
+
 /**
  * @api {get} /applications Returns all the registered applications.
  * @apiName GetApplications
@@ -37,6 +150,14 @@ var express = require('express'),
  * @apiParam {Number} [page=1]
  *
  * @apiPermission admin
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "fields": "_id name prefix host anonymous timeCreated",
+ *          "sort": "-name",
+ *          "limit": 20,
+ *          "page": 1
+ *      }
  *
  * @apiParamExample {json} Request-Example:
  *      {
@@ -57,8 +178,37 @@ var express = require('express'),
  *              "name": "Gleaner App.",
  *              "prefix": "gleaner",
  *              "host": "localhost:3300",
- *              "anonymous": [],
- *              "timeCreated": "2015-07-06T09:03:52.636Z"
+ *              "owner": "root",
+ *              "autoroles": [
+ *                  "student",
+ *                  "teacher,
+ *                  "developer"
+ *              ],
+ *              "timeCreated": "2015-07-06T09:03:52.636Z",
+ *              "routes": [
+ *                  "gleaner/games",
+ *                  "gleaner/activities",
+ *                  "gleaner/classes"
+ *               ],
+ *               "anonymous": [
+ *                  "/collector",
+ *                  "/env"
+ *               ],
+ *               "look":[
+ *                  {
+ *                      "url": "route/get",
+ *                      "permissions: {
+ *                          "user1: [
+ *                              "dashboard1",
+ *                              "dashboard2"
+ *                          ],
+ *                          "user2: [
+ *                              "dashboard1",
+ *                              "dashboard3"
+ *                          ]
+ *                      }
+ *                  }
+ *               ]
  *          }],
  *          "pages": {
  *              "current": 1,
@@ -97,19 +247,67 @@ router.get('/', authentication.authorized, function (req, res, next) {
 
 /**
  * @api {post} /applications Register a new application, if an application with the same prefix already exists it will be overridden with the new values.
- * @apiName postApplications
+ * @apiName PostApplications
  * @apiGroup Applications
  *
  * @apiParam {String} prefix Application prefix.
  * @apiParam {String} host Application host.
- * @apiParam {String[]} anonymous Express-like routes for whom unidentified (anonymous) requests will be forwarded anyway.
+ * @apiParam {String[]} [anonymous Express-like] routes for whom unidentified (anonymous) requests will be forwarded anyway.
+ * @apiParam {String[]} [autoroles] Roles that the application use.
+ * @apiParam {Object[]} [look] Allow access to routes for specific users. Key field identify specific field that the algorithm need look to
+ *                      allow the access. In the next example, the user1 can use the route POST "rout/get" to see results if the req.body
+ *                      contains the value "dashboard1" in "docs._id" field.
+ *                      "look":[{"url": "route/get",
+ *                              "permissions: { "user1: ["dashboard1"] },
+ *                              "key": "docs._id",
+ *                              "_id": "59ce615e3ef2df4d94f734fc",
+ *                              "methods": ["post"]}]
+ * @apiParam {String[]} [routes] All the applications routes that are not anonymous
+ * @apiParam {String} [owner] The (user) owner of the application
  *
  * @apiPermission admin
  *
  * @apiParamExample {json} Request-Example:
  *      {
+ *          "name": "Gleaner",
  *          "prefix" : "gleaner",
- *          "host" : "localhost:3300"
+ *          "host" : "localhost:3300",
+ *          "autoroles": [
+ *              "student",
+ *              "teacher,
+ *              "developer"
+ *          ],
+ *          "look":[
+ *              {
+ *                  "url": "route/get",
+ *                  "permissions: {
+ *                      "user1: [
+ *                          "dashboard1",
+ *                          "dashboard2"
+ *                       ],
+ *                       "user2: [
+ *                          "dashboard1",
+ *                          "dashboard3"
+ *                       ]
+ *                  },
+ *                  "key": "docs._id",
+ *                  "_id": "59ce615e3ef2df4d94f734fc",
+ *                  "methods": [
+ *                      "post",
+ *                      "put"
+ *                  ]
+ *               }
+ *          ]
+ *          "anonymous": [
+ *              "/collector",
+ *              "/env"
+ *          ],
+ *          "routes": [
+ *              "gleaner/games",
+ *              "gleaner/activities",
+ *              "gleaner/classes"
+ *          ],
+ *          "owner": "root"
  *      }
  *
  * @apiSuccess(200) Success.
@@ -120,7 +318,10 @@ router.get('/', authentication.authorized, function (req, res, next) {
  *          "_id": "559a447831b7acec185bf513",
  *          "prefix": "gleaner",
  *          "host": "localhost:3300",
- *          "anonymous": [],
+ *          "anonymous": [
+ *              "/collector",
+ *              "/env"
+ *           ],
  *          "timeCreated": "2015-07-06T09:03:52.636Z"
  *      }
  *
@@ -141,6 +342,12 @@ router.post('/', authentication.authorized, function (req, res, next) {
 
             if (!req.body.host) {
                 err = new Error('Host required!');
+                return done(err);
+            }
+
+            var validationObj = v.validate(req.body, appSchema);
+            if (validationObj.errors && validationObj.errors.length > 0) {
+                err = new Error('Bad format: ' + validationObj.errors[0]);
                 return done(err);
             }
 
@@ -288,8 +495,10 @@ router.get(applicationIdRoute, authentication.authorized, function (req, res, ne
  * @apiParam {String} name The new name.
  * @apiParam {String} prefix Application prefix.
  * @apiParam {String} host Application host.
- * @apiParam {String[]} anonymous Express-like routes for whom unidentified (anonymous) requests will be forwarded anyway.
+ * @apiParam {String[]} [anonymous] Express-like routes for whom unidentified (anonymous) requests will be forwarded anyway.
  *                                      The routes from this array will be added only if they're not present yet.
+ * @apiParam {Object[]} [look] Allow access to routes for specific users.
+ * @apiParam {String[]} [routes] All the applications routes that are not anonymous
  *
  * @apiPermission admin
  *
@@ -322,6 +531,13 @@ router.put(applicationIdRoute, authentication.authorized, function (req, res, ne
         var err = new Error('You must provide a valid application id');
         err.status = 400;
         return next(err);
+    }
+
+    var validationObj = v.validate(req.body, appSchema);
+    if (validationObj.errors && validationObj.errors.length > 0) {
+        var errVal = new Error('Bad format: ' + validationObj.errors[0]);
+        errVal.status = 400;
+        return next(errVal);
     }
 
     var applicationId = req.params.applicationId || '';
@@ -427,6 +643,11 @@ router.delete(applicationIdRoute, authentication.authorized, function (req, res,
  * @apiGroup Applications
  *
  * @apiParam {String} prefix Application prefix.
+ * @apiParam {String} key Field name to check in the body of the request.
+ * @apiParam {String} user The user that have access to the URL.
+ * @apiParam {String[]} resources The value of the key field that can use the user in the URL route.
+ * @apiParam {String[]} methods URL methods allowed.
+ * @apiParam {String} url
  *
  * @apiPermission admin
  *
@@ -477,6 +698,13 @@ router.put('/look/:prefix', authentication.authorized, function (req, res, next)
     req.app.db.model('application').findByPrefix(req.params.prefix, function (err, results) {
         if (err) {
             return next(err);
+        }
+
+        var validationObj = v.validate(req.body, putLookSchema);
+        if (validationObj.errors && validationObj.errors.length > 0) {
+            var errVal = new Error('Bad format: ' + validationObj.errors[0]);
+            errVal.status = 400;
+            return next(errVal);
         }
 
         var users = [];

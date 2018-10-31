@@ -103,7 +103,6 @@ module.exports = function (jwtMiddleware) {
                     }
                 }
             }
-
             req.app.acl.isAllowed(userId, resource, action, function (err, allowed) {
                 if (err) {
                     return next(err);
@@ -287,13 +286,17 @@ module.exports = function (jwtMiddleware) {
                 }
 
                 var lookup = application.look;
+                var option = {
+                    sensitive: true,
+                    strict: false,
+                    end: true
+                };
+
+                var route = req.params[0];
+
+                // Search the route in the lookup object
+                // (In the positive case, check if the specific user can access to the specific resource)
                 if (lookup) {
-                    var route = req.params[0];
-                    var option = {
-                        sensitive: true,
-                        strict: false,
-                        end: true
-                    };
                     for (var j = 0; j < lookup.length; ++j) {
                         var lookupObject = lookup[j];
                         var url = lookupObject.url;
@@ -302,7 +305,6 @@ module.exports = function (jwtMiddleware) {
                         }
 
                         var urlRegExp = pathToRe(url, [], option);
-
                         var urlMatch = urlRegExp.exec(route);
                         if (urlMatch) {
                             var methods = lookupObject.methods;
@@ -321,14 +323,10 @@ module.exports = function (jwtMiddleware) {
                     }
                 }
 
+                // Search the route in the anonymous object
+                // (In the positive case, the route doesn't has restrictions)
                 var anonymous = application.anonymous;
                 if (anonymous) {
-                    var appRoute = req.params[0];
-                    var options = {
-                        sensitive: true,
-                        strict: false,
-                        end: true
-                    };
                     var jwtCallback = function (err) {
                         if (req.user) {
                             return req.app.tokenStorage.middleware(req, res, function (err) {
@@ -346,11 +344,9 @@ module.exports = function (jwtMiddleware) {
                             continue;
                         }
 
-                        var regExp = pathToRe(path, [], options);
-
-                        var match = regExp.exec(appRoute);
+                        var regExp = pathToRe(path, [], option);
+                        var match = regExp.exec(route);
                         if (match) {
-
                             return jwtMiddleware(req, res, jwtCallback);
                         }
                     }
