@@ -312,7 +312,8 @@ function ltiSetup(app) {
                 return next(err);
             }
 
-            var url = req.protocol + '://' + req.hostname + '/api/proxy/' + req.params.prefix + '/loginbyplugin' + results.sendData;
+            var url = req.protocol + '://' + req.hostname + ':'+ req.app.config.port + '/api/proxy/' + req.params.prefix + '/loginbyplugin' + results.sendData;
+
             res.redirect(url);
         });
     });
