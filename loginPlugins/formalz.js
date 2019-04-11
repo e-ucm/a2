@@ -37,7 +37,7 @@ var pluginId = 'formalz';
  */
 var pluginName = 'formalz';
 
-function oauthSetup(app) {
+function formalzSetup(app) {
 
     var userExists = function (id, db, callback) {
         db.model('user').findOne({ externalId: { $elemMatch: { domain:'formalz', id: id.toString() } } }, function (err, user) {
@@ -56,7 +56,7 @@ function oauthSetup(app) {
         });
     };
 
-    router.post('/formalz', authentication.authorized, function (req, res) {
+    router.post('/formalz',/* authentication.authorized,*/ function (req, res) {       
         if(!req.body.id){
             res.status(400);
             return res.json({message: 'Missing id in body'});
@@ -114,4 +114,4 @@ function oauthSetup(app) {
     };
 }
 
-module.exports = oauthSetup;
+module.exports = formalzSetup;
