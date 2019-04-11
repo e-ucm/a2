@@ -19,6 +19,7 @@
 
 var express = require('express'),
     router = express.Router(),
+    authentication = require('../util/authentication'),
     jwt = require('jsonwebtoken'),
     async = require('async');
 
@@ -55,7 +56,7 @@ function oauthSetup(app) {
         });
     };
 
-    router.post('/formalz', function (req, res) {
+    router.post('/formalz', authentication.authorized, function (req, res) {
         if(!req.body.id){
             res.status(400);
             return res.json({message: 'Missing id in body'});
