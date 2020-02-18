@@ -95,8 +95,8 @@ router.get('/', authentication.authorized, function (req, res, next) {
     var query = (isJson(req.query.query) && JSON.parse(req.query.query)) || {};
     var fields = req.query.fields || '';
     var sort = req.query.sort || '_id';
-    var limit = req.query.limit || 20;
-    var page = req.query.page || 1;
+    var limit = parseInt(req.query.limit) || 20;
+    var page = parseInt(req.query.page) || 1;
 
     req.app.db.model('user').pagedFind(query, fields, removeFields, sort, limit, page, function (err, results) {
 
