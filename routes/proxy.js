@@ -31,12 +31,13 @@ proxy.on('proxyReq', function (proxyReq, req, res, options) {
     try {
         var forwardHeader = req.headers['x-forwarded-host'];
         var forwardProtocol = req.headers['x-forwarded-proto'];
-        if (!forwardHeader) {
-            var hostHeader = req.get('host') + '/api/proxy/' + req.params.prefix + '/';
-            proxyReq.setHeader('x-forwarded-host', hostHeader);
-        } else {
-            proxyReq.setHeader('x-forwarded-host', forwardHeader);
+
+        var host = req.get('host');
+        if (forwardHeader) {
+            host = req.headers['x-forwarded-host'];
         }
+        proxyReq.setHeader('x-forwarded-host', host);
+
         if (!forwardProtocol) {
             var hostProtocol = req.protocol;
             proxyReq.setHeader('x-forwarded-proto', hostProtocol);
