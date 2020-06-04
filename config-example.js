@@ -47,6 +47,6 @@ exports.smtp = {
     user: process.env.SMTP_USERNAME || '{{smtpUsername}}',
     password: process.env.SMTP_PASSWORD || '{{smtpPassword}}',
     host: process.env.SMTP_HOST || '{{smtpHost}}',
-    ssl: true
+    ssl: process.env.SMTP_SSL || {{smtpSsl}}
   }
 };
