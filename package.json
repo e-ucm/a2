@@ -46,7 +46,7 @@
     "passport-local-mongoose": "3.1.x",
     "passport-lti": "*",
     "passport-oauth2": "1.4.0",
-    "passport-saml": "0.15.x",
+    "passport-saml": "3.1.x",
     "path-to-regexp": "^1.2.x",
     "q": "*",
     "redis": "*",
