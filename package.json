@@ -39,7 +39,7 @@
     "jsonschema": "*",
     "lodash": "*",
     "mongodb": "^2.2.x",
-    "mongoose": "^4.7.x",
+    "mongoose": "^4.13.x",
     "morgan": "^1.6.x",
     "multer": "*",
     "passport": "^0.3.x",
