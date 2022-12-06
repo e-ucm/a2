@@ -30,7 +30,7 @@
     "cookie-parser": "*",
     "debug": "^2.2.x",
     "emailjs": "^1.0.x",
-    "express": "~4.13.x",
+    "express": "~4.17.x",
     "express-jwt": "*",
     "http-proxy": "*",
     "http-status": "^1.2.0",
